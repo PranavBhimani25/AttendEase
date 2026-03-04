@@ -1,0 +1,136 @@
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Login";
+}
+
+<div class="auth-title">
+    AttendEase
+</div>
+
+<div class="auth-subtitle">
+    Employee Attendance System
+</div>
+
+<form id="loginForm"></form>
+
+<div class="auth-footer">
+    Don't have an account?
+    <a href="/Auth/Register">Register</a>
+</div>
+
+<div id="notification"></div>
+
+@section Scripts{
+
+    <script>
+
+        $(document).ready(function(){
+            $("#notification").kendoNotification({
+                position: {
+                    pinned: true,
+                    top: 30,
+                    right: 30
+                },
+                autoHideAfter: 1500,
+                stacking: "down",
+                templates: [
+                    {
+                        type: "error",
+                        template: "<div class='k-notification-error'>#: message #</div>"
+                    }
+                ]
+            });
+
+            $("#loginForm").kendoForm({
+
+                formData:{
+                    c_email:"",
+                    c_password:""
+                },
+
+                items:[
+
+                    {
+                        field:"email",
+                        label:"Email",
+                        validation:{ required: { message: "Email is required" }, email: { message: "Invalid email format" } },
+                        editor:function(container,options){
+                            $('<input required="required" name="'+options.field+'" type="email"/>')
+                            .appendTo(container)
+                            .kendoTextBox({
+                                placeholder:"Enter your email"
+                            });
+                        }
+                    },
+
+                    {
+                        field:"password",
+                        label:"Password",
+                        validator:{required: { message: "Password is required" }},
+                        editor:function(container,options){
+                            $('<input required="required" name="'+options.field+'" type="password"/>')
+                            .appendTo(container)
+                            .kendoTextBox({
+                                placeholder:"Enter password"
+                            });
+                        }
+                    }
+
+                ],
+
+                buttonsTemplate:`
+                    <button type="submit" class="k-button k-primary w-100">
+                        Login
+                    </button>
+                `,
+
+                submit:function(e){
+
+                    e.preventDefault();
+                    var formdata = {
+                        c_email: e.model.email,
+                        c_password: e.model.password
+                    };
+
+                    $.ajax({
+                        url:"http://localhost:5233/api/AuthApi/login",
+                        method:"POST",
+                        data: JSON.stringify(formdata),
+                        contentType:"application/json", 
+                        success:function(response){
+                            if (response.token) {
+                                $("#notification").data("kendoNotification")
+                                    .show("Login successful!", "success");
+
+                                sessionStorage.setItem("token", response.token);
+
+                                if(response.role === "Admin"){
+                                    setTimeout(function(){
+                                        window.location.href = "/Admin/Dashboard";
+                                    }, 1500);
+                                } else {
+                                    setTimeout(function(){
+                                        window.location.href = "/Employee/Dashboard";
+                                    }, 1500);
+                                }
+
+                            } else {
+                                $("#notification").data("kendoNotification")
+                                    .show("Login failed: No token received", "error");
+                            }
+                        },
+                        error:function(xhr){
+                            var message = "Login Failed";
+                            if (xhr.responseJSON && xhr.responseJSON.message){
+                                message = xhr.responseJSON.message;
+                            }
+                            @* var message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Login failed"; *@
+                            $("#notification").data("kendoNotification").show({message: message}, "error");
+                        }
+                    });    
+                }
+            });
+        });
+
+    </script>
+}

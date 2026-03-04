@@ -1,0 +1,73 @@
+# Build folders
+
+bin/
+obj/
+
+# Visual Studio
+
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / VS Code
+
+.idea/
+.vscode/
+
+# ASP.NET Core secrets
+
+appsettings.Development.json
+appsettings.json
+secrets.json
+
+# Logs
+
+logs/
+*.log
+
+# Node modules (if frontend used)
+
+node_modules/
+
+# Package files
+
+*.nupkg
+packages/
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Publish output
+
+publish/
+wwwroot/uploads/
+
+# EF Core migrations snapshot
+
+*Migrations/*Designer.cs
+
+# Temporary files
+
+*.tmp
+*.temp
+
+# Coverage reports
+
+coverage/
+TestResults/
+
+# dotenv
+
+.env
+
+# Azure / cloud configs
+
+local.settings.json
+
+# JetBrains Rider
+
+*.DotSettings.user

@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+<div class="auth-title">
+    AttendEase
+</div>
+<div class="auth-subtitle">
+    Employee Attendance System
+</div>
+<form id="registerForm"></form>
+<div class="auth-footer">
+    Already have an account?
+    <a href="/Auth/Login">Login</a>
+</div>
+
+<div id="notification"></div>
+
+@section Scripts{
+    <style>
+        .auth-card{
+            width:auto;
+            height:  ;
+            background:white;
+            padding:40px;
+            border-radius:12px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.2);
+        }
+    </style>
+    <script>
+        $(document).ready(function(){
+            $("#notification").kendoNotification({
+                postion: {
+                    pinned: true,
+                    top: 30,
+                    right: 30
+                },
+                autoHideAfter: 1500,
+                stacking: "down",
+                templates:[
+                    {
+                        type:"error",
+                        template:"<div class='k-notification-error'>#: message #</div>"
+                    }
+                ]
+            });
+
+            $("#registerForm").kendoForm({
+                items:[
+                {
+                    field:"name",
+                    label:"Full Name",
+                    validation:{ required: { message: "Full name is required" } },
+                    editor:function(container,options){
+                        $('<input required="required" name="'+options.field+'" type="text"/>')
+                        .appendTo(container)
+                        .kendoTextBox({
+                            placeholder:"Enter your full name"
+                        })
+                    }
+                },
+                {
+                    field:"email",
+                    label:"Email",
+                    validation:{ required: { message: "Email is required" }, email: { message: "Invalid email format" } },
+                    editor:function(container,options){
+                        $('<input required="required" name="'+options.field+'" type="email"/>')
+                        .appendTo(container)
+                        .kendoTextBox({
+                            placeholder:"Enter your email"
+                        })
+                    }
+                },
+                {
+                    field:"password",
+                    label:"Password",
+                    validation:{ required: { message: "Password is required" }, minLength: { message: "Password must be at least 6 characters", value: 6 } },
+                    editor:function(container,options){
+                        $('<input required="required" name="'+options.field+'" type="password"/>')
+                        .appendTo(container)
+                        .kendoTextBox({
+                            placeholder:"Enter your password"
+                        })
+                    }
+                },
+                {
+                    field:"confirm_password",
+                    label:"Confirm Password",
+                    validation:{ required: { message: "Please confirm your password" }, minLength: { message: "Password must be at least 6 characters", value: 6 } },
+                    editor:function(container,options){
+                        $('<input required="required" name="'+options.field+'" type="password"/>')
+                        .appendTo(container)
+                        .kendoTextBox({
+                            placeholder:"Confirm your password"
+                        })
+                    }
+                },
+                {
+                    field: "gender",
+                    label: "Gender",
+                    editor: function (container, options){
+                        $("<select name='" + options.field + "'></select>")
+                            .appendTo(container)
+                            .kendoDropDownList({
+                                optionLabel: "Select gender",
+                                dataTextField: "text",
+                                dataValueField: "value",
+                                dataSource: [
+                                    { text: "Male", value: "Male" },
+                                    { text: "Female", value: "Female" },
+                                    { text: "Other", value: "Other" }
+                                ]
+                            });
+                    }
+                },
+                {
+                        field: "profile_image",
+                        label: { text: "Profile Image" },
+                        editor: function (container, options) {
+                            $("<input type='file' name='" + options.field + "' />")
+                                .appendTo(container)
+                                .kendoUpload({
+                                    async: {
+                                        @* saveUrl: "/ContactSingle/UploadImage",  // optional *@
+                                        autoUpload: false
+                                    },
+                                    multiple: false,
+                                    validation: {
+                                        allowedExtensions: [".jpg", ".jpeg", ".png"],
+                                        maxFileSize: 2097152 // 2MB
+                                    }
+                                });
+                        }
+                    }
+                ],
+                buttonsTemplate:`
+                    <button type="submit" class="k-button k-primary w-100">
+                        Register
+                    </button>
+                `,
+                submit:function(e){
+                    e.preventDefault();
+                    var formdata = new FormData(); 
+                    formdata.append("c_name", e.model.name);
+                    formdata.append("c_email", e.model.email);
+                    formdata.append("c_password", e.model.password);
+                    @* formdata.append("c_confirm_password", e.model.confirm_password); *@
+                    @* formdata.append("c_gender", e.model.gender); *@
+
+                    var genderValue = $("select[name='gender']").data("kendoDropDownList").value();
+                    formdata.append("c_gender", genderValue);
+                    console.log(genderValue);
+
+                    @* var files = $("input[name='profile_image']").get(0).files;
+                    if(files.length > 0){
+                        formdata.append("c_profileimage", files[0]);
+                    } *@
+                    var files = $("input[name='profile_image']").get(0).files;
+                    if (files.length > 0) {
+                        formdata.append("c_profileimage", files[0]);
+                    }
+
+                    $.ajax({
+                        url:"http://localhost:5233/api/AuthApi/register",
+                        method:"POST",
+                        data:formdata,
+                        contentType: false,
+                        processData: false,
+                        success:function(response){
+                            if(response.success){
+                                $("#notification").data("kendoNotification").show({message:"Registration successful! Redirecting to login..."}, "success");
+                                setTimeout(function(){
+                                    window.location.href = "/Auth/Login";
+                                }, 1500);
+                            } else {
+                                $("#notification").data("kendoNotification").show({ message : response.message || "Registration failed"}, "error");
+                            }
+                        },
+                        error:function(){
+                            $("#notification").data("kendoNotification").show({message:"An error occurred. Please try again."}, "error");
+                        }
+                    });
+                }
+            });
+            
+            var validator = $("#registerForm").kendoValidator({
+                rules: {
+                    passwordMatch: function(input) {
+                        if (input.attr("name") === "confirm_password") {
+
+                            var password = $("input[name='password']").val();
+                            var confirmPassword = input.val();
+
+                            return password === confirmPassword;
+                        }
+
+                        return true;
+                    }
+                },
+                messages: {
+                    passwordMatch: "Passwords do not match"
+                }
+            }).data("kendoValidator");
+
+        })
+    </script>
+}

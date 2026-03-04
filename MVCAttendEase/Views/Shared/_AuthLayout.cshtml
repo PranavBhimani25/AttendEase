@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - AttendEase</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MVCAttendEase.styles.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" /> *@
+    <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
+
+
+
+    <style>
+
+        body{
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg,#1E3A8A,#3B82F6);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:flex-start;   /* changed */
+            padding-top:60px;         /* space from top */
+            padding-bottom:60px;
+        }
+
+        .auth-container{
+            width:100%;
+            max-width:520px;
+        }
+
+        .auth-card{
+            background:white;
+            padding:35px;
+            border-radius:12px;
+            box-shadow:0 12px 30px rgba(0,0,0,0.2);
+        }
+
+        .auth-title{
+            text-align:center;
+            font-size:28px;
+            font-weight:600;
+            margin-bottom:10px;
+            color:#1E3A8A;
+        }
+
+        .auth-subtitle{
+            text-align:center;
+            color:#777;
+            margin-bottom:30px;
+        }
+
+        .auth-footer{
+            text-align:center;
+            margin-top:20px;
+        }
+
+        .auth-footer a{
+            color:#3B82F6;
+            text-decoration:none;
+            font-weight:500;
+        }
+
+        .k-button{
+            background:#3B82F6;
+            border:none;
+        }
+
+        .k-button:hover{
+            background:#1E40AF;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            @RenderBody()
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/kendo/kendo.all.min.js"></script>
+
+
+    @RenderSection("Scripts",required:false)
+
+</body>
+
+</html>

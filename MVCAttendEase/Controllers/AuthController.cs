@@ -42,8 +42,8 @@ namespace MVCAttendEase.Controllers
 
             if (result != null)
             {
-                HttpContext.Session.SetString("Role", result.c_role);
-                return Ok(new { message = "Login successful",success=true , role = result.c_role, id = result.c_empid });
+                HttpContext.Session.SetString("Role", result.Role);
+                return Ok(new { message = "Login successful",success=true , role = result.Role, id = result.EmpId });
             }
             return BadRequest(new { message = "Invalid email or password", success = false });
         }

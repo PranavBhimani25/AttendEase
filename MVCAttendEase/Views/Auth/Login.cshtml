@@ -103,7 +103,8 @@
                                 if (response.success) {
                                     $("#notification").data("kendoNotification")
                                     .show("Login successful!", "success");                                   
-                                    
+                                    sessionStorage.setItem("userRole", response.role); // Store role in sessionStorage
+                                    sessionStorage.setItem("userId", response.id); // Store name in sessionStorage
                                     if(response.role === "Admin"){
                                         setTimeout(function(){
                                             window.location.href = "/Admin/Dashboard";

@@ -25,10 +25,53 @@ namespace MVCAttendEase.Controllers
         [Route("Dashboard")]
         public async Task<IActionResult> Dashboard()
         {
-            var count=await _adminRepo.GetEmployeeCount();
-            Console.WriteLine(count);
             return View();
         }
+
+        [Route("GetEmployeeCount")]
+        public async Task<IActionResult> GetEmployeeCount()
+        {
+            var count=await _adminRepo.GetEmployeeCount();
+            Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Employee not found"});
+            }
+            return Ok(new{success=true,data=count});
+        }
+
+        [Route("PresentEmpCount")]
+        public async Task<IActionResult> PresentEmpCount()
+        {
+            var count=await _adminRepo.PresentEmpCount();
+            Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Employee not present"});
+            }
+            return Ok(new{success=true,data=count});
+        }
+
+        [Route("AbsentEmpCount")]   
+        public async Task<IActionResult> AbsentEmpCount()
+        {
+            var count=await _adminRepo.AbsentEmpCount();
+            Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Absent Employee not found"});
+            }
+            return Ok(new{success=true,data=count});
+        }
+
+
+
+
+
+
+
+
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

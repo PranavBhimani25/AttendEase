@@ -18,9 +18,26 @@ namespace Repositories.Implementation
         }
 
 
-        public Task<int> AbsentEmpCount()
+        public async Task<int> AbsentEmpCount()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query=@"SELECT COUNT(*) FROM t_employees e WHERE e.c_status = 'Active' AND e.c_empid NOT IN( SELECT c_empid FROM t_attendance WHERE c_attenddate = CURRENT_DATE);";
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var count=await cmd.ExecuteScalarAsync();
+
+                return Convert.ToInt32(count);
+            }catch(Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
 
         public Task<int> CountDesigningHour()
@@ -43,12 +60,9 @@ namespace Repositories.Implementation
             try
             {
                 var query = "SELECT COUNT(*) FROM t_employees";
-
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
-
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
-
                 var result = await cmd.ExecuteScalarAsync();
 
                 return Convert.ToInt32(result);
@@ -74,10 +88,27 @@ namespace Repositories.Implementation
             throw new NotImplementedException();
         }
 
-        public Task<int> PresentEmpCount()
+        public async Task<int> PresentEmpCount()
         {
-            // var query = "SELECT COUNT(DISTINCT c_empid) FROM t_attendance WHERE c_attenddate = CURRENT_DATE";
-            throw new NotImplementedException();
+            try
+            {
+                var query = "SELECT COUNT(DISTINCT c_empid) FROM t_attendance WHERE c_attenddate = CURRENT_DATE";
+                
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var count=await cmd.ExecuteScalarAsync();
+                return Convert.ToInt32(count);
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
 
         public Task<int> UpdateEmpStatus()

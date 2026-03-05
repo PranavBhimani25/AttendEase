@@ -1,7 +1,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 
-namespace APIAttendEase.Services
+namespace MVCAttendEase.Services
 {
     public class CloudinaryService
     {
@@ -34,5 +34,6 @@ namespace APIAttendEase.Services
             return result.SecureUrl?.ToString();
 
         }
+        
     }
 }

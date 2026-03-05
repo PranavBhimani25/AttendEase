@@ -22,7 +22,7 @@ namespace Repositories.Implementation
 
         public async Task<EmployeeModel> Login(LoginModel model)
         {
-            var query = "SELECT c_empid,c_email,c_role FROM t_employees WHERE c_email = @Email AND c_password = @Password";
+            var query = "SELECT c_empid,c_email,c_role,c_status FROM t_employees WHERE c_email = @Email AND c_password = @Password AND c_status = 'Active'";
             try
             {
                 await _connection.OpenAsync();
@@ -37,7 +37,8 @@ namespace Repositories.Implementation
                     {
                         c_empid = reader.GetInt32(reader.GetOrdinal("c_empid")),
                         c_email = reader.GetString(reader.GetOrdinal("c_email")),
-                        c_role = reader.GetString(reader.GetOrdinal("c_role"))
+                        c_role = reader.GetString(reader.GetOrdinal("c_role")),
+                        c_status = reader.GetString(reader.GetOrdinal("c_status"))
                     };
                 }
                 else

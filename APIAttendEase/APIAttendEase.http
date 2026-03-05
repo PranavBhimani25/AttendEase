@@ -1,6 +1,0 @@
-@APIAttendEase_HostAddress = http://localhost:5233
-
-GET {{APIAttendEase_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

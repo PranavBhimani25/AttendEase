@@ -5,10 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MVCAttendEase.Filters;
 
 namespace MVCAttendEase.Controllers
 {
     [Route("[controller]")]
+    [ServiceFilter(typeof(AdminFilter))]
     public class AdminController : Controller
     {
         private readonly ILogger<AdminController> _logger;

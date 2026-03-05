@@ -35,10 +35,10 @@ namespace Repositories.Implementation
                 {
                     return new EmployeeModel
                     {
-                        c_empid = reader.GetInt32(reader.GetOrdinal("c_empid")),
-                        c_email = reader.GetString(reader.GetOrdinal("c_email")),
-                        c_role = reader.GetString(reader.GetOrdinal("c_role")),
-                        c_status = reader.GetString(reader.GetOrdinal("c_status"))
+                        EmpId = reader.GetInt32(reader.GetOrdinal("c_empid")),
+                        Email = reader.GetString(reader.GetOrdinal("c_email")),
+                        Role = reader.GetString(reader.GetOrdinal("c_role")),
+                        Status = reader.GetString(reader.GetOrdinal("c_status"))
                     };
                 }
                 else

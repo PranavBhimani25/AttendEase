@@ -1,32 +1,47 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+
 
 namespace Repositories.Models
 {
     public class AttendanceModel
     {
-        public int c_attendid { get; set; }
+        public int AttendId { get; set; }
 
-        public int c_empid { get; set; }
+        [Required(ErrorMessage = "Employee Id is required")]
+        public int EmpId { get; set; }
 
-        public DateTime c_attenddate { get; set; }
+        [Required(ErrorMessage = "Attendance date is required")]
+        public DateTime AttendDate { get; set; }
 
-        public int c_clockinhour { get; set; }
+        [Required(ErrorMessage = "Clock-in hour is required")]
+        [Range(0, 23, ErrorMessage = "Clock-in hour must be between 0 and 23")]
+        public int ClockInHour { get; set; }
 
-        public int c_clockinmin { get; set; }
+        [Required(ErrorMessage = "Clock-in minutes are required")]
+        [Range(0, 59, ErrorMessage = "Clock-in minutes must be between 0 and 59")]
+        public int ClockInMin { get; set; }
 
-        public int? c_clockouthour { get; set; }
+        [Range(0, 23, ErrorMessage = "Clock-out hour must be between 0 and 23")]
+        public int? ClockOutHour { get; set; }
 
-        public int? c_clockoutmin { get; set; }
+        [Range(0, 59, ErrorMessage = "Clock-out minutes must be between 0 and 59")]
+        public int? ClockOutMin { get; set; }
 
-        public int? c_workinghour { get; set; }
+        [Range(0, 24, ErrorMessage = "Working hours must be between 0 and 24")]
+        public int? WorkingHour { get; set; }
 
-        public string c_attendstatus { get; set; }
+        [Required(ErrorMessage = "Attendance status is required")]
+        [RegularExpression("^(LateIn|EarlyOut|Regular)$", 
+            ErrorMessage = "Status must be LateIn, EarlyOut, or Regular")]
+        public string AttendStatus { get; set; }
 
-        public string c_worktype { get; set; }
+        [Required(ErrorMessage = "Work type is required")]
+        public string WorkType { get; set; }
 
-        public string? c_tasktype { get; set; }
+        public string? TaskType { get; set; }
     }
 }

@@ -45,7 +45,7 @@ namespace Repositories.Implementation
         {
             try
             {
-                bool exists = await IsTodayAttendanceExists(model.c_empid);
+                bool exists = await IsTodayAttendanceExists(model.EmpId);
 
                 if (exists)
                     return (false, "Already checked in today", "");
@@ -64,11 +64,11 @@ namespace Repositories.Implementation
 
                 using var cmd = new NpgsqlCommand(qry, _conn);
 
-                cmd.Parameters.AddWithValue("@empid", model.c_empid);
+                cmd.Parameters.AddWithValue("@empid", model.EmpId);
                 cmd.Parameters.AddWithValue("@hour", now.Hour);
                 cmd.Parameters.AddWithValue("@min", now.Minute);
-                cmd.Parameters.AddWithValue("@worktype", model.c_worktype);
-                cmd.Parameters.AddWithValue("@tasktype", model.c_tasktype ?? "");
+                cmd.Parameters.AddWithValue("@worktype", model.WorkType);
+                cmd.Parameters.AddWithValue("@tasktype", model.TaskType ?? "");
                 cmd.Parameters.AddWithValue("@status", status);
 
                 await cmd.ExecuteNonQueryAsync();
@@ -87,7 +87,7 @@ namespace Repositories.Implementation
         {
             try
             {
-                bool exists = await IsTodayAttendanceExists(model.c_empid);
+                bool exists = await IsTodayAttendanceExists(model.EmpId);
 
                 if (!exists)
                     return (false, "Please check in first", 0, "");
@@ -112,7 +112,7 @@ namespace Repositories.Implementation
 
                 using (var cmd = new NpgsqlCommand(fetchQry, _conn))
                 {
-                    cmd.Parameters.AddWithValue("@empid", model.c_empid);
+                    cmd.Parameters.AddWithValue("@empid", model.EmpId);
 
                     using var reader = await cmd.ExecuteReaderAsync();
 
@@ -159,9 +159,9 @@ namespace Repositories.Implementation
                 updateCmd.Parameters.AddWithValue("@hour", now.Hour);
                 updateCmd.Parameters.AddWithValue("@min", now.Minute);
                 updateCmd.Parameters.AddWithValue("@working", workingHours);
-                updateCmd.Parameters.AddWithValue("@tasktype", model.c_tasktype ?? "");
+                updateCmd.Parameters.AddWithValue("@tasktype", model.TaskType ?? "");
                 updateCmd.Parameters.AddWithValue("@status", status);
-                updateCmd.Parameters.AddWithValue("@empid", model.c_empid);
+                updateCmd.Parameters.AddWithValue("@empid", model.EmpId);
 
                 await updateCmd.ExecuteNonQueryAsync();
 

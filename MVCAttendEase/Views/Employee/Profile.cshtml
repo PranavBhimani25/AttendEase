@@ -1,0 +1,283 @@
+@{
+    ViewData["Title"] = "Profile Page";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
+}
+
+
+
+<div class="container">
+
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4">
+            <div class="k-card">
+                <div class="k-card-body" style="text-align:center">
+                    <img id="profileImage" alt="Not Found" style="width:120px;height:120px;border-radius:50%" />
+                    <h3 id="empName"></h3>
+                    <hr/>
+                    <p><b>Email:</b> <span id="empEmail"></span></p>
+                    <p><b>Gender : </b><span id="empgender"></span></p>
+                </div>
+            </div>
+
+             <div class="d-flex flex-column align-items-center gap-2 mt-2">
+
+    <!-- Update Profile -->
+    <button id="btnUpdateProfile" class="k-button k-primary k-button-sm w-75 d-flex align-items-center justify-content-center gap-2">
+        <span class="k-icon k-i-edit"></span>
+        Update Profile
+    </button>
+
+    <!-- Change Password -->
+    <button id="btnChangePassword" class="k-button k-outline k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
+            style="border-color:#d32f2f;color:#d32f2f">
+        <span class="k-icon k-i-lock"></span>
+        Change Password
+    </button>   
+
+</div>
+        </div>
+        
+        <!-- Employee Details -->
+        <div class="col-md-8">
+            <div id="employeeForm"></div>
+        </div>
+
+    </div>
+
+</div>
+<div id="updateProfileWindow" style="display:none;">
+
+    <div class="text-center mb-3">
+        <img id="imgPreview"
+            src="/images/user.png"
+            style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:1px solid #ddd" />
+    </div>
+
+    <div id="updateEmployeeForm"></div>
+</div>
+
+<div id="changePasswordWindow" style="display:none;">
+    <div id="changePasswordForm"></div>
+</div>
+
+
+@section Scripts{
+
+<script>
+
+
+
+
+var id = sessionStorage.getItem("userId");
+console.log("ID:", id);
+
+$(document).ready(function () {
+
+    $.ajax({
+            url: '/Employee/GetEmployeeProfile/' + id,
+            type: 'GET',
+            success: function (response) {
+
+                if (response.success) {
+                    $("#empName").text(response.data.c_name);
+                    $("#empgender").text(response.data.c_gender);
+                    $("#empEmail").text(response.data.c_email);
+                    $("#profileImage").attr('src', response.data.c_profileimage);
+                }
+                else {       
+                }
+            },
+            error: function () {
+                alert("Error occurred");
+            }
+     });
+
+    var employeeData = {
+        name: "John Smith",
+        gender: "Male",
+        email: "john@company.com",
+        department: "IT",
+        address: "New York",
+        joiningDate: "2022-05-10"
+    };
+
+    $("#employeeForm").kendoForm({
+        formData: employeeData,
+        layout: "grid",
+        grid: { cols: 2, gutter:20 },
+
+        items: [
+            {
+                field: "department",
+                label: "Department"
+            },
+            {
+                field: "joiningDate",
+                label: "Joining Date",
+                editor: "DatePicker"
+            },
+            {
+                field: "address",
+                label: "Address",
+                colSpan: 2,
+                editor: "TextArea"
+            }
+        ]
+    });
+
+
+    var updateWindow=$("#updateProfileWindow").kendoWindow({
+        title:"Update Profile",
+        modal:true,
+        visible:false,
+        resizable:false,
+        width:"500px",
+        actions:["Close"]
+    }).data("kendoWindow");
+
+    $("#btnUpdateProfile").click(function(){
+
+    $.ajax({
+        url: "/Employee/GetEmployee/" + id,
+        type: "GET",
+        success: function(response){
+
+            var form = $("#updateEmployeeForm").data("kendoForm");
+            $("#imgPreview").attr('src', response.data.c_profileimage);
+            form.setOptions({
+                formData: response.data
+            });
+
+            // also update preview image
+            $("#imgPreview").attr("src", data.c_profileimage);
+        },
+        error: function(xhr){
+            console.error(xhr);
+        }
+    });
+
+    updateWindow.center().open();
+});
+
+
+    // Initialize form first
+$("#updateEmployeeForm").kendoForm({
+    formData: {},
+    layout:"grid",
+    grid:{cols:2,gutter:15},
+    items:[
+        {field:"c_name",label:"Name"},
+        {field:"c_email",label:"Email"},
+        {
+            field:"c_gender",
+            label:"Gender",
+            editor:"DropDownList",
+            editorOptions:{
+                dataSource:["Male","Female","Other"]
+            }
+        },
+        {
+            field:"c_profileimage",
+            label:"Profile Image",
+            editor:function(container){
+                $('<input type="file" accept="image/*" />')
+                    .appendTo(container)
+                    .on("change",function(e){
+                        const file=e.target.files[0];
+                        if(!file) return;
+
+                        const reader=new FileReader();
+                        reader.onload=function(ev){
+                            $("#imgPreview").attr("src",ev.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+            }
+        }  
+    ]
+});
+
+  
+
+    $(document).on("click","#btnClosePopup",function(){
+        updateWindow.close();
+    });
+
+    var changePasswordWindow=$("#changePasswordWindow").kendoWindow({
+        title:"Change Password",
+        modal:true,
+        visible:false,
+        resizable:false,
+        width:"400px",
+        actions:["Close"]
+    }).data("kendoWindow");
+
+    $("#btnChangePassword").click(function(){
+        changePasswordWindow.center().open();
+    });
+
+    $("#changePasswordForm").kendoForm({
+        layout:"grid",
+        grid:{cols:1,gutter:6},
+        items:[
+            {
+                    field:"NewPassword",
+                    label:"New Password",
+                    editor:function(container){
+                        $('<input type="password" class="k-textbox w-100" placeholder="New password" />')
+                            .appendTo(container);
+                    }
+            },
+            {
+                field:"ConfirmPassword",
+                label:"Confirm Password",
+                editor:function(container){
+                    $('<input type="password" class="k-textbox w-100" placeholder="Confirm  password" />')
+                        .appendTo(container);
+                }
+            }
+        ],
+        buttonsTemplate:`
+            <div class="k-form-buttons" style="margin-top:8px">
+                <button id="Passchg" class="k-button k-primary k-button-sm">Update</button>
+                <button type="button" class="k-button k-button-sm" id="btnCloseChangePwd">Cancel</button>
+            </div>
+        `
+    });
+
+    $(document).on("click","#btnCloseChangePwd",function(){
+        changePasswordWindow.close();
+    });
+
+    $(document).on("click","#Passchg",function(){
+        var id=sessionStorage.getItem("userId");
+        @* debugger; *@
+        var password=$("input[placeholder='New password']").val();
+        var confpass=$("input[placeholder='Confirm  password']").val();
+
+        if(password!==confpass){
+            alert("Passwords do not match");
+            return;
+        }
+
+        $.ajax({
+            url:"/Employee/ChangePassword/"+id,
+            type:"PUT",
+            contentType:"application/json",
+            data:JSON.stringify(password),
+            success:function(response){
+                console.log(response);
+                changePasswordWindow.close();
+            },error:function(xhr,status,error){
+                alert("Error: " + xhr.responseText);
+            }
+        });
+
+    });
+
+
+
+});
+</script>
+}

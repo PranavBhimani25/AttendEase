@@ -15,6 +15,9 @@ builder.Services.AddScoped<EmployeeFilter>();
 builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
+builder.Services.AddScoped<IAdminInterface, AdminRepository>();
+builder.Services.AddScoped<IEmployeeInterface, EmployeeRepository>();
+builder.Services.AddScoped<IAttendanceInterface, AttendanceRepository>();
 
 builder.Services.AddScoped<NpgsqlConnection>(_ =>
     new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));

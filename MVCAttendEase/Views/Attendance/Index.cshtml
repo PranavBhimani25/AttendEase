@@ -1,0 +1,240 @@
+@model Repositories.Models.AttendanceModel
+
+@{
+    ViewData["Title"] = "Attendance";
+}
+
+<div class="container mt-4">
+
+    <h3>Employee Attendance</h3>
+
+    <button id="btnCheckIn" class="k-button k-button-solid-primary">
+        Check In
+    </button>
+
+    <button id="btnCheckOut" class="k-button k-button-solid-error">
+        Check Out
+    </button>
+
+    <br/><br/>
+
+    <div id="statusMessage"></div>
+
+</div>
+
+
+<!-- COMMON POPUP -->
+<div id="attendancePopup" style="display:none">
+
+    <div id="popupForm"></div>
+
+    <br/>
+
+    <button id="submitAttendance" class="k-button k-button-solid-primary">
+        Submit
+    </button>
+
+    <button id="cancelPopup" class="k-button">
+        Cancel
+    </button>
+
+</div>
+
+
+@section Scripts{
+
+<link href="~/lib/kendo/kendo.default-v2.min.css" rel="stylesheet"/>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script src="~/lib/kendo/kendo.all.min.js"></script>
+
+<script>
+
+let actionType = "";
+
+$(document).ready(function(){
+
+    // =========================
+    // POPUP WINDOW
+    // =========================
+
+    $("#attendancePopup").kendoWindow({
+        width:"400px",
+        title:"Attendance",
+        visible:false,
+        modal:true
+    });
+
+
+    // =========================
+    // CHECK IN BUTTON
+    // =========================
+
+    $("#btnCheckIn").click(function(){
+
+        actionType = "checkin";
+
+        $("#popupForm").empty();   // clear previous form
+
+        $("#popupForm").kendoForm({
+
+            formData:{
+                c_worktype:""
+            },
+
+            buttonsTemplate:"",
+
+            items:[
+            {
+                field:"c_worktype",
+                label:"Work Type",
+                editor:"DropDownList",
+                editorOptions:{
+                    dataSource:[
+                        "Remote",
+                        "Office",
+                        "Field"
+                    ]
+                }
+            }
+            ]
+
+        });
+
+        $("#attendancePopup")
+            .data("kendoWindow")
+            .title("Check In")
+            .center()
+            .open();
+
+    });
+
+
+    // =========================
+    // CHECK OUT BUTTON
+    // =========================
+
+    $("#btnCheckOut").click(function(){
+
+        actionType = "checkout";
+
+        $("#popupForm").empty();
+
+        $("#popupForm").kendoForm({
+
+            formData:{
+                c_tasktype:[]
+            },
+
+            buttonsTemplate:"",
+
+            items:[
+            {
+                field:"c_tasktype",
+                label:"Task Type",
+                editor:"CheckBoxGroup",
+                editorOptions:{
+                    items:[
+                        {label:"Developing", value:"Developing"},
+                        {label:"Designing", value:"Designing"},
+                        {label:"Research", value:"Research"}
+                    ]
+                }
+            }
+            ]
+
+        });
+
+        $("#attendancePopup")
+            .data("kendoWindow")
+            .title("Check Out")
+            .center()
+            .open();
+
+    });
+
+
+    // =========================
+    // CANCEL BUTTON
+    // =========================
+
+    $("#cancelPopup").click(function(){
+        $("#attendancePopup").data("kendoWindow").close();
+    });
+
+
+    // =========================
+    // SUBMIT BUTTON
+    // =========================
+
+    $("#submitAttendance").click(function(){
+
+    if(actionType === "checkin")
+    {
+        var workType = $("#popupForm")
+            .find("[name='c_worktype']")
+            .data("kendoDropDownList")
+            .value();
+
+        $.ajax({
+
+            url:"/Attendance/CheckIn",
+            type:"POST",
+
+            data:{
+                c_empid:1,
+                c_worktype: workType,
+                c_tasktype:""
+            },
+
+            success:function(res){
+
+                $("#statusMessage").html(
+                    "<b>"+res.message+"</b> ("+res.status+")"
+                );
+
+                $("#attendancePopup").data("kendoWindow").close();
+            }
+
+        });
+    }
+
+
+    if(actionType === "checkout")
+    {
+        var tasks = [];
+
+        $("#popupForm input[name='c_tasktype']:checked").each(function(){
+            tasks.push($(this).val());
+        });
+
+        $.ajax({
+
+            url:"/Attendance/CheckOut",
+            type:"POST",
+
+            data:{
+                c_empid:1,
+                c_tasktype: tasks.join(",")
+            },
+
+            success:function(res){
+
+                $("#statusMessage").html(
+                    "<b>"+res.message+"</b> | Working Hours: "+res.workingHours
+                );
+
+                $("#attendancePopup").data("kendoWindow").close();
+            }
+
+        });
+    }
+
+});
+
+});
+
+</script>
+
+}

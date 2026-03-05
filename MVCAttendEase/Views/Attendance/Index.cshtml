@@ -183,9 +183,8 @@ $(document).ready(function(){
             type:"POST",
 
             data:{
-                c_empid:1,
+                c_empid: sessionStorage.getItem("userId"),
                 c_worktype: workType,
-                c_tasktype:""
             },
 
             success:function(res){

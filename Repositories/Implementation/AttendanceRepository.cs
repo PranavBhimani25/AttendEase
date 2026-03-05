@@ -55,7 +55,7 @@ namespace Repositories.Implementation
                 DateTime now = DateTime.Now;
                 DateTime officeStart = DateTime.Today.AddHours(9).AddMinutes(15);
 
-                string status = now > officeStart ? "Late" : "Regular";
+                string status = now > officeStart ? "LateIn" : "Regular";
 
                 string qry = @"INSERT INTO t_attendance
                 (c_empid,c_attenddate,c_clockinhour,c_clockinmin,c_worktype,c_tasktype,c_attendstatus)
@@ -140,10 +140,10 @@ namespace Repositories.Implementation
 
                 bool earlyLeave = now < officeEnd;
 
-                if (status == "Late" && earlyLeave)
-                    status = "Late + EarlyLeave";
+                if (status == "LateIn" && earlyLeave)
+                    status = "LateIn + EarlyOut";
                 else if (earlyLeave)
-                    status = "EarlyLeave";
+                    status = "EarlyOut";
 
                 string updateQry = @"UPDATE t_attendance
                                      SET c_clockouthour=@hour,

@@ -1,5 +1,293 @@
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-<h1>Admin Dashboard</h1>
 
+<div class="page-title">
+    Attendance Summary
+</div>
+
+<div class="k-card-container">
+
+    <!-- TOTAL EMPLOYEE -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">Total Employees</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-user"></span>
+            </div>
+            <div class="stat-number" id="totalEmp">0</div>
+        </div>
+    </div>
+
+
+    <!-- PRESENT -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">Present Employee</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-check"></span>
+            </div>
+            <div class="stat-number" id="presentEmp">0</div>
+        </div>
+    </div>
+
+
+    <!-- ABSENT -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">Absent Employee</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-close"></span>
+            </div>
+            <div class="stat-number" id="absentEmp">0</div>
+        </div>
+    </div>
+
+
+    <!-- LEAVE -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">On Leave</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-calendar"></span>
+            </div>
+            <div class="stat-number" id="leaveEmp">0</div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="section-title">
+    Task Summary
+</div>
+
+<div class="task-container">
+    <div id="hoursGrid"></div>
+</div>
+
+
+<div id="notification"></div>
+
+
+@section Scripts{
+
+<style>
+
+.page-title{
+    font-size:36px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+/* CARD CONTAINER */
+
+.k-card-container{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+    margin-top:30px;
+}
+
+/* CARD */
+
+.stat-card{
+    text-align:center;
+    padding:25px;
+    transition:0.3s;
+    border-radius:10px;
+}
+
+.stat-card:hover{
+    transform:translateY(-5px);
+}
+
+/* HEADER */
+
+.k-card-header{
+    font-weight:600;
+    font-size:18px;
+    border-bottom:1px solid #eee;
+}
+
+/* ICON */
+
+.stat-icon{
+    font-size:35px;
+    margin-top:15px;
+    color:#2b7cff;
+}
+.stat-icon .k-icon{
+    font-size:40px;
+    color:#2b7cff;
+}
+
+/* NUMBER */
+
+.stat-number{
+    font-size:40px;
+    font-weight:bold;
+    margin-top:10px;
+    color:#2b7cff;
+}
+
+/* TASK GRID */
+
+.section-title{
+    font-size:30px;
+    font-weight:600;
+    margin-top:40px;
+    margin-bottom:15px;
+}
+
+.task-container{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 20px rgba(0,0,0,0.1);
+}
+
+</style>
+
+
+<script>
+
+$(document).ready(function(){
+
+    $("#notification").kendoNotification({
+        position:{
+            pinned:true,
+            top:30,
+            right:30
+        },
+        autoHideAfter:2000,
+        stacking:"down"
+    });
+
+    createHoursGrid();
+    loadDashboard();
+
+});
+
+
+/* CREATE GRID */
+
+function createHoursGrid(){
+
+    $("#hoursGrid").kendoGrid({
+
+        columns:[
+            { field:"type", title:"Work Type" },
+            { field:"hours", title:"Total Hours" }
+        ],
+
+        dataSource:{
+            data:[],
+            pageSize:10
+        },
+
+        sortable:true,
+        pageable:false
+
+    });
+
+}
+
+
+/* LOAD DASHBOARD DATA */
+
+function loadDashboard(){
+
+    $.get("/Admin/GetEmployeeCount",function(res){
+        if(res.success){
+            $("#totalEmp").text(res.data);
+        }
+    });
+
+    $.get("/Admin/GetPresentEmployee",function(res){
+        if(res.success){
+            $("#presentEmp").text(res.data);
+        }
+    });
+
+    $.get("/Admin/GetAbsentEmployee",function(res){
+        if(res.success){
+            $("#absentEmp").text(res.data);
+        }
+    });
+
+    $.get("/Admin/GetLeaveEmployee",function(res){
+        if(res.success){
+            $("#leaveEmp").text(res.data);
+        }
+    });
+
+
+    var hoursData=[];
+
+
+    $.get("/Admin/GetDesigningHours",function(res){
+
+        if(res.success){
+
+            hoursData.push({
+                type:"Designing",
+                hours:res.data
+            });
+
+            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+
+        }
+
+    });
+
+
+    $.get("/Admin/GetDevelopingHours",function(res){
+
+        if(res.success){
+
+            hoursData.push({
+                type:"Developing",
+                hours:res.data
+            });
+
+            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+
+        }
+
+    });
+
+
+    $.get("/Admin/GetResearchHours",function(res){
+
+        if(res.success){
+
+            hoursData.push({
+                type:"Research",
+                hours:res.data
+            });
+
+            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+
+        }
+
+    });
+
+}
+
+</script>
+
+}

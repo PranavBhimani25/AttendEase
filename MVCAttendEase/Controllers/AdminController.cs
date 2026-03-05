@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVCAttendEase.Filters;
+using Repositories.Interfaces;
 
 namespace MVCAttendEase.Controllers
 {
@@ -13,16 +14,19 @@ namespace MVCAttendEase.Controllers
     [ServiceFilter(typeof(AdminFilter))]
     public class AdminController : Controller
     {
-        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(ILogger<AdminController> logger)
+        private readonly IAdminInterface _adminRepo;
+
+        public AdminController(IAdminInterface adminRepository)
         {
-            _logger = logger;
+            _adminRepo=adminRepository;
         }
 
         [Route("Dashboard")]
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
+            var count=await _adminRepo.GetEmployeeCount();
+            Console.WriteLine(count);
             return View();
         }
 

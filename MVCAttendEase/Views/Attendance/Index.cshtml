@@ -183,8 +183,8 @@ $(document).ready(function(){
             type:"POST",
 
             data:{
-                c_empid: sessionStorage.getItem("userId"),
-                c_worktype: workType,
+                EmpId: sessionStorage.getItem("userId"), // Model Vise name
+                WorkType: workType,
             },
 
             success:function(res){
@@ -214,8 +214,8 @@ $(document).ready(function(){
             type:"POST",
 
             data:{
-                c_empid:1,
-                c_tasktype: tasks.join(",")
+                EmpId:sessionStorage.getItem("userId"),
+                TaskType: tasks.join(",")
             },
 
             success:function(res){

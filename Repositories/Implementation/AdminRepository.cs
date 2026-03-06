@@ -133,35 +133,43 @@ namespace Repositories.Implementation
         }
 
         public async Task<List<EmployeeModel>> ListEmployee()
-        {
-            // try
-            // {
-            //     var query = "";
-            //     using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
-            //     await _conn.CloseAsync();
-            //     await _conn.OpenAsync();
-            //     var reader = await cmd.ExecuteReaderAsync();
-            //     if (reader.HasRows)
-            //     {
-            //         while (reader.Read())
-            //         {
-            //             var employee = new EmployeeModel
-            //             {
-            //                 EmpId=Convert.ToInt32(reader["c_empid"]),
-                            
-            //             }
-            //         }
-            //     }
-            // }catch(Exception ex)
-            // {
-            //     Console.WriteLine($"Error: {ex.Message}");
-            //     return null!;
-            // }
-            // finally
-            // {
-            //     await _conn.CloseAsync();
-            // }
-            throw new NotImplementedException();
+        {   
+            var employees = new List<EmployeeModel>();
+            try
+            {
+                var query ="SELECT c_empid, c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role FROM t_employees;";
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var reader = await cmd.ExecuteReaderAsync();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        var employee = new EmployeeModel
+                        {
+                            EmpId=Convert.ToInt32(reader["c_empid"]),
+                            Name=Convert.ToString(reader["c_name"])!,
+                            Email=Convert.ToString(reader["c_email"])!,
+                            Password=Convert.ToString(reader["c_password"])!,
+                            Gender=Convert.ToString(reader["c_gender"])!,
+                            Status=Convert.ToString(reader["c_status"])!,
+                            ProfileImage=Convert.ToString(reader["c_profileimage"])!,
+                            Role=Convert.ToString(reader["c_role"])!
+                        };
+                        employees.Add(employee);
+                    }
+                }
+            }catch(Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return null!;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
+            return employees;
         }
 
         public async Task<int> OnLeaveEmpCount()

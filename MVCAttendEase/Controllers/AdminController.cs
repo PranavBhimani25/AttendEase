@@ -113,9 +113,16 @@ namespace MVCAttendEase.Controllers
             return Ok(new{success=true,data=count});
         }
 
-
-
-
+        [Route("ListEmployee")]
+        public async Task<IActionResult> ListEmployee()
+        {
+            var employees=await _adminRepo.ListEmployee();
+            if(employees == null)
+            {
+                return Ok(new{success=false,message="Employee not found"});
+            }
+            return Ok(new{success=true,data=employees});
+        }
 
 
 

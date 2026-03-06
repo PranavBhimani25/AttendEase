@@ -6,37 +6,49 @@
 
 <div class="container mt-4">
 
-    <h3>Employee Attendance</h3>
+    <h3 class="mb-3">Employee Attendance</h3>
 
-    <button id="btnCheckIn" class="k-button k-button-solid-primary">
-        Check In
-    </button>
+    <span id="notification"></span>
 
-    <button id="btnCheckOut" class="k-button k-button-solid-error">
-        Check Out
-    </button>
+    <div class="d-flex gap-3">
 
-    <br/><br/>
+        <button id="btnCheckIn" class="k-button k-button-lg k-button-solid-primary">
+            Check In
+        </button>
 
-    <div id="statusMessage"></div>
+        <button id="btnCheckOut" class="k-button k-button-lg k-button-solid-error">
+            Check Out
+        </button>
+
+    </div>
+
+    <div id="attendanceGrid"></div>
+
+    <br/>
+
+    <div id="loader"></div>
 
 </div>
 
 
-<!-- COMMON POPUP -->
+<!-- POPUP -->
 <div id="attendancePopup" style="display:none">
 
     <div id="popupForm"></div>
 
     <br/>
 
-    <button id="submitAttendance" class="k-button k-button-solid-primary">
-        Submit
-    </button>
+    <div class="k-dialog-buttongroup k-dialog-button-layout-stretched">
 
-    <button id="cancelPopup" class="k-button">
-        Cancel
-    </button>
+        <button id="submitAttendance" class="k-button k-button-solid-primary">
+            Submit
+        </button>
+
+        <button id="cancelPopup" class="k-button k-button-solid-base">
+            Cancel
+        </button>
+
+    </div>
 
 </div>
 
@@ -46,7 +58,6 @@
 <link href="~/lib/kendo/kendo.default-v2.min.css" rel="stylesheet"/>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
 <script src="~/lib/kendo/kendo.all.min.js"></script>
 
 <script>
@@ -56,14 +67,47 @@ let actionType = "";
 $(document).ready(function(){
 
     // =========================
+    // KENDO NOTIFICATION
+    // =========================
+
+    var notification = $("#notification").kendoNotification({
+        position:{
+            pinned:true,
+            top:30,
+            right:30
+        },
+        autoHideAfter:3000,
+        stacking:"down",
+        templates: [{
+            type: "success",
+            template: "<div class='k-notification-success'>#= message #</div>"
+        },{
+            type: "error",
+            template: "<div class='k-notification-error'>#= message #</div>"
+        }]
+    }).data("kendoNotification");
+
+
+    // =========================
+    // KENDO LOADER
+    // =========================
+
+    var loader = $("#loader").kendoLoader({
+        visible:false,
+        size:"large"
+    }).data("kendoLoader");
+
+
+    // =========================
     // POPUP WINDOW
     // =========================
 
     $("#attendancePopup").kendoWindow({
-        width:"400px",
+        width:"420px",
         title:"Attendance",
+        modal:true,
         visible:false,
-        modal:true
+        resizable:false
     });
 
 
@@ -75,22 +119,25 @@ $(document).ready(function(){
 
         actionType = "checkin";
 
-        $("#popupForm").empty();   // clear previous form
+        $("#popupForm").empty();
 
         $("#popupForm").kendoForm({
 
             formData:{
-                c_worktype:""
+                WorkType:""
             },
 
             buttonsTemplate:"",
 
+            layout:"grid",
+
             items:[
             {
-                field:"c_worktype",
+                field:"WorkType",
                 label:"Work Type",
                 editor:"DropDownList",
                 editorOptions:{
+                    optionLabel:"Select Work Type",
                     dataSource:[
                         "Remote",
                         "Office",
@@ -104,7 +151,7 @@ $(document).ready(function(){
 
         $("#attendancePopup")
             .data("kendoWindow")
-            .title("Check In")
+            .title("Employee Check In")
             .center()
             .open();
 
@@ -124,14 +171,14 @@ $(document).ready(function(){
         $("#popupForm").kendoForm({
 
             formData:{
-                c_tasktype:[]
+                TaskType:[]
             },
 
             buttonsTemplate:"",
 
             items:[
             {
-                field:"c_tasktype",
+                field:"TaskType",
                 label:"Task Type",
                 editor:"CheckBoxGroup",
                 editorOptions:{
@@ -148,7 +195,7 @@ $(document).ready(function(){
 
         $("#attendancePopup")
             .data("kendoWindow")
-            .title("Check Out")
+            .title("Employee Check Out")
             .center()
             .open();
 
@@ -160,7 +207,9 @@ $(document).ready(function(){
     // =========================
 
     $("#cancelPopup").click(function(){
+
         $("#attendancePopup").data("kendoWindow").close();
+
     });
 
 
@@ -170,67 +219,226 @@ $(document).ready(function(){
 
     $("#submitAttendance").click(function(){
 
-    if(actionType === "checkin")
-    {
-        var workType = $("#popupForm")
-            .find("[name='c_worktype']")
-            .data("kendoDropDownList")
-            .value();
+        loader.show();
 
-        $.ajax({
+        if(actionType === "checkin")
+        {
 
-            url:"/Attendance/CheckIn",
-            type:"POST",
+            var workType = $("#popupForm")
+                .find("[name='WorkType']")
+                .data("kendoDropDownList")
+                .value();
 
-            data:{
-                EmpId: sessionStorage.getItem("userId"), // Model Vise name
-                WorkType: workType,
-            },
-
-            success:function(res){
-
-                $("#statusMessage").html(
-                    "<b>"+res.message+"</b> ("+res.status+")"
-                );
-
-                $("#attendancePopup").data("kendoWindow").close();
+            if(!workType)
+            {
+                loader.hide();
+                notification.show({message:"Please select work type"}, "error");
+                return;
             }
 
-        });
-    }
+            $.ajax({
+
+                url:"/Attendance/CheckIn",
+                type:"POST",
+
+                data:{
+                    EmpId: parseInt(sessionStorage.getItem("userId")),
+                    WorkType: workType
+                },
+
+                success:function(res){
+
+                    loader.hide();
+
+                    if(res.success)
+                        notification.show({message:res.message + " ("+res.status+")"},"success");
+                    else
+                        notification.show({message:res.message},"error");
+
+                    $("#attendancePopup").data("kendoWindow").close();
+
+                },
+
+                error:function(){
+
+                    loader.hide();
+                    notification.show({message:"Server Error Occurred"},"error");
+
+                }
+
+            });
+
+        }
 
 
-    if(actionType === "checkout")
-    {
-        var tasks = [];
+        if(actionType === "checkout")
+        {
 
-        $("#popupForm input[name='c_tasktype']:checked").each(function(){
-            tasks.push($(this).val());
-        });
+            var tasks = [];
 
-        $.ajax({
+            $("#popupForm input[name='TaskType']:checked").each(function(){
+                tasks.push($(this).val());
+            });
 
-            url:"/Attendance/CheckOut",
-            type:"POST",
+            $.ajax({
 
-            data:{
-                EmpId:sessionStorage.getItem("userId"),
-                TaskType: tasks.join(",")
+                url:"/Attendance/CheckOut",
+                type:"POST",
+
+                data:{
+                    EmpId: parseInt(sessionStorage.getItem("userId")),
+                    TaskType: tasks.join(",")
+                },
+
+                success:function(res){
+
+                    loader.hide();
+
+                    if(res.success)
+                        notification.show({message:res.message + " | Hours: "+res.workingHours},"success");
+                    else
+                        notification.show({message:res.message},"error");
+
+                    $("#attendancePopup").data("kendoWindow").close();
+
+                },
+
+                error:function(){
+
+                    loader.hide();
+                    notification.show({message:"Server Error Occurred"},"error");
+
+                }
+
+            });
+
+        }
+
+    });
+
+    // =========================
+    // ATTENDANCE GRID
+    // =========================
+
+    $("#attendanceGrid").kendoGrid({
+
+        height: 400,
+
+        sortable: true,
+
+        pageable: true,
+
+        filterable: true,
+
+        columns: [
+
+            {
+                field: "attendDate",
+                title: "Date",
+                width: 150,
+                template: "#= kendo.toString(kendo.parseDate(attendDate),'dd/MM/yyyy') #"
             },
 
-            success:function(res){
+            {
+                title: "Check In",
+                width: 120,
+                template: "#= clockInHour + ':' + (clockInMin < 10 ? '0' + clockInMin : clockInMin) #"
+            },
 
-                $("#statusMessage").html(
-                    "<b>"+res.message+"</b> | Working Hours: "+res.workingHours
-                );
+            {
+                title: "Check Out",
+                width: 120,
+                template: "# if(clockOutHour != null){ # #= clockOutHour + ':' + (clockOutMin < 10 ? '0' + clockOutMin : clockOutMin) # # } else { # - # } #"
+            },
 
-                $("#attendancePopup").data("kendoWindow").close();
+            { field: "workingHour", title: "Working Hours", width: 120 },
+
+            {
+                field: "attendStatus",
+                title: "Status",
+                template: function(data){
+
+                    if(data.attendStatus === "LateIn")
+                        return "<span class='k-badge k-badge-warning'>Late</span>";
+
+                    if(data.attendStatus === "EarlyOut")
+                        return "<span class='k-badge k-badge-error'>Early Out</span>";
+
+                    return "<span class='k-badge k-badge-success'>Regular</span>";
+                }
+            },
+
+            { field: "workType", title: "Work Type", width: 120 },
+
+            {
+                field: "taskType",
+                title: "Task Type",
+                template: "<div style='white-space:normal'>#= taskType #</div>"
             }
 
-        });
-    }
+        ],
 
-});
+        dataSource: {
+
+            transport: {
+
+                read: function(options){
+
+                    $.ajax({
+
+                        url: "/Attendance/GetAttendanceByEmployee",
+
+                        data: {
+                            empId: sessionStorage.getItem("userId")
+                        },
+
+                        success: function(result){
+
+                            options.success(result);
+
+                        }
+
+                    });
+
+                }
+
+            },
+
+            pageSize: 5,
+
+            schema: {
+
+                model: {
+
+                    fields: {
+
+                        attendDate: { type: "date" },
+
+                        clockInHour: { type: "number" },
+
+                        clockInMin: { type: "number" },
+
+                        clockOutHour: { type: "number" },
+
+                        clockOutMin: { type: "number" },
+
+                        workingHour: { type: "number" },
+
+                        attendStatus: { type: "string" },
+
+                        workType: { type: "string" },
+
+                        taskType: { type: "string" }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
 
 });
 

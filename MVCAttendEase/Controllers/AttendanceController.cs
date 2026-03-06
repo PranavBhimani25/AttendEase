@@ -50,6 +50,13 @@ namespace MVCAttendEase.Controllers
             });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAttendanceByEmployee(int empId)
+        {
+            var result = await _attendanceRepo.GetAttendanceByEmployee(empId);
+            return Json(result);
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

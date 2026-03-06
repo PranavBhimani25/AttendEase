@@ -141,9 +141,13 @@ namespace Repositories.Implementation
                 bool earlyLeave = now < officeEnd;
 
                 if (status == "LateIn" && earlyLeave)
-                    status = "LateIn + EarlyOut";
-                else if (earlyLeave)
+                {
                     status = "EarlyOut";
+                }
+                else if (earlyLeave)
+                {
+                    status = "EarlyOut";
+                }
 
                 string updateQry = @"UPDATE t_attendance
                                      SET c_clockouthour=@hour,
@@ -171,6 +175,45 @@ namespace Repositories.Implementation
             {
                 await _conn.CloseAsync();
             }
+        }
+
+        public async Task<List<AttendanceModel>> GetAttendanceByEmployee(int empId)
+        {
+            List<AttendanceModel> list = new();
+
+            await _conn.OpenAsync();
+
+            string query = @"SELECT *
+                     FROM t_attendance
+                     WHERE c_empid=@empId
+                     ORDER BY c_attenddate DESC";
+
+            using var cmd = new NpgsqlCommand(query, _conn);
+
+            cmd.Parameters.AddWithValue("@empId", empId);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                list.Add(new AttendanceModel
+                {
+
+                    AttendId = reader.GetInt32(0),
+                    EmpId = reader.GetInt32(1),
+                    AttendDate = reader.GetDateTime(2),
+                    ClockInHour = reader.GetInt32(3),
+                    ClockInMin = reader.GetInt32(4),
+                    ClockOutHour = reader.IsDBNull(5) ? null : reader.GetInt32(5),
+                    ClockOutMin = reader.IsDBNull(6) ? null : reader.GetInt32(6),
+                    WorkingHour = reader.IsDBNull(7) ? null : reader.GetInt32(7),
+                    AttendStatus = reader.GetString(8),
+                    WorkType = reader.GetString(9),
+                    TaskType = reader.IsDBNull(10) ? null : reader.GetString(10)
+
+                });
+            }
+                return list;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Repositories.Interfaces
         Task<(bool success, string message, string status)> CheckIn(AttendanceModel model);
 
         Task<(bool success, string message, int workingHours, string status)> CheckOut(AttendanceModel model);
-    
+
+        Task<List<AttendanceModel>> GetAttendanceByEmployee(int empId);
     }
 }

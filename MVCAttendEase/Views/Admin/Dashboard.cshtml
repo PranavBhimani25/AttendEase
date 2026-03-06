@@ -1,5 +1,396 @@
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-<h1>Admin Dashboard</h1>
 
+<div class="page-title">
+    Attendance Summary
+</div>
+
+<div class="k-card-container">
+
+    <!-- TOTAL EMPLOYEE -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">Total Employees</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-user"></span>
+            </div>
+            <div class="stat-number" id="totalEmp">0</div>
+        </div>
+    </div>
+
+
+    <!-- PRESENT -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">Present Employee</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-check"></span>
+            </div>
+            <div class="stat-number" id="presentEmp">0</div>
+        </div>
+    </div>
+
+
+    <!-- ABSENT -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">Absent Employee</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-close"></span>
+            </div>
+            <div class="stat-number" id="absentEmp">0</div>
+        </div>
+    </div>
+
+
+    <!-- LEAVE -->
+    <div class="k-card stat-card">
+        <div class="k-card-header">
+            <h5 class="k-card-title">On Leave</h5>
+        </div>
+
+        <div class="k-card-body">
+            <div class="stat-icon">
+                <span class="k-icon k-i-calendar"></span>
+            </div>
+            <div class="stat-number" id="leaveEmp">0</div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="section-title">
+    Task Summary
+</div>
+
+<div class="task-container">
+    <div id="hoursGrid"></div>
+</div>
+
+<div class="section-title">
+    Employee List
+</div>
+
+<div class="task-container">
+    <div id="employeeGrid"></div>
+</div>
+
+
+<div id="notification"></div>
+
+
+@section Scripts{
+
+<style>
+
+.page-title{
+    font-size:36px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+/* CARD CONTAINER */
+
+.k-card-container{
+    display:grid;
+    grid-template-columns:repeat(4,220px);
+    gap:50px;
+    margin-top:20px;
+    margin-left:90px;
+}
+
+/* CARD */
+
+.stat-card{
+    text-align:center;
+    padding:15px;
+    transition:0.3s;
+    border-radius:10px;
+    width:230px;
+    height:190px;  
+}
+
+.stat-card:hover{
+    transform:translateY(-5px);
+}
+
+/* HEADER */
+
+.k-card-header{
+    font-weight:600;
+    font-size:15px;
+    border-bottom:1px solid #eee;
+    padding-bottom:5px;
+    
+}
+
+/* ICON */
+
+.stat-icon{
+    font-size:35px;
+    margin-top:8px;
+    color:#2b7cff;
+}
+.stat-icon .k-icon{
+    font-size:28px;
+    color:#2b7cff;
+}
+
+/* NUMBER */
+
+.stat-number{
+    font-size:28px;
+    font-weight:bold;
+    margin-top:5px;
+    color:#2b7cff;
+}
+
+/* TASK GRID */
+
+.section-title{
+    font-size:30px;
+    font-weight:600;
+    margin-top:40px;
+    margin-bottom:15px;
+}
+
+.task-container{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 20px rgba(0,0,0,0.1);
+}
+
+</style>
+
+
+<script>
+
+$(document).ready(function(){
+
+    $("#notification").kendoNotification({
+        position:{
+            pinned:true,
+            top:30,
+            right:30
+        },
+        autoHideAfter:2000,
+        stacking:"down"
+    });
+
+    createHoursGrid();
+    createEmployeeGrid(); 
+    loadDashboard();    
+
+});
+
+
+/* CREATE GRID */
+
+function createHoursGrid(){
+
+    $("#hoursGrid").kendoGrid({
+
+        columns:[
+            { field:"type", title:"Work Type" },
+            { field:"hours", title:"Total Hours" }
+        ],
+
+        dataSource:{
+            data:[],
+            pageSize:10
+        },
+
+        sortable:true,
+        pageable:false
+
+    });
+
+}
+
+function createEmployeeGrid(){
+
+    $("#employeeGrid").kendoGrid({
+
+        columns:[
+
+            { field:"empId", title:"Employee ID", width:"120px" },
+            { field:"name", title:"Name" },
+            { field:"email", title:"Email" },
+            { field:"gender", title:"Gender" },
+            { field:"role", title:"Role" },
+
+            {
+                field: "status",
+                title: "Status",
+                template: function(data){
+                    return data.status === "Active" 
+                        ? "<span style='color:green;font-weight:bold'>Active</span>" 
+                        : "<span style='color:red;font-weight:bold'>Inactive</span>";
+                }
+            },
+
+           {
+                title: "Action",
+                template: function(data) {
+                    var btnClass = data.status === "Active" ? "k-button k-button-solid k-button-solid-success" 
+                                                        : "k-button k-button-solid k-button-solid-danger";
+                    var btnText = data.status === "Active" ? "Deactivate" : "Activate";
+                    return `<button class="status-btn ${btnClass}" data-empid="${data.empId}" data-status="${data.status}">${btnText}</button>`;
+                },
+                width: "120px"
+            }
+        ],
+
+        dataSource:{
+            transport:{
+                read:{
+                    url:"/Admin/ListEmployee",
+                    dataType:"json"
+                }
+            },
+            schema:{
+                data:"data",
+                total: "total"
+            },
+            pageSize:10
+        },
+        pageable:true,
+        sortable:true,
+        filterable:true
+
+    });
+
+}
+
+// Handle status button click
+$(document).on("click", ".status-btn", function() {
+    var empId = $(this).data("empid");
+    var currentStatus = $(this).data("status");
+    var newStatus = currentStatus === "Active" ? "Inactive" : "Active";
+
+    $.ajax({
+        url: "/Admin/UpdateEmpStatus",
+        type: "POST",
+        data: { id: empId, status: newStatus },
+        success: function(res) {
+            if(res.success) {
+                $("#notification").data("kendoNotification").show("Status updated", "success");
+
+                var grid = $("#employeeGrid").data("kendoGrid");
+                var dataItem = grid.dataSource.get(empId);
+
+                if (dataItem) {
+                    dataItem.set("status", newStatus); // updates column template
+                }
+
+                // Update button text & data-status
+                var btn = $(`button[data-empid='${empId}']`);
+                btn.data("status", newStatus);
+                btn.text(newStatus === "Active" ? "Deactivate" : "Activate");
+                btn.removeClass("k-button-solid-success k-button-solid-danger")
+                   .addClass(newStatus === "Active" ? "k-button-solid-success" : "k-button-solid-danger");
+
+                grid.dataSource.read();
+                loadDashboard();
+            }
+        }
+    });
+});
+
+/* LOAD DASHBOARD DATA */
+
+function loadDashboard(){
+
+    $.get("/Admin/GetEmployeeCount",function(res){
+        if(res.success){
+            $("#totalEmp").text(res.data);
+        }
+    });
+
+    $.get("/Admin/PresentEmpCount",function(res){
+        if(res.success){
+            $("#presentEmp").text(res.data);
+        }
+    });
+
+    $.get("/Admin/AbsentEmpCount",function(res){
+        if(res.success){
+            $("#absentEmp").text(res.data);
+        }
+    });
+
+    $.get("/Admin/OnLeaveEmpCount",function(res){
+        if(res.success){
+            $("#leaveEmp").text(res.data);
+        }
+    });
+
+
+    var hoursData=[];
+
+
+    $.get("/Admin/DesigningHour",function(res){
+
+        if(res.success){
+
+            hoursData.push({
+                type:"Designing",
+                hours:res.data
+            });
+
+            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+
+        }
+
+    });
+
+
+    $.get("/Admin/DevelopingHour",function(res){
+
+        if(res.success){
+
+            hoursData.push({
+                type:"Developing",
+                hours:res.data
+            });
+
+            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+
+        }
+
+    });
+
+
+    $.get("/Admin/ResearchHour",function(res){
+
+        if(res.success){
+
+            hoursData.push({
+                type:"Research",
+                hours:res.data
+            });
+
+            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+
+        }
+
+    });
+
+}
+
+</script>
+
+}

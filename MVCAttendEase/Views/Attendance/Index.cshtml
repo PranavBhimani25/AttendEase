@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Attendance";
+    Layout = "~/Views/Shared/_EmployeeLayout.cshtml";
 }
 
 <div class="container mt-4">
@@ -10,7 +11,7 @@
 
     <span id="notification"></span>
 
-    <div class="d-flex gap-3">
+    <div class="d-flex gap-3 mt-4 mb-4">
 
         <button id="btnCheckIn" class="k-button k-button-lg k-button-solid-primary">
             Check In
@@ -70,7 +71,7 @@ $(document).ready(function(){
     // KENDO NOTIFICATION
     // =========================
 
-    var notification = $("#notification").kendoNotification({
+    $("#notification").kendoNotification({
         position:{
             pinned:true,
             top:30,
@@ -78,14 +79,8 @@ $(document).ready(function(){
         },
         autoHideAfter:3000,
         stacking:"down",
-        templates: [{
-            type: "success",
-            template: "<div class='k-notification-success'>#= message #</div>"
-        },{
-            type: "error",
-            template: "<div class='k-notification-error'>#= message #</div>"
-        }]
-    }).data("kendoNotification");
+       
+    });
 
 
     // =========================
@@ -232,7 +227,8 @@ $(document).ready(function(){
             if(!workType)
             {
                 loader.hide();
-                notification.show({message:"Please select work type"}, "error");
+                @* notification.show({message:"Please select work type"}, "error"); *@
+                $("#notification").data("kendoNotification").show("Please select work type","error");
                 return;
             }
 
@@ -251,9 +247,11 @@ $(document).ready(function(){
                     loader.hide();
 
                     if(res.success)
-                        notification.show({message:res.message + " ("+res.status+")"},"success");
+                        @* notification.show(res.message + " " +res.status,"success"); *@
+                        $("#notification").data("kendoNotification").show(res.message + " | Status: "+res.status,"success");
                     else
-                        notification.show({message:res.message},"error");
+                        @* notification.show("Error in check in ","error"); *@
+                        $("#notification").data("kendoNotification").show(res.message,"error");
 
                     $("#attendancePopup").data("kendoWindow").close();
 
@@ -268,7 +266,8 @@ $(document).ready(function(){
                 error:function(){
 
                     loader.hide();
-                    notification.show({message:"Server Error Occurred"},"error");
+                    @* notification.show({message:"Server Error Occurred"},"error"); *@
+                    $("#notification").data("kendoNotification").show("Server Error Occurred","error");
 
                 }
 

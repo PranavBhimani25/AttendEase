@@ -35,7 +35,7 @@ namespace Repositories.Models
         public int? WorkingHour { get; set; }
 
         [Required(ErrorMessage = "Attendance status is required")]
-        [RegularExpression("^(LateIn|EarlyOut|Regular)$", 
+        [RegularExpression("^(LateIn|EarlyOut|Regular)$",
             ErrorMessage = "Status must be LateIn, EarlyOut, or Regular")]
         public string? AttendStatus { get; set; }
 

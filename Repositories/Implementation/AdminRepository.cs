@@ -22,7 +22,7 @@ namespace Repositories.Implementation
         {
             try
             {
-                var query=@"SELECT COUNT(*) FROM t_employees e WHERE e.c_status = 'Active' AND e.c_empid NOT IN( SELECT c_empid FROM t_attendance WHERE c_attenddate = CURRENT_DATE);";
+                var query=@"SELECT COUNT(*) FROM t_employees e WHERE e.c_status = 'Active' AND e.c_role = 'Employee' AND e.c_empid NOT IN( SELECT c_empid FROM t_attendance WHERE c_attenddate = CURRENT_DATE);";
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
@@ -146,7 +146,7 @@ namespace Repositories.Implementation
         {
             try
             {
-                var query = "SELECT COUNT(*) FROM t_employees";
+                var query = "SELECT COUNT(*) FROM t_employees where c_role = 'Employee'";
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
@@ -232,7 +232,15 @@ namespace Repositories.Implementation
         {
             try
             {
-                var query = "SELECT COUNT(DISTINCT c_empid) FROM t_attendance WHERE c_attenddate = CURRENT_DATE";
+                var query = @"SELECT COUNT(*) 
+                                    FROM t_employees e
+                                    WHERE e.c_status = 'Active'
+                                    AND e.c_role = 'Employee'
+                                    AND e.c_empid IN (
+                                        SELECT c_empid 
+                                        FROM t_attendance 
+                                        WHERE c_attenddate = CURRENT_DATE
+                            );";
                 
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();

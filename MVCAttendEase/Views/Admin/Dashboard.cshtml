@@ -304,6 +304,7 @@ $(document).on("click", ".status-btn", function() {
                    .addClass(newStatus === "Active" ? "k-button-solid-success" : "k-button-solid-danger");
 
                 grid.dataSource.read();
+                loadDashboard();
             }
         }
     });

@@ -40,19 +40,73 @@ namespace Repositories.Implementation
             }
         }
 
-        public Task<int> CountDesigningHour()
+        public async Task<int> CountDesigningHour()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query = "select sum(c_workinghour) from t_attendance where c_tasktype ='Designing';";
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var result = await cmd.ExecuteScalarAsync();
+
+                return Convert.ToInt32(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
 
-        public Task<int> CountDevelopingHour()
+        public async Task<int> CountDevelopingHour()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query = "select sum(c_workinghour) from t_attendance where c_tasktype ='Developing';";
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var result = await cmd.ExecuteScalarAsync();
+
+                return Convert.ToInt32(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
 
-        public Task<int> CountResearchHour()
+        public async Task<int> CountResearchHour()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query = "select sum(c_workinghour) from t_attendance where c_tasktype ='Research';";
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var result = await cmd.ExecuteScalarAsync();
+
+                return Convert.ToInt32(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
 
         public async Task<int> GetEmployeeCount()
@@ -78,14 +132,59 @@ namespace Repositories.Implementation
             }
         }
 
-        public Task<List<EmployeeModel>> ListEmployee()
+        public async Task<List<EmployeeModel>> ListEmployee()
         {
+            // try
+            // {
+            //     var query = "";
+            //     using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+            //     await _conn.CloseAsync();
+            //     await _conn.OpenAsync();
+            //     var reader = await cmd.ExecuteReaderAsync();
+            //     if (reader.HasRows)
+            //     {
+            //         while (reader.Read())
+            //         {
+            //             var employee = new EmployeeModel
+            //             {
+            //                 EmpId=Convert.ToInt32(reader["c_empid"]),
+                            
+            //             }
+            //         }
+            //     }
+            // }catch(Exception ex)
+            // {
+            //     Console.WriteLine($"Error: {ex.Message}");
+            //     return null!;
+            // }
+            // finally
+            // {
+            //     await _conn.CloseAsync();
+            // }
             throw new NotImplementedException();
         }
 
-        public Task<int> OnLeaveEmpCount()
+        public async Task<int> OnLeaveEmpCount()
         {
-            throw new NotImplementedException();
+             try
+            {
+                var query = "SELECT COUNT(*) AS leave_count FROM t_employees WHERE c_status = 'Inactive';";
+                
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var count=await cmd.ExecuteScalarAsync();
+                return Convert.ToInt32(count);
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
 
         public async Task<int> PresentEmpCount()

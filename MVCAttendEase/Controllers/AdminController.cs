@@ -32,7 +32,7 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> GetEmployeeCount()
         {
             var count=await _adminRepo.GetEmployeeCount();
-            Console.WriteLine(count);
+            // Console.WriteLine(count);
             if(count == -1)
             {
                 return Ok(new{success=false,message="Employee not found"});
@@ -44,7 +44,7 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> PresentEmpCount()
         {
             var count=await _adminRepo.PresentEmpCount();
-            Console.WriteLine(count);
+            // Console.WriteLine(count);
             if(count == -1)
             {
                 return Ok(new{success=false,message="Employee not present"});
@@ -56,7 +56,7 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> AbsentEmpCount()
         {
             var count=await _adminRepo.AbsentEmpCount();
-            Console.WriteLine(count);
+            // Console.WriteLine(count);
             if(count == -1)
             {
                 return Ok(new{success=false,message="Absent Employee not found"});
@@ -64,6 +64,54 @@ namespace MVCAttendEase.Controllers
             return Ok(new{success=true,data=count});
         }
 
+        [Route("OnLeaveEmpCount")]
+        public async Task<IActionResult> OnLeaveEmpCount()
+        {
+            var count=await _adminRepo.OnLeaveEmpCount();
+            // Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Not one on Leave"});
+            }
+            return Ok(new{success=true,data=count});
+        }
+
+        [Route("DevelopingHour")]
+        public async Task<IActionResult> DevelopingHour()
+        {
+            var count=await _adminRepo.CountDevelopingHour();
+            // Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Developing hour is not count"});
+            }
+            return Ok(new{success=true,data=count});
+        }
+
+        [Route("DesigningHour")]
+        public async Task<IActionResult> DesigningHour()
+        {
+            var count=await _adminRepo.CountDesigningHour();
+            // Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Designing hour is not count"});
+            }
+            return Ok(new{success=true,data=count});
+        }
+
+
+        [Route("ResearchHour")]
+        public async Task<IActionResult> ResearchHour()
+        {
+            var count=await _adminRepo.CountResearchHour();
+            // Console.WriteLine(count);
+            if(count == -1)
+            {
+                return Ok(new{success=false,message="Research hour not found"});
+            }
+            return Ok(new{success=true,data=count});
+        }
 
 
 

@@ -300,9 +300,11 @@ $(document).ready(function(){
                     loader.hide();
 
                     if(res.success)
-                        notification.show({message:res.message + " | Hours: "+res.workingHours},"success");
+                        @* notification.show({message:res.message + " | Hours: "+res.workingHours},"success"); *@
+                        $("#notification").data("kendoNotification").show(res.message + " | Hours: "+res.workingHours,"success");
                     else
-                        notification.show({message:res.message},"error");
+                        @* notification.show({message:res.message},"error"); *@
+                        $("#notification").data("kendoNotification").show(res.message,"error");
 
                     $("#attendancePopup").data("kendoWindow").close();
                     
@@ -317,7 +319,8 @@ $(document).ready(function(){
                 error:function(){
 
                     loader.hide();
-                    notification.show({message:"Server Error Occurred"},"error");
+                    @* notification.show({message:"Server Error Occurred"},"error"); *@
+                    $("#notification").data("kendoNotification").show("Server Error Occurred","error");
 
                 }
 

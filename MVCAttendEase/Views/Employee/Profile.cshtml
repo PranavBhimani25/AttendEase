@@ -1,7 +1,69 @@
-@{
+@* @{
     ViewData["Title"] = "Profile Page";
     Layout = "../Shared/_EmployeeLayout.cshtml";
 }
+
+
+<style>
+    
+#calendar {
+    width: 60%;
+    height: 400px;
+}
+
+#calendar .k-calendar-view {
+    width: 100%;
+    font-size: 25px;
+}
+
+/* Increase space between dates */
+#calendar .k-calendar-table td {
+    height: 70px;      /* increases vertical spacing */
+    padding: 10px;     /* increases spacing around numbers */
+}
+
+/* Optional: make date numbers centered */
+#calendar .k-calendar-table td span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.present,
+.absent,
+.weekend{
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+
+    width:30px;
+    height:30px;
+
+    border-radius:50%;
+    font-weight:bold;
+}
+
+.present{
+    background-color:green;
+    color:white;
+}
+
+.absent{
+    background-color:red;
+    color:white;
+}
+
+.weekend{
+    background-color:yellow;
+    color:black;
+}
+
+.profile p{
+    font-size : 20px;
+}
+</style>
 
 
 
@@ -9,7 +71,7 @@
 
     <div class="row">
         <!-- Profile Card -->
-        <div class="col-md-4">
+        <div class="col-md-4 profile">
             <div class="k-card">
                 <div class="k-card-body" style="text-align:center">
                     <img id="profileImage" alt="Not Found" style="width:120px;height:120px;border-radius:50%" />
@@ -20,46 +82,59 @@
                 </div>
             </div>
 
-             <div class="d-flex flex-column align-items-center gap-2 mt-2">
+            <div class="d-flex flex-column align-items-center gap-2 mt-2">
 
-    <!-- Update Profile -->
-    <button id="btnUpdateProfile" class="k-button k-primary k-button-sm w-75 d-flex align-items-center justify-content-center gap-2">
-        <span class="k-icon k-i-edit"></span>
-        Update Profile
-    </button>
+                <!-- Update Profile -->
+                <button id="btnUpdateProfile" class="k-button k-primary k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
+                        style="border-color:#d32f2f;color:#d32f2f">
+                    <span class="k-icon k-i-edit"></span>
+                    Update Profile
+                </button>
 
-    <!-- Change Password -->
-    <button id="btnChangePassword" class="k-button k-outline k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
-            style="border-color:#d32f2f;color:#d32f2f">
-        <span class="k-icon k-i-lock"></span>
-        Change Password
-    </button>   
-
-</div>
+                <!-- Change Password -->
+                <button id="btnChangePassword" class="k-button k-outline k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
+                        style="border-color:#d32f2f;color:#d32f2f">
+                    <span class="k-icon k-i-lock"></span>
+                    Change Password
+                </button>   
+            </div>
         </div>
-        
-        <!-- Employee Details -->
-        <div class="col-md-8">
-            <div id="employeeForm"></div>
+        <div id="example" class="col-md-8">
+            <div class="demo-section" style="text-align: center;">
+            <div id="calendar">
         </div>
-
     </div>
 
+
+    <div class="row">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <input id="viewType"/>
+            </div>
+        </div>
+        <div id="hoursChart"></div>
+    </div>
+    
+
+
+
+</div>
 </div>
 <div id="updateProfileWindow" style="display:none;">
 
     <div class="text-center mb-3">
-        <img id="imgPreview"
-            src="/images/user.png"
-            style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:1px solid #ddd" />
+        <img id="imgPreview" src="" alt="Not Found" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:1px solid #ddd" />
     </div>
 
-    <div id="updateEmployeeForm"></div>
+    <form id="updateEmployeeForm"></form>
 </div>
 
 <div id="changePasswordWindow" style="display:none;">
     <div id="changePasswordForm"></div>
 </div>
+
+<div id="notification"></div>
+
 
 
 @section Scripts{
@@ -72,59 +147,113 @@
 var id = sessionStorage.getItem("userId");
 console.log("ID:", id);
 
+
+
+var attendanceData=[];
+function getColor(data){
+
+    var date = data.date;
+    var today = new Date();
+
+    today.setHours(0,0,0,0);
+    date.setHours(0,0,0,0);
+
+    var day = date.getDay();
+
+    if(date > today){
+        return "<span>"+date.getDate()+"</span>";
+    }
+
+    if(day == 0 || day == 6){
+        return "<span class='weekend'>"+date.getDate()+"</span>";
+    }
+
+    for(var i=0;i<attendanceData.length;i++){
+
+        var attendDate = new Date(attendanceData[i].attendDate);
+        attendDate.setHours(0,0,0,0);
+
+        if(attendDate.getTime() == date.getTime()){
+            return "<span class='present'>"+date.getDate()+"</span>";
+        }
+    }
+
+    return "<span class='absent'>"+date.getDate()+"</span>";
+}
+
+
 $(document).ready(function () {
+    loadEmployee();
+    var id = sessionStorage.getItem("userId");
 
-    $.ajax({
-            url: '/Employee/GetEmployeeProfile/' + id,
-            type: 'GET',
-            success: function (response) {
+    $.get("/Employee/GetAttendence/" + id, function (data) {
+        console.log(data);
 
-                if (response.success) {
-                    $("#empName").text(response.data.c_name);
-                    $("#empgender").text(response.data.c_gender);
-                    $("#empEmail").text(response.data.c_email);
-                    $("#profileImage").attr('src', response.data.c_profileimage);
-                }
-                else {       
-                }
-            },
-            error: function () {
-                alert("Error occurred");
+        attendanceData = data;
+
+        $("#calendar").kendoCalendar({
+            month: {
+                content: "#= getColor(data) #"
             }
-     });
+        });
 
-    var employeeData = {
-        name: "John Smith",
-        gender: "Male",
-        email: "john@company.com",
-        department: "IT",
-        address: "New York",
-        joiningDate: "2022-05-10"
-    };
-
-    $("#employeeForm").kendoForm({
-        formData: employeeData,
-        layout: "grid",
-        grid: { cols: 2, gutter:20 },
-
-        items: [
-            {
-                field: "department",
-                label: "Department"
-            },
-            {
-                field: "joiningDate",
-                label: "Joining Date",
-                editor: "DatePicker"
-            },
-            {
-                field: "address",
-                label: "Address",
-                colSpan: 2,
-                editor: "TextArea"
-            }
-        ]
     });
+
+
+    $("#viewType").kendoDropDownList({
+        dataSource: ["Daily", "Monthly"],
+        value: "Daily",
+        change: function () {
+            loadChart(this.value());
+        }
+    });
+    $("#hoursChart").kendoChart({
+        title: {
+            text: "Employee Working Hours"
+        },
+        legend: {
+            position: "bottom"
+        },
+        seriesDefaults: {
+            type: "line"
+        },
+        series: [{
+            name: "Hours",
+            data: []
+        }],
+        categoryAxis: {
+            categories: []
+        },
+        valueAxis: {
+            title: {
+                text: "Hours"
+            }
+        },
+        tooltip: {
+            visible: true,
+            format: "{0} hours"
+        }
+    });
+
+
+
+
+    $("#notification").kendoNotification({
+                position: {
+                    pinned: true,
+                    top: 30,
+                    right: 30
+                },
+                autoHideAfter: 1500,
+                stacking: "down",
+                templates: [
+                    {
+                        type: "error",
+                        template: "<div class='k-notification-error'>#: message #</div>"
+                    },
+                ]
+            });
+
 
 
     var updateWindow=$("#updateProfileWindow").kendoWindow({
@@ -144,13 +273,11 @@ $(document).ready(function () {
         success: function(response){
 
             var form = $("#updateEmployeeForm").data("kendoForm");
-            $("#imgPreview").attr('src', response.data.c_profileimage);
+            $("#imgPreview").attr('src', response.data.profileImage);
             form.setOptions({
                 formData: response.data
             });
 
-            // also update preview image
-            $("#imgPreview").attr("src", data.c_profileimage);
         },
         error: function(xhr){
             console.error(xhr);
@@ -167,10 +294,14 @@ $("#updateEmployeeForm").kendoForm({
     layout:"grid",
     grid:{cols:2,gutter:15},
     items:[
-        {field:"c_name",label:"Name"},
-        {field:"c_email",label:"Email"},
+        {field:"empId", label:"empid", editor:"TextBox", hidden :true},
+        {field:"name",label:"Name"},
+        {field:"email",label:"Email",editor: "TextBox",
+            editorOptions: {
+                enable: false   // disables editing
+            }},
         {
-            field:"c_gender",
+            field:"gender",
             label:"Gender",
             editor:"DropDownList",
             editorOptions:{
@@ -178,24 +309,73 @@ $("#updateEmployeeForm").kendoForm({
             }
         },
         {
-            field:"c_profileimage",
+            field:"profileImage",
             label:"Profile Image",
-            editor:function(container){
-                $('<input type="file" accept="image/*" />')
+            editor: function(container){
+                $('<input type="file" id="profileImageInput" accept="image/*" />')
                     .appendTo(container)
-                    .on("change",function(e){
-                        const file=e.target.files[0];
+                    .on("change", function(e){
+
+                        const file = e.target.files[0];
                         if(!file) return;
 
-                        const reader=new FileReader();
-                        reader.onload=function(ev){
-                            $("#imgPreview").attr("src",ev.target.result);
+                        const reader = new FileReader();
+
+                        reader.onload = function(ev){
+                            $("#imgPreview").attr("src", ev.target.result);
                         };
+
                         reader.readAsDataURL(file);
                     });
             }
         }  
-    ]
+    ],
+    buttonsTemplate: `
+        <button type="submit" class="k-button k-primary">Submit</button>
+        <button type="reset" class="k-button">Clear</button>
+    `,
+
+    submit: function (e) {
+
+        e.preventDefault();
+        var formData = e.model;
+
+        var selectedFile = $("#profileImageInput")[0].files[0];
+
+        var data = new FormData();
+
+        data.append("EmpId", formData.empId);
+        data.append("Name", formData.name);
+        data.append("Email", formData.email);
+        data.append("Gender", formData.gender);
+        data.append("ProfileImageUrl", formData.profileImage);
+
+        if (selectedFile) {
+            data.append("ProfileImage", selectedFile);
+        }
+
+        $.ajax({
+            url: "/Employee/UpdateEmployee",
+            type: "POST",
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if(data.success){
+                    $("#notification").data("kendoNotification").show(data.message,"success");
+                }
+                else{
+                    $("#notification").data("kendoNotification").show(data.message,"error");
+                }
+                updateWindow.close();
+                loadEmployee();
+            },
+            error: function () {
+                updateWindow.close();
+                loadEmployee();
+            }
+        });
+        }
 });
 
   
@@ -225,7 +405,7 @@ $("#updateEmployeeForm").kendoForm({
                     field:"NewPassword",
                     label:"New Password",
                     editor:function(container){
-                        $('<input type="password" class="k-textbox w-100" placeholder="New password" />')
+                        $('<input type="password" name="password" required minlength="6" class="k-textbox w-100" placeholder="New password" />')
                             .appendTo(container);
                     }
             },
@@ -233,14 +413,14 @@ $("#updateEmployeeForm").kendoForm({
                 field:"ConfirmPassword",
                 label:"Confirm Password",
                 editor:function(container){
-                    $('<input type="password" class="k-textbox w-100" placeholder="Confirm  password" />')
+                    $('<input type="password" name="confirmpassword" required minlength="6" class="k-textbox w-100" placeholder="Confirm  password" />')
                         .appendTo(container);
                 }
             }
         ],
         buttonsTemplate:`
             <div class="k-form-buttons" style="margin-top:8px">
-                <button id="Passchg" class="k-button k-primary k-button-sm">Update</button>
+                <button type="button" id="Passchg" class="k-button k-primary k-button-sm">Update</button>
                 <button type="button" class="k-button k-button-sm" id="btnCloseChangePwd">Cancel</button>
             </div>
         `
@@ -251,14 +431,14 @@ $("#updateEmployeeForm").kendoForm({
     });
 
     $(document).on("click","#Passchg",function(){
-        var id=sessionStorage.getItem("userId");
-        @* debugger; *@
-        var password=$("input[placeholder='New password']").val();
-        var confpass=$("input[placeholder='Confirm  password']").val();
+        var password=$("input[name='password']").val();
+        var confpass=$("input[name='confirmpassword']").val();
+        console.log(`${password} --- > ${confpass}`);
 
         if(password!==confpass){
-            alert("Passwords do not match");
-            return;
+            var msg = "Password and Confirm Password Not Matched";
+            $("#notification").data("kendoNotification").show({message : msg},"error");
+            return false;
         }
 
         $.ajax({
@@ -266,9 +446,16 @@ $("#updateEmployeeForm").kendoForm({
             type:"PUT",
             contentType:"application/json",
             data:JSON.stringify(password),
-            success:function(response){
-                console.log(response);
+            success:function(data){
+                console.log(data);
+                if(data.success){
+                    $("#notification").data("kendoNotification").show(data.message,"success");
+                }
+                else{
+                    $("#notification").data("kendoNotification").show(data.message,"error");
+                }
                 changePasswordWindow.close();
+                loadEmployee();
             },error:function(xhr,status,error){
                 alert("Error: " + xhr.responseText);
             }
@@ -278,6 +465,68 @@ $("#updateEmployeeForm").kendoForm({
 
 
 
+    var validator = $("#changePasswordForm").kendoValidator({
+                rules: {
+                    passwordMatch: function(input) {
+                        if (input.attr("name") === "confirmpassword") {
+
+                            var password = $("input[name='password']").val();
+                            var confirmPassword = input.val();
+
+                            return password === confirmPassword;
+                        }
+
+                        return true;
+                    }
+                },
+                messages: {
+                    passwordMatch: "Passwords do not match"
+                }
+            }).data("kendoValidator");
+
+
+
 });
-</script>
+
+function loadEmployee(){
+        $.ajax({
+                url: '/Employee/GetEmployeeProfile/' + id,
+                type: 'GET',
+                success: function (response) {
+
+                    if (response.success) {
+                        $("#empName").text(response.data.name);
+                        $("#empgender").text(response.data.gender);
+                        $("#empEmail").text(response.data.email);
+                        $("#profileImage").attr('src', response.data.profileImage);
+                    }
+                    else {       
+                    }
+                },
+                error: function () {
+                    alert("Error occurred");
+                }
+        });
+    }
+
+function loadChart(viewType){
+
+    $.ajax({
+        url: "/Employee/GetEmployeeHours",
+        type: "GET",
+        data: { type: viewType },
+        success: function (res) {
+
+            var chart = $("#hoursChart").data("kendoChart");
+
+            chart.options.series[0].data = res.hours;
+            chart.options.categoryAxis.categories = res.categories;
+
+            chart.refresh();
+        }
+    });
+
 }
+
+</script>
+} *@

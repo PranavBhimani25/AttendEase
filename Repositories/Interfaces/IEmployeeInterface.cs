@@ -14,5 +14,13 @@ namespace Repositories.Interfaces
         Task<EmployeeModel> GetOne(int id);
 
         Task<int> ChangePWD(int id,string pass);
+
+        Task<int> Update(UpdateEmployee emp);
+
+        Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId,int month,int year);
+
+        Task<List<vm_YearlyWorkingHours>> GetYearlyWorkingHours(int empId,int year);
+
+        Task<List<vm_MonthlyWorkingHours>> GetMonthlyWorkingHours(int empId,int month,int year);
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVCAttendEase.Filters;
+using MVCAttendEase.Services;
 using Repositories.Interfaces;
 using Repositories.Models;
 
@@ -17,11 +18,13 @@ namespace MVCAttendEase.Controllers
     {
         private readonly ILogger<EmployeeController> _logger;
         private readonly IEmployeeInterface _emp;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService)
         {
             _logger = logger;
             _emp = emp;
+            _cloudinaryService = cloudinaryService;
         }
 
         [Route("Dashboard")]
@@ -65,13 +68,67 @@ namespace MVCAttendEase.Controllers
             var status=await  _emp.ChangePWD(id,password);
             if (status == 1)
             {
-                return Ok(new{success=true,message="Password CHnage SuccessFully...!"});
+                return Ok(new{success=true,message="Password Changed Successfully...!"});
             }
             else
             {
-                return BadRequest("There Is Some Error.");
+                return BadRequest(new {message = "There Is Some Error.", success = true});
             }
         }
+
+
+        [HttpPost]
+        [Route("UpdateEmployee")]
+        public async Task<IActionResult> UpdateEmployee([FromForm] UpdateEmployee emp)
+        {
+            if (emp.ProfileImage != null && emp.ProfileImage.Length > 0)
+            {
+                emp.ProfileImageUrl = await _cloudinaryService.UploadImageAsync(emp.ProfileImage);
+            }
+
+            var employee = await _emp.Update(emp);
+            if(employee > 0)
+            {
+                return Ok(new { message = "Update Employee`s Details Successfull", success = true });
+            }
+            else
+            {
+                return BadRequest(new { message = "Update Employee Data Failed", success = false });
+            }
+           
+        }
+
+
+
+        [HttpGet("GetAttendence/{empId}")]
+        public async Task<IActionResult> GetAttendance(int empId)
+        {
+            int month=DateTime.Now.Month;
+            int year=DateTime.Now.Year;
+
+            var data=await _emp.GetAttendanceByEmployee(empId,month,year);
+
+            return Ok(data);
+        }
+
+
+
+       [HttpGet("GetMonthlyWorkingHours")]
+        public async Task<IActionResult> GetMonthlyWorkingHours(int empId,int month,int year)
+        {
+            var data = await _emp.GetMonthlyWorkingHours(empId,month,year);
+
+            return Ok(data);
+        }
+
+        [HttpGet("GetYearlyWorkingHours")]
+        public async Task<IActionResult> GetYearlyWorkingHours(int empId,int year)
+        {
+            var data = await _emp.GetYearlyWorkingHours(empId,year);
+            return Ok(data);
+        }
+
+        
 
       
 

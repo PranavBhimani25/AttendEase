@@ -1,5 +1,680 @@
 @{
-    ViewData["Title"] = "Employee Dashboard";
+    ViewData["Title"] = "Profile Page";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
 }
 
-<h1>Employee Dashboard</h1>
+
+<style>
+
+
+    /* Reduce height of each day cell */
+    #scheduler .k-scheduler-monthview .k-scheduler-table td{
+        height: 70px !important;
+    }
+
+    /* Reduce header size (date numbers row) */
+    #scheduler .k-scheduler-monthview .k-scheduler-datecolumn{
+        height: 25px;
+    }
+
+    /* Reduce event box size */
+    #scheduler .k-event{
+        padding:2px 4px;
+        font-size:12px;
+    }
+
+    .present-event{
+        background-color:green !important;
+        color:white !important;
+        text-align:center;
+    }
+
+    .absent-event{
+        background-color:red !important;
+        color:white !important;
+        text-align:center;
+    }
+
+    .weekend-event{
+        background-color:yellow !important;
+        color:black !important;
+        text-align:center;
+    }
+
+
+
+
+
+    .profile p{
+        font-size : 20px;
+    }
+</style>
+
+
+
+<div class="container">
+
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4 profile">
+            <div class="k-card">
+                <div class="k-card-body" style="text-align:center">
+                    <img id="profileImage" alt="Not Found" style="width:120px;height:120px;border-radius:50%" />
+                    <h3 id="empName"></h3>
+                    <hr/>
+                    <p><b>Email:</b> <span id="empEmail"></span></p>
+                    <p><b>Gender : </b><span id="empgender"></span></p>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column align-items-center gap-2 mt-2">
+
+                <!-- Update Profile -->
+                <button id="btnUpdateProfile" class="k-button k-primary k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
+                        style="border-color:#d32f2f;color:#d32f2f">
+                    <span class="k-icon k-i-edit"></span>
+                    Update Profile
+                </button>
+
+                <!-- Change Password -->
+                <button id="btnChangePassword" class="k-button k-outline k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
+                        style="border-color:#d32f2f;color:#d32f2f">
+                    <span class="k-icon k-i-lock"></span>
+                    Change Password
+                </button>   
+            </div>
+        </div>
+        <div id="calender" class="col-md-8">
+            <div class="demo-section" style="text-align: center;">
+            <div id="scheduler"></div>
+        </div>
+    </div>
+
+    <div class="demo-section wide">
+        <div style="width:250px;margin-bottom:10px">
+            <input id="chartViewSelector" />
+        </div>
+    <div id="chart"></div>
+
+</div>
+
+</div>
+</div>
+<div id="updateProfileWindow" style="display:none;">
+
+    <div class="text-center mb-3">
+        <img id="imgPreview" src="" alt="Not Found" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:1px solid #ddd" />
+    </div>
+
+    <form id="updateEmployeeForm"></form>
+</div>
+
+<div id="changePasswordWindow" style="display:none;">
+    <div id="changePasswordForm"></div>
+</div>
+
+<div id="notification"></div>
+
+
+
+@section Scripts{
+
+<script>
+
+
+
+
+var id = sessionStorage.getItem("userId");
+console.log("ID:", id);
+
+
+var attendanceData = [];
+
+$(document).ready(function () {
+    loadEmployee();
+    var id = sessionStorage.getItem("userId");
+
+    $.get("/Employee/GetAttendence/" + id, function (data) {
+
+        attendanceData = data;
+        var events = [];
+        var today = new Date();
+        today.setHours(0,0,0,0);
+        var start = new Date(today.getFullYear(), today.getMonth()-1, 1);
+        var end = new Date(today.getFullYear(), today.getMonth()+1, 0);
+        for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            var date = new Date(d);
+            date.setHours(0,0,0,0);
+            var day = date.getDay();
+            var status = "";
+            var className = "";
+            if(date > today){
+                continue;
+            }
+            if(day == 0 || day == 6){
+                status = "Weekend";
+                className = "weekend-event";
+            }
+            else{
+                var isPresent = false;
+                for(var i=0;i<attendanceData.length;i++){
+                    var attendDate = new Date(attendanceData[i].attendDate);
+                    attendDate.setHours(0,0,0,0);
+
+                    if(attendDate.getTime() == date.getTime()){
+                        isPresent = true;
+                        break;
+                    }
+                }
+
+                if(isPresent){
+                    status = "Present";
+                    className = "present-event";
+                }
+                else{
+                    status = "Absent";
+                    className = "absent-event";
+                }
+            }
+
+            events.push({
+                start: new Date(date),
+                end: new Date(date),
+                title: status,
+                className: className,
+                isAllDay: true
+            });
+        }
+
+        $("#scheduler").kendoScheduler({
+
+            date: new Date(),
+            height: 500,
+
+            views: [
+                { type: "month", selected: true }
+            ],
+
+            eventTemplate: "<div class='#: className #'>#: title #</div>",
+
+            dataSource: {
+                data: events
+            }
+        });
+    });
+
+
+    //graphs
+
+        var id = sessionStorage.getItem("userId");
+        var today = new Date();
+        var month = today.getMonth() + 1;
+        var year = today.getFullYear();
+
+        $("#chartViewSelector").kendoDropDownList({
+            dataSource: [
+                { text: "Monthly Working Hours", value: "monthly" },
+                { text: "Yearly Working Hours", value: "yearly" }
+            ],
+
+            dataTextField: "text",
+            dataValueField: "value",
+            value: "monthly",
+
+            change: function () {
+
+                var selected = this.value();
+
+                if (selected === "monthly") {
+                    loadMonthlyChart();
+                }
+                else {
+                    loadYearlyChart();
+                }
+            }
+        });
+        
+         loadMonthlyChart();
+
+         function loadMonthlyChart() {
+        var attendanceDS = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Employee/GetMonthlyWorkingHours",
+                    dataType: "json",
+                    data: {
+                        empId: id,
+                        month: month,
+                        year: year
+                    }
+                }
+            }
+
+        });
+        attendanceDS.fetch(function () {
+
+            var data = this.data();
+
+            var categories = [];
+            var workingHours = [];
+
+            var daysInMonth = new Date(year, month, 0).getDate();
+            for (var d = 1; d <= daysInMonth; d++) {
+                var date = new Date(year, month - 1, d);
+                var day = date.getDay();
+                if (day === 0 || day === 6) continue;
+                var label = d + " " + kendo.toString(date, "ddd").toUpperCase();
+                categories.push(label);
+                var hours = 0;
+                for (var i = 0; i < data.length; i++) {
+                    var attendDate = new Date(data[i].date);
+                    if (attendDate.getDate() === d) {
+                        hours = data[i].workingHour;
+                        break;
+                    }
+                }
+                workingHours.push(hours);
+            }
+            createMonthlyChart(categories, workingHours);
+        });
+    }
+
+    function createMonthlyChart(categories, hours) {
+        var chart = $("#chart").data("kendoChart");
+        if(chart){
+            chart.destroy();
+            $("#chart").empty();
+        }
+
+        $("#chart").kendoChart({
+            title: {
+                text: "Monthly Working Hours (Without Holidays/Weekends)"
+            },
+            legend: {
+                position: "bottom"
+            },
+            seriesDefaults: {
+                type: "line",
+                style: "smooth"
+            },
+            series: [{
+                name: "Working Hours",
+                data: hours
+            }],
+            categoryAxis: {
+                categories: categories,
+                labels: {
+                    rotation: -45
+                }
+            },
+            valueAxis: {
+                min: 0,
+                title: {
+                    text: "Hours"
+                }
+            },
+            tooltip: {
+                visible: true,
+                template: "#= category # : #= value # hrs"
+            }
+        });
+    }
+
+    //yearly
+
+    function loadYearlyChart() {
+        var chart = $("#chart").data("kendoChart");
+        if(chart){
+            chart.destroy();
+            $("#chart").empty();
+        }
+
+        $.get("/Employee/GetYearlyWorkingHours",
+            {
+                empId: id,
+                year: year
+            },
+            function (data) {
+                console.log("Yearly Data:", data);
+                var months = [
+            "Jan","Feb","Mar","Apr","May","Jun",
+            "Jul","Aug","Sep","Oct","Nov","Dec"
+        ];
+                 var hours = new Array(12).fill(0);
+
+                for (var i = 0; i < data.length; i++) {
+
+                    var monthIndex = data[i].month - 1; 
+                    hours[monthIndex] = data[i].totalHours;
+
+                }
+
+                createYearlyChart(months, hours);
+
+            });
+
+    }
+
+
+    function createYearlyChart(months, hours) {
+
+        $("#chart").kendoChart({
+
+            title: {
+                text: "Yearly Working Hours (Without Holidays/Weekends)"
+            },
+
+            legend: {
+                position: "bottom"
+            },
+
+            seriesDefaults: {
+                type: "column"
+            },
+
+            series: [{
+                name: "Total Working Hours",
+                data: hours
+            }],
+            categoryAxis: {
+                categories: months,
+                majorGridLines: {
+                    visible: false
+                }
+            },
+            valueAxis: {
+                min: 0,
+                title: {
+                    text: "Hours"
+                }
+            },
+            tooltip: {
+                visible: true,
+                template: "#= category # : #= value # hrs"
+            }
+        });
+
+    }
+
+
+
+
+
+    $("#notification").kendoNotification({
+                position: {
+                    pinned: true,
+                    top: 30,
+                    right: 30
+                },
+                autoHideAfter: 1500,
+                stacking: "down",
+                templates: [
+                    {
+                        type: "error",
+                        template: "<div class='k-notification-error'>#: message #</div>"
+                    },
+                ]
+            });
+
+
+
+    var updateWindow=$("#updateProfileWindow").kendoWindow({
+        title:"Update Profile",
+        modal:true,
+        visible:false,
+        resizable:false,
+        width:"500px",
+        actions:["Close"]
+    }).data("kendoWindow");
+
+    $("#btnUpdateProfile").click(function(){
+
+    $.ajax({
+        url: "/Employee/GetEmployee/" + id,
+        type: "GET",
+        success: function(response){
+
+            var form = $("#updateEmployeeForm").data("kendoForm");
+            $("#imgPreview").attr('src', response.data.profileImage);
+            form.setOptions({
+                formData: response.data
+            });
+
+        },
+        error: function(xhr){
+            console.error(xhr);
+        }
+    });
+
+    updateWindow.center().open();
+});
+
+
+    // Initialize form first
+$("#updateEmployeeForm").kendoForm({
+    formData: {},
+    layout:"grid",
+    grid:{cols:2,gutter:15},
+    items:[
+        {field:"empId", label:"empid", editor:"TextBox", 
+            editorOptions : {enable : false}},
+        {field:"name",label:"Name"},
+        {field:"email",label:"Email",editor: "TextBox",
+            editorOptions: {
+                enable: false   // disables editing
+            }},
+        {
+            field:"gender",
+            label:"Gender",
+            editor:"DropDownList",
+            editorOptions:{
+                dataSource:["Male","Female","Other"]
+            }
+        },
+        {
+            field:"profileImage",
+            label:"Profile Image",
+            editor: function(container){
+                $('<input type="file" id="profileImageInput" accept="image/*" />')
+                    .appendTo(container)
+                    .on("change", function(e){
+
+                        const file = e.target.files[0];
+                        if(!file) return;
+
+                        const reader = new FileReader();
+
+                        reader.onload = function(ev){
+                            $("#imgPreview").attr("src", ev.target.result);
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+            }
+        }  
+    ],
+    buttonsTemplate: `
+        <button type="submit" class="k-button k-primary">Submit</button>
+        <button type="reset" class="k-button">Clear</button>
+    `,
+
+    submit: function (e) {
+
+        e.preventDefault();
+        var formData = e.model;
+
+        var selectedFile = $("#profileImageInput")[0].files[0];
+
+        var data = new FormData();
+
+        data.append("EmpId", formData.empId);
+        data.append("Name", formData.name);
+        data.append("Email", formData.email);
+        data.append("Gender", formData.gender);
+        data.append("ProfileImageUrl", formData.profileImage);
+
+        if (selectedFile) {
+            data.append("ProfileImage", selectedFile);
+        }
+
+        $.ajax({
+            url: "/Employee/UpdateEmployee",
+            type: "POST",
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if(data.success){
+                    $("#notification").data("kendoNotification").show(data.message,"success");
+                }
+                else{
+                    $("#notification").data("kendoNotification").show(data.message,"error");
+                }
+                updateWindow.close();
+                loadEmployee();
+            },
+            error: function () {
+                updateWindow.close();
+                loadEmployee();
+            }
+        });
+        }
+});
+
+  
+
+    $(document).on("click","#btnClosePopup",function(){
+        updateWindow.close();
+    });
+
+    var changePasswordWindow=$("#changePasswordWindow").kendoWindow({
+        title:"Change Password",
+        modal:true,
+        visible:false,
+        resizable:false,
+        width:"400px",
+        actions:["Close"]
+    }).data("kendoWindow");
+
+    $("#btnChangePassword").click(function(){
+        changePasswordWindow.center().open();
+    });
+
+    $("#changePasswordForm").kendoForm({
+        layout:"grid",
+        grid:{cols:1,gutter:6},
+        items:[
+            {
+                    field:"NewPassword",
+                    label:"New Password",
+                    editor:function(container){
+                        $('<input type="password" name="password" required minlength="6" class="k-textbox w-100" placeholder="New password" />')
+                            .appendTo(container);
+                    }
+            },
+            {
+                field:"ConfirmPassword",
+                label:"Confirm Password",
+                editor:function(container){
+                    $('<input type="password" name="confirmpassword" required minlength="6" class="k-textbox w-100" placeholder="Confirm  password" />')
+                        .appendTo(container);
+                }
+            }
+        ],
+        buttonsTemplate:`
+            <div class="k-form-buttons" style="margin-top:8px">
+                <button type="button" id="Passchg" class="k-button k-primary k-button-sm">Update</button>
+                <button type="button" class="k-button k-button-sm" id="btnCloseChangePwd">Cancel</button>
+            </div>
+        `
+    });
+
+    $(document).on("click","#btnCloseChangePwd",function(){
+        changePasswordWindow.close();
+    });
+
+    $(document).on("click","#Passchg",function(){
+        if(!validator.validate()){
+            return; // stop if validation fails
+        }
+        
+        var password=$("input[name='password']").val();
+        var confpass=$("input[name='confirmpassword']").val();
+        console.log(`${password} --- > ${confpass}`);
+
+        if(password!==confpass){
+            var msg = "Password and Confirm Password Not Matched";
+            $("#notification").data("kendoNotification").show({message : msg},"error");
+            return false;
+        }
+
+        $.ajax({
+            url:"/Employee/ChangePassword/"+id,
+            type:"PUT",
+            contentType:"application/json",
+            data:JSON.stringify(password),
+            success:function(data){
+                console.log(data);
+                if(data.success){
+                    $("#notification").data("kendoNotification").show(data.message,"success");
+                }
+                else{
+                    $("#notification").data("kendoNotification").show(data.message,"error");
+                }
+                changePasswordWindow.close();
+                loadEmployee();
+            },error:function(xhr,status,error){
+                alert("Error: " + xhr.responseText);
+            }
+        });
+
+    });
+
+
+
+    var validator = $("#changePasswordForm").kendoValidator({
+                rules: {
+                    passwordMatch: function(input) {
+                        if (input.attr("name") === "confirmpassword") {
+
+                            var password = $("input[name='password']").val();
+                            var confirmPassword = input.val();
+
+                            return password === confirmPassword;
+                        }
+
+                        return true;
+                    }
+                },
+                messages: {
+                    passwordMatch: "Passwords do not match"
+                }
+            }).data("kendoValidator");
+
+
+
+});
+
+function loadEmployee(){
+        $.ajax({
+                url: '/Employee/GetEmployeeProfile/' + id,
+                type: 'GET',
+                success: function (response) {
+
+                    if (response.success) {
+                        $("#empName").text(response.data.name);
+                        $("#empgender").text(response.data.gender);
+                        $("#empEmail").text(response.data.email);
+                        $("#profileImage").attr('src', response.data.profileImage);
+                    }
+                    else {       
+                    }
+                },
+                error: function () {
+                    alert("Error occurred");
+                }
+        });
+    }
+
+</script>
+}

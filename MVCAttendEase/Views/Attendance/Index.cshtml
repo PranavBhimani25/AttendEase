@@ -285,6 +285,12 @@ $(document).ready(function(){
                 tasks.push($(this).val());
             });
 
+            if(tasks.length === 0){
+                $("#notification").data("kendoNotification")
+                    .show("Please select at least one Task Type","error");
+                return;
+            }
+
             $.ajax({
 
                 url:"/Attendance/CheckOut",

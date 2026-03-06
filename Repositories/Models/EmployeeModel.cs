@@ -6,27 +6,27 @@ namespace Repositories.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int c_empid { get; set; }
+        public int EmpId { get; set; }
 
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
-        public string c_name { get; set; }
+        public string Name { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
-        public string c_email { get; set; }
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
         [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
-        public string c_password { get; set; }
+        public string Password { get; set; }
 
         [Required(ErrorMessage = "Gender is required")]
-        public string c_gender { get; set; }
+        public string Gender { get; set; }
 
-        public string c_status { get; set; } = "Inactive";
+        public string Status { get; set; } = "Inactive";
 
-        public string? c_profileimage { get; set; }
+        public string? ProfileImage { get; set; }
 
-        public string c_role { get; set; } = "Employee";
+        public string Role { get; set; } = "Employee";
     }
 }

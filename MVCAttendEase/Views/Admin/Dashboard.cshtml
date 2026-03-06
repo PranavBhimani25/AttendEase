@@ -79,6 +79,14 @@
     <div id="hoursGrid"></div>
 </div>
 
+<div class="section-title">
+    Employee List
+</div>
+
+<div class="task-container">
+    <div id="employeeGrid"></div>
+</div>
+
 
 <div id="notification"></div>
 
@@ -178,6 +186,7 @@ $(document).ready(function(){
     });
 
     createHoursGrid();
+    createEmployeeGrid(); 
     loadDashboard();
 
 });
@@ -201,6 +210,96 @@ function createHoursGrid(){
 
         sortable:true,
         pageable:false
+
+    });
+
+}
+
+function createEmployeeGrid(){
+
+    $("#employeeGrid").kendoGrid({
+
+        columns:[
+
+            { field:"empId", title:"Employee ID", width:"120px" },
+            { field:"name", title:"Name" },
+            { field:"email", title:"Email" },
+            { field:"gender", title:"Gender" },
+            { field:"role", title:"Role" },
+
+            {
+                field:"status",
+                title:"Status",
+                template:function(data){
+
+                    if(data.status === "Active"){
+                        return "<span style='color:green;font-weight:bold'>Active</span>";
+                    }
+                    else{
+                        return "<span style='color:red;font-weight:bold'>Inactive</span>";
+                    }
+
+                }
+            },
+
+            {
+                title:"Action",
+                template:`<button class="k-button k-button-md k-button-solid-primary">
+                          Update
+                          </button>`,
+                width:"150px"
+            }
+
+        ],
+
+        dataSource:{
+            transport:{
+                read:{
+                    url:"/Admin/ListEmployee",
+                    dataType:"json"
+                }
+            },
+            schema:{
+                data:"data"
+            },
+            pageSize:10
+        },
+
+        pageable:{
+            pageSizes:[10,20,50,100],
+            buttonCount:5
+        },
+        sortable:true,
+        filterable:true
+
+    });
+
+}
+
+function changeStatus(empId,status){
+
+    $.ajax({
+
+        url:"/Admin/ChangeEmployeeStatus",
+        type:"POST",
+
+        data:{
+            id:empId,
+            status:status
+        },
+
+        success:function(res){
+
+            if(res.success){
+
+                $("#notification").data("kendoNotification")
+                    .show("Status updated","success");
+
+                $("#employeeGrid").data("kendoGrid").dataSource.read();
+
+            }
+
+        }
 
     });
 

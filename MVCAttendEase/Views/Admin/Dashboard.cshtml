@@ -217,13 +217,13 @@ function loadDashboard(){
         }
     });
 
-    $.get("/Admin/GetPresentEmployee",function(res){
+    $.get("/Admin/PresentEmpCount",function(res){
         if(res.success){
             $("#presentEmp").text(res.data);
         }
     });
 
-    $.get("/Admin/GetAbsentEmployee",function(res){
+    $.get("/Admin/AbsentEmpCount",function(res){
         if(res.success){
             $("#absentEmp").text(res.data);
         }

@@ -1,56 +1,4 @@
-﻿@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Admin</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MVCAttendEase.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" /> 
-    <link rel="stylesheet" href="~/lib/kendo/kendo.common.min.css" />
-    <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Admin" asp-action="Dashboard">Admin</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Report">Report</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MVCAttendEase - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/lib/kendo/kendo.all.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html> *@
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,15 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin</title>
 
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <!-- Kendo UI -->
     <link rel="stylesheet" href="~/lib/kendo/kendo.common.min.css" />
     <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" />
     <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
-
-    <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 
@@ -77,54 +20,43 @@
     <!-- SIDEBAR -->
     <div id="sidebar">
         <div class="sidebar-header">
-            <h4></h4>
+            <h4>Admin</h4>
         </div>
 
         <ul class="k-list-group">
-
             <li class="k-list-group-item">
                 <span class="k-icon k-i-dashboard"></span>
                 <a asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
             </li>
-
             <li class="k-list-group-item">
                 <span class="k-icon k-i-chart-bar"></span>
                 <a asp-controller="Admin" asp-action="Report">Report</a>
             </li>
-
             <li class="k-list-group-item">
                 <span class="k-icon k-i-user"></span>
                 <a asp-controller="Auth" asp-action="Logout">Logout</a>
             </li>
-
         </ul>
     </div>
-
 
     <!-- MAIN CONTENT -->
     <div id="main">
 
         <!-- TOP BAR -->
         <div class="topbar">
-
             <button id="sidebar-toggle" class="k-button k-button-md k-rounded-md">
                 <span class="k-icon k-i-menu"></span>
             </button>
-
             <h4 class="ms-3">@ViewData["Title"]</h4>
-
         </div>
 
         <div class="content-wrapper">
-
             @RenderBody()
-
         </div>
 
     </div>
 
 </div>
-
 
 <footer class="footer text-muted">
     <div class="container">
@@ -132,97 +64,111 @@
     </div>
 </footer>
 
-
-<!-- Scripts -->
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/lib/kendo/kendo.all.min.js"></script>
 
 <script>
-
 $(document).ready(function () {
-
-    $("#sidebar").kendoDrawer({
-        mode: "push",
-        mini: true,
-        position: "left"
-    });
-
-    var drawer = $("#sidebar").data("kendoDrawer");
-
     $("#sidebar-toggle").click(function () {
-        drawer.toggle();
+        $("#sidebar").toggleClass("collapsed");
     });
-
 });
-
 </script>
 
 <style>
 
 /* Layout */
-
-#example{
-    display:flex;
+#example {
+    display: flex;
+    min-height: 100vh;
 }
 
 /* Sidebar */
-
-#sidebar{
-    width:250px;
-    background:#2c3e50;
-    color:white;
-    min-height:100vh;
+#sidebar {
+    width: 250px;
+    background: #2c3e50;
+    color: white;
+    min-height: 100vh;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.sidebar-header{
-    padding:20px;
-    font-size:20px;
-    font-weight:bold;
+#sidebar.collapsed {
+    width: 60px;
+}
+
+.sidebar-header {
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#sidebar.collapsed .sidebar-header h4 {
+    display: none;
 }
 
 /* Sidebar items */
-
-.k-list-group-item{
-    padding:15px 20px;
-    border:none;
-    background:none;
+.k-list-group-item {
+    padding: 15px 20px;
+    border: none !important;
+    background: none !important;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
-.k-list-group-item a{
-    color:white;
-    text-decoration:none;
-    margin-left:10px;
+.k-list-group-item a {
+    color: white;
+    text-decoration: none;
+    margin-left: 10px;
+    transition: opacity 0.2s;
 }
 
-.k-list-group-item:hover{
-    background:#34495e;
+#sidebar.collapsed .k-list-group-item a {
+    display: none;
+}
+#sidebar.collapsed {
+    width: 0;
+    padding: 0;
+}
+
+.k-list-group-item:hover {
+    background: #34495e !important;
+}
+
+/* Icon color fix */
+.k-list-group-item .k-icon {
+    color: white;
+    flex-shrink: 0;
 }
 
 /* Top bar */
-
-.topbar{
-    display:flex;
-    align-items:center;
-    padding:15px;
-    border-bottom:1px solid #ddd;
+.topbar {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
 }
 
 /* Content */
-
-#main{
-    flex:1;
+#main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.content-wrapper{
-    padding:25px;
+.content-wrapper {
+    padding: 25px;
+    flex: 1;
 }
 
 /* Footer */
-
-.footer{
-    text-align:center;
-    padding:10px;
+.footer {
+    text-align: center;
+    padding: 10px;
 }
 
 </style>

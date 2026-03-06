@@ -26,6 +26,15 @@ namespace MVCAttendEase.Controllers
             return View();
         }
 
+
+        [Route("Report")]
+         public IActionResult Report()
+        {
+            return View();
+        }
+
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

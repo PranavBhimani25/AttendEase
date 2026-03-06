@@ -229,7 +229,7 @@ function loadDashboard(){
         }
     });
 
-    $.get("/Admin/GetLeaveEmployee",function(res){
+    $.get("/Admin/OnLeaveEmpCount",function(res){
         if(res.success){
             $("#leaveEmp").text(res.data);
         }
@@ -239,7 +239,7 @@ function loadDashboard(){
     var hoursData=[];
 
 
-    $.get("/Admin/GetDesigningHours",function(res){
+    $.get("/Admin/DesigningHour",function(res){
 
         if(res.success){
 
@@ -255,7 +255,7 @@ function loadDashboard(){
     });
 
 
-    $.get("/Admin/GetDevelopingHours",function(res){
+    $.get("/Admin/DevelopingHour",function(res){
 
         if(res.success){
 
@@ -271,7 +271,7 @@ function loadDashboard(){
     });
 
 
-    $.get("/Admin/GetResearchHours",function(res){
+    $.get("/Admin/ResearchHour",function(res){
 
         if(res.success){
 

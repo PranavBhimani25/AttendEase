@@ -21,24 +21,28 @@
     #scheduler .k-event{
         padding:2px 4px;
         font-size:12px;
+        background-color : inherit;
     }
 
     .present-event{
         background-color:green !important;
         color:white !important;
         text-align:center;
+        border-radius: 5px;
     }
 
     .absent-event{
         background-color:red !important;
         color:white !important;
         text-align:center;
+        border-radius: 5px;
     }
 
     .weekend-event{
         background-color:yellow !important;
         color:black !important;
         text-align:center;
+        border-radius: 5px;
     }
 
 
@@ -190,7 +194,7 @@ $(document).ready(function () {
 
             date: new Date(),
             height: 500,
-
+            editable: false, 
             views: [
                 { type: "month", selected: true }
             ],

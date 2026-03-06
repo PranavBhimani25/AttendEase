@@ -4,12 +4,9 @@
 }
 
 <div class="page-title">
-    Employee Attendance Report
+    Employee List
 </div>
 
-@* <div class="section-title">
-    Employee List
-</div> *@
 
 <div class="task-container">
     <div id="employeeGrid"></div>
@@ -17,6 +14,16 @@
 
 
 <div id="notification"></div>
+
+<div id="employeeDetailWindow" style="display:none;">
+    <div id="employeeDetailContent"></div>
+</div>
+<div id="monthPickerWindow" style="display:none;">
+    <div id="monthPickerContent"></div>
+</div>
+<div id="monthlyReportWindow" style="display:none;">
+    <div id="monthlyReportContent"></div>
+</div>
 
 
 @section Scripts{
@@ -29,27 +36,11 @@
     margin-bottom:20px;
 }
 
-/* CARD CONTAINER */
 
-.k-card-container{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:25px;
-    margin-top:30px;
-}
 
-/* CARD */
 
-.stat-card{
-    text-align:center;
-    padding:25px;
-    transition:0.3s;
-    border-radius:10px;
-}
 
-.stat-card:hover{
-    transform:translateY(-5px);
-}
+
 
 /* HEADER */
 
@@ -96,10 +87,70 @@
     box-shadow:0 10px 20px rgba(0,0,0,0.1);
 }
 
+.report-filter-wrap{
+    display:grid;
+    gap:14px;
+    padding:4px;
+}
+
+.report-filter-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+.report-shell{
+    display:grid;
+    gap:20px;
+    padding:6px;
+}
+
+.report-cards{
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:12px;
+}
+
+.report-card{
+    background:#fff;
+    border:1px solid #e7ebef;
+    border-radius:10px;
+    padding:12px;
+}
+
+.report-card-title{
+    font-size:13px;
+    color:#6c757d;
+    margin-bottom:6px;
+    min-height:36px;
+}
+
+.report-card-value{
+    font-size:24px;
+    font-weight:700;
+    color:#2b7cff;
+}
+
+.report-charts{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.report-chart-box{
+    background:#fff;
+    border:1px solid #e7ebef;
+    border-radius:10px;
+    padding:10px;
+}
+
 </style>
 
 
 <script>
+
+var selectedReportEmployeeId = 0;
+var selectedReportEmployeeName = "";
 
 $(document).ready(function(){
 
@@ -112,8 +163,12 @@ $(document).ready(function(){
         autoHideAfter:2000,
         stacking:"down"
     });
+
+    initDetailWindow();
+    initMonthPickerWindow();
+    initMonthlyReportWindow();
     createEmployeeGrid(); 
-    loadReport();
+    bindGridActions();
 
 });
 
@@ -129,30 +184,20 @@ function createEmployeeGrid(){
             { field:"empId", title:"Employee ID", width:"120px" },
             { field:"name", title:"Name" },
             
-            @* {
-                field:"status",
-                title:"Status",
-                template:function(data){
-
-                    if(data.status === "Active"){
-                        return "<span style='color:green;font-weight:bold'>Active</span>";
-                    }
-                    else{
-                        return "<span style='color:red;font-weight:bold'>Inactive</span>";
-                    }
-
-                } 
-            @* }, *@
+          
             {
                 title:"Action",
-                template:`<button class="k-button k-button-md k-button-solid-primary">
-                          Details
-                          </button>`,
-                 template:`<button class="k-button k-button-md k-button-solid-primary">
-                          Report
-                          </button>`,          
+                template:`
+                    <div style="display:flex; gap:8px;">
+                        <button class="k-button k-button-md k-button-outline k-button-outline-primary detail-btn" data-empid="#: empId #">
+                            Detail
+                        </button>
+                        <button class="k-button k-button-md k-button-solid-primary report-btn" data-empid="#: empId #">
+                            Report
+                        </button>
+                    </div>`,
 
-                width:"150px"
+                width:"240px"
             }
 
         ],
@@ -160,12 +205,9 @@ function createEmployeeGrid(){
         dataSource:{
             transport:{
                 read:{
-                    url:"/Admin/ListEmployee",
+                    url:"/Admin/GetEmployees",
                     dataType:"json"
                 }
-            },
-            schema:{
-                data:"data"
             },
             pageSize:10
         },
@@ -181,24 +223,294 @@ function createEmployeeGrid(){
 
 }
 
-/* LOAD DASHBOARD DATA */
+function initDetailWindow(){
+    $("#employeeDetailWindow").kendoWindow({
+        width: "520px",
+        title: "Employee Details",
+        visible: false,
+        modal: true,
+        resizable: false,
+        actions: ["Close"]
+    });
+}
 
-function loadReport(){
-    var hoursData=[];
+function bindGridActions(){
+    $("#employeeGrid").on("click", ".detail-btn", function(){
+        var empId = $(this).data("empid");
+        showEmployeeDetails(empId);
+    });
 
+    $("#employeeGrid").on("click", ".report-btn", function(){
+        var grid = $("#employeeGrid").data("kendoGrid");
+        var row = $(this).closest("tr");
+        var dataItem = grid.dataItem(row);
 
-    $.get("/Admin/DesigningHour",function(res){
+        selectedReportEmployeeId = dataItem.empId;
+        selectedReportEmployeeName = dataItem.name || "";
+        openMonthPickerWindow();
+    });
+}
 
-        if(res.success){
+function showEmployeeDetails(empId){
+    var windowRef = $("#employeeDetailWindow").data("kendoWindow");
+    var contentRef = $("#employeeDetailContent");
 
-            hoursData.push({
-                type:"Designing",
-                hours:res.data
-            });
+    contentRef.html("<p>Loading employee details...</p>");
+    windowRef.center().open();
 
-            $("#hoursGrid").data("kendoGrid").dataSource.data(hoursData);
+    $.ajax({
+        url: "/Admin/GetEmployeeDetails",
+        type: "GET",
+        data: { empId: empId },
+        success: function(emp){
+            var imageHtml = emp.profileImage
+                ? `<img src="${emp.profileImage}" alt="Profile" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:1px solid #ddd;" />`
+                : `<div style="width:96px;height:96px;border-radius:50%;background:#f1f3f5;display:flex;align-items:center;justify-content:center;color:#6c757d;font-weight:600;">N/A</div>`;
 
+            var detailsHtml = `
+                <div style="display:flex;gap:16px;align-items:flex-start;">
+                    ${imageHtml}
+                    <div style="display:grid;gap:8px;">
+                        <div><strong>Employee ID:</strong> ${emp.empId}</div>
+                        <div><strong>Name:</strong> ${emp.name || "-"}</div>
+                        <div><strong>Email:</strong> ${emp.email || "-"}</div>
+                        <div><strong>Gender:</strong> ${emp.gender || "-"}</div>
+                        <div><strong>Status:</strong> ${emp.status || "-"}</div>
+                    </div>
+                </div>`;
+
+            contentRef.html(detailsHtml);
+            windowRef.title(`Employee Details - ${emp.empId}`);
+        },
+        error: function(xhr){
+            var msg = "Unable to load employee details.";
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                msg = xhr.responseJSON.message;
+            }
+
+            contentRef.html(`<p style="color:#d9534f;">${msg}</p>`);
+            $("#notification").data("kendoNotification").show({ message: msg }, "error");
         }
+    });
+}
+
+function initMonthPickerWindow(){
+    $("#monthPickerWindow").kendoWindow({
+        width: "420px",
+        title: "Generate Monthly Report",
+        visible: false,
+        modal: true,
+        resizable: false,
+        actions: ["Close"]
+    });
+}
+
+function initMonthlyReportWindow(){
+    $("#monthlyReportWindow").kendoWindow({
+        width: "1200px",
+        height: "760px",
+        title: "Monthly Report",
+        visible: false,
+        modal: true,
+        resizable: true,
+        actions: ["Maximize", "Close"]
+    });
+}
+
+function openMonthPickerWindow(){
+    var wnd = $("#monthPickerWindow").data("kendoWindow");
+
+    var html = `
+        <div class="report-filter-wrap">
+            <label for="reportMonthPicker"><strong>Select Month and Year</strong></label>
+            <input id="reportMonthPicker" style="width:100%;" />
+            <div class="report-filter-actions">
+                <button id="cancelReportBtn" class="k-button k-button-md k-button-outline k-button-outline-base">Cancel</button>
+                <button id="generateReportBtn" class="k-button k-button-md k-button-solid-primary">Generate</button>
+            </div>
+        </div>`;
+
+    $("#monthPickerContent").html(html);
+    $("#reportMonthPicker").kendoDatePicker({
+        start: "year",
+        depth: "year",
+        format: "MMMM yyyy",
+        value: new Date()
+    });
+
+    wnd.center().open();
+}
+
+$(document).on("click", "#cancelReportBtn", function(){
+    $("#monthPickerWindow").data("kendoWindow").close();
+});
+
+$(document).on("click", "#generateReportBtn", function(){
+    var picker = $("#reportMonthPicker").data("kendoDatePicker");
+    var selectedDate = picker ? picker.value() : null;
+
+    if (!selectedDate) {
+        $("#notification").data("kendoNotification").show({ message: "Please select month and year." }, "error");
+        return;
+    }
+
+    var month = selectedDate.getMonth() + 1;
+    var year = selectedDate.getFullYear();
+
+    $("#monthPickerWindow").data("kendoWindow").close();
+    generateMonthlyReportWindow(selectedReportEmployeeId, selectedReportEmployeeName, month, year);
+});
+
+function generateMonthlyReportWindow(empId, empName, month, year){
+    var reportWnd = $("#monthlyReportWindow").data("kendoWindow");
+
+    var shellHtml = `
+        <div class="report-shell">
+            <div id="reportCards" class="report-cards"></div>
+            <div class="report-charts">
+                <div class="report-chart-box"><div id="attendancePieChart"></div></div>
+                <div class="report-chart-box"><div id="dailyHourBarChart"></div></div>
+            </div>
+            <div>
+                <div id="monthlyReportGrid"></div>
+            </div>
+        </div>`;
+
+    $("#monthlyReportContent").html(shellHtml);
+    reportWnd.title(`Monthly Report - ${empName} (${month}/${year})`);
+    reportWnd.center().open();
+
+    $.ajax({
+        url: "/Admin/GetEmployeeMonthlyReportData",
+        type: "GET",
+        data: { empId: empId, month: month, year: year },
+        success: function(response){
+            var summary = response.summary || response.Summary || {};
+            var dailyHours = response.dailyHours || response.DailyHours || [];
+            var attendanceDetails = response.attendanceDetails || response.AttendanceDetails || [];
+
+            renderReportCards(summary);
+            renderAttendancePieChart(summary);
+            renderDailyHourBarChart(dailyHours);
+            renderMonthlyGrid(normalizeAttendanceRows(attendanceDetails));
+        },
+        error: function(xhr){
+            var msg = "Unable to generate report.";
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                msg = xhr.responseJSON.message;
+            }
+            $("#monthlyReportContent").html(`<p style="color:#d9534f;">${msg}</p>`);
+            $("#notification").data("kendoNotification").show({ message: msg }, "error");
+        }
+    });
+}
+
+function normalizeAttendanceRows(rows){
+    return (rows || []).map(function(r){
+        return {
+            attendDate: r.attendDate || r.AttendDate || null,
+            workType: r.workType || r.WorkType || "",
+            taskType: r.taskType || r.TaskType || "",
+            workingHours: r.workingHours ?? r.WorkingHours ?? 0,
+            attendStatus: r.attendStatus || r.AttendStatus || ""
+        };
+    });
+}
+
+function renderReportCards(summary){
+    var cards = [
+        { title: "Total Working Hours In Month", value: summary.totalWorkingHours ?? 0 },
+        { title: "Total Present Days In Month", value: summary.presentDays ?? 0 },
+        { title: "Absent Days", value: summary.absentDays ?? 0 },
+        { title: "Late In", value: summary.lateInDays ?? 0 },
+        { title: "Early Out", value: summary.earlyOutDays ?? 0 }
+    ];
+
+    var html = cards.map(function(c){
+        return `
+            <div class="report-card k-card">
+                <div class="report-card-title">${c.title}</div>
+                <div class="report-card-value">${c.value}</div>
+            </div>`;
+    }).join("");
+
+    $("#reportCards").html(html);
+}
+
+function renderAttendancePieChart(summary){
+    $("#attendancePieChart").kendoChart({
+        title: { text: "Attendance Split" },
+        legend: { position: "bottom" },
+        series: [{
+            type: "pie",
+            data: [
+                { category: "Absent", value: summary.absentDays ?? 0, color: "#dc3545" },
+                { category: "Late In", value: summary.lateInDays ?? 0, color: "#ffc107" },
+                { category: "Early Out", value: summary.earlyOutDays ?? 0, color: "#fd7e14" },
+                { category: "Regular", value: summary.regularDays ?? 0, color: "#0d6efd" }
+            ],
+            field: "value",
+            categoryField: "category",
+            labels: { visible: true, format: "{0}" }
+        }],
+        tooltip: { visible: true, template: "#= category #: #= value #" }
+    });
+}
+
+function renderDailyHourBarChart(dailyHours){
+    var data = dailyHours.map(function(x){
+        return {
+            dayLabel: x.day.toString(),
+            hours: x.workingHours
+        };
+    });
+
+    $("#dailyHourBarChart").kendoChart({
+        title: { text: "Daily Working Hours" },
+        legend: { visible: false },
+        dataSource: { data: data },
+        series: [{
+            type: "column",
+            field: "hours",
+            categoryField: "dayLabel",
+            color: "#2b7cff",
+            name: "Hours"
+        }],
+        categoryAxis: {
+            title: { text: "Day" },
+            majorGridLines: { visible: false }
+        },
+        valueAxis: {
+            title: { text: "Working Hours" },
+            min: 0
+        },
+        tooltip: { visible: true, template: "Day #= category #: #= value # hrs" }
+    });
+}
+
+function renderMonthlyGrid(rows){
+    $("#monthlyReportGrid").kendoGrid({
+        dataSource: {
+            data: rows,
+            pageSize: 10
+        },
+        height: 280,
+        scrollable: true,
+        sortable: true,
+        pageable: {
+            pageSizes: [10, 20, 50],
+            buttonCount: 5
+        },
+        noRecords: {
+            template: "No attendance records found for selected month."
+        },
+        columns: [
+            { field: "attendDate", title: "Attend Date", template: "#= kendo.toString(kendo.parseDate(attendDate), 'dd-MMM-yyyy') #" },
+            { field: "workType", title: "Work Type" },
+            { field: "taskType", title: "Task Type" },
+            { field: "workingHours", title: "Working Hours" },
+            { field: "attendStatus", title: "Attend Status" }
+        ]
     });
 }
 

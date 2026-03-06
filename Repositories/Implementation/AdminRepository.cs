@@ -44,7 +44,18 @@ namespace Repositories.Implementation
         {
             try
             {
-                var query = "select sum(c_workinghour) from t_attendance where c_tasktype ='Designing';";
+                var query = @"WITH task_hours AS (
+                                                SELECT 
+                                                    unnest(string_to_array(c_tasktype, ',')) AS task, 
+                                                    c_workinghour
+                                                FROM t_attendance
+                                                WHERE date_trunc('month', c_attenddate) = date_trunc('month', CURRENT_DATE)
+                                            )
+                                            SELECT 
+                                                SUM(c_workinghour) AS total_working_hours
+                                            FROM task_hours
+                                            GROUP BY task
+                                            HAVING task = 'Designing';";
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
@@ -67,7 +78,18 @@ namespace Repositories.Implementation
         {
             try
             {
-                var query = "select sum(c_workinghour) from t_attendance where c_tasktype ='Developing';";
+                var query =@"WITH task_hours AS (
+                                                SELECT 
+                                                    unnest(string_to_array(c_tasktype, ',')) AS task, 
+                                                    c_workinghour
+                                                FROM t_attendance
+                                                WHERE date_trunc('month', c_attenddate) = date_trunc('month', CURRENT_DATE)
+                                            )
+                                            SELECT 
+                                                SUM(c_workinghour) AS total_working_hours
+                                            FROM task_hours
+                                            GROUP BY task
+                                            HAVING task = 'Developing';";
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
@@ -90,7 +112,18 @@ namespace Repositories.Implementation
         {
             try
             {
-                var query = "select sum(c_workinghour) from t_attendance where c_tasktype ='Research';";
+                var query = @"WITH task_hours AS (
+                                                SELECT 
+                                                    unnest(string_to_array(c_tasktype, ',')) AS task, 
+                                                    c_workinghour
+                                                FROM t_attendance
+                                                WHERE date_trunc('month', c_attenddate) = date_trunc('month', CURRENT_DATE)
+                                            )
+                                            SELECT 
+                                                SUM(c_workinghour) AS total_working_hours
+                                            FROM task_hours
+                                            GROUP BY task
+                                            HAVING task = 'Research';";
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
@@ -137,7 +170,7 @@ namespace Repositories.Implementation
             var employees = new List<EmployeeModel>();
             try
             {
-                var query ="SELECT c_empid, c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role FROM t_employees;";
+                var query ="SELECT c_empid, c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role FROM t_employees where c_role='Employee' order by c_empid;";
                 using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
@@ -218,9 +251,27 @@ namespace Repositories.Implementation
             }
         }
 
-        public Task<int> UpdateEmpStatus()
+        public async Task<int> UpdateEmpStatus(int id,string status)
         {
-            throw new NotImplementedException();
+            try
+            {  
+                var query = "UPDATE t_employees SET c_status = @status WHERE c_empid = @id";
+                using NpgsqlCommand cmd = new NpgsqlCommand(query, _conn);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@status", status);
+                await _conn.CloseAsync();
+                await _conn.OpenAsync();
+                var result=await cmd.ExecuteNonQueryAsync();
+                return Convert.ToInt32(result);                
+            }catch(Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
         }
     }
 }

@@ -192,7 +192,7 @@ $(document).ready(function(){
 
     createHoursGrid();
     createEmployeeGrid(); 
-    loadDashboard();
+    loadDashboard();    
 
 });
 
@@ -233,28 +233,25 @@ function createEmployeeGrid(){
             { field:"role", title:"Role" },
 
             {
-                field:"status",
-                title:"Status",
-                template:function(data){
-
-                    if(data.status === "Active"){
-                        return "<span style='color:green;font-weight:bold'>Active</span>";
-                    }
-                    else{
-                        return "<span style='color:red;font-weight:bold'>Inactive</span>";
-                    }
-
+                field: "status",
+                title: "Status",
+                template: function(data){
+                    return data.status === "Active" 
+                        ? "<span style='color:green;font-weight:bold'>Active</span>" 
+                        : "<span style='color:red;font-weight:bold'>Inactive</span>";
                 }
             },
 
-            {
-                title:"Action",
-                template:`<button class="k-button k-button-md k-button-solid-primary">
-                          Update
-                          </button>`,
-                width:"150px"
+           {
+                title: "Action",
+                template: function(data) {
+                    var btnClass = data.status === "Active" ? "k-button k-button-solid k-button-solid-success" 
+                                                        : "k-button k-button-solid k-button-solid-danger";
+                    var btnText = data.status === "Active" ? "Deactivate" : "Activate";
+                    return `<button class="status-btn ${btnClass}" data-empid="${data.empId}" data-status="${data.status}">${btnText}</button>`;
+                },
+                width: "120px"
             }
-
         ],
 
         dataSource:{
@@ -265,15 +262,12 @@ function createEmployeeGrid(){
                 }
             },
             schema:{
-                data:"data"
+                data:"data",
+                total: "total"
             },
             pageSize:10
         },
-
-        pageable:{
-            pageSizes:[10,20,50,100],
-            buttonCount:5
-        },
+        pageable:true,
         sortable:true,
         filterable:true
 
@@ -281,35 +275,39 @@ function createEmployeeGrid(){
 
 }
 
-function changeStatus(empId,status){
+// Handle status button click
+$(document).on("click", ".status-btn", function() {
+    var empId = $(this).data("empid");
+    var currentStatus = $(this).data("status");
+    var newStatus = currentStatus === "Active" ? "Inactive" : "Active";
 
     $.ajax({
+        url: "/Admin/UpdateEmpStatus",
+        type: "POST",
+        data: { id: empId, status: newStatus },
+        success: function(res) {
+            if(res.success) {
+                $("#notification").data("kendoNotification").show("Status updated", "success");
 
-        url:"/Admin/ChangeEmployeeStatus",
-        type:"POST",
+                var grid = $("#employeeGrid").data("kendoGrid");
+                var dataItem = grid.dataSource.get(empId);
 
-        data:{
-            id:empId,
-            status:status
-        },
+                if (dataItem) {
+                    dataItem.set("status", newStatus); // updates column template
+                }
 
-        success:function(res){
+                // Update button text & data-status
+                var btn = $(`button[data-empid='${empId}']`);
+                btn.data("status", newStatus);
+                btn.text(newStatus === "Active" ? "Deactivate" : "Activate");
+                btn.removeClass("k-button-solid-success k-button-solid-danger")
+                   .addClass(newStatus === "Active" ? "k-button-solid-success" : "k-button-solid-danger");
 
-            if(res.success){
-
-                $("#notification").data("kendoNotification")
-                    .show("Status updated","success");
-
-                $("#employeeGrid").data("kendoGrid").dataSource.read();
-
+                grid.dataSource.read();
             }
-
         }
-
     });
-
-}
-
+});
 
 /* LOAD DASHBOARD DATA */
 

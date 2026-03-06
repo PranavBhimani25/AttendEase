@@ -22,6 +22,6 @@ namespace Repositories.Interfaces
 
         Task<List<EmployeeModel>> ListEmployee();
 
-        Task<int> UpdateEmpStatus();
+        Task<int> UpdateEmpStatus(int id,string status);
     }
 }

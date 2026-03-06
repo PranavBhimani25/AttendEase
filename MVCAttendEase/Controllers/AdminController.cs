@@ -121,7 +121,19 @@ namespace MVCAttendEase.Controllers
             {
                 return Ok(new{success=false,message="Employee not found"});
             }
-            return Ok(new{success=true,data=employees});
+            return Ok(new{success=true,data=employees,total=employees.Count()});
+        }
+
+        [HttpPost]
+        [Route("UpdateEmpStatus")]
+        public async Task<IActionResult> UpdateEmpStatus(int id,string status)
+        {
+            var result=await _adminRepo.UpdateEmpStatus(id,status);
+            if(result > 0 )
+            {
+                return Ok(new{success=true,message="Status updated"});
+            }
+            return Ok(new{success=false,message="Status not updated"});
         }
 
 

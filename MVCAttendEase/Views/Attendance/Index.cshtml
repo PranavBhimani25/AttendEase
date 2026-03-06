@@ -55,10 +55,10 @@
 
 @section Scripts{
 
-<link href="~/lib/kendo/kendo.default-v2.min.css" rel="stylesheet"/>
+@* <link href="~/lib/kendo/kendo.default-v2.min.css" rel="stylesheet"/>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/kendo/kendo.all.min.js"></script>
+<script src="~/lib/kendo/kendo.all.min.js"></script> *@
 
 <script>
 
@@ -257,7 +257,13 @@ $(document).ready(function(){
 
                     $("#attendancePopup").data("kendoWindow").close();
 
-                },
+                     // reload grid
+                    var grid = $("#attendanceGrid").data("kendoGrid");
+                    if(grid){
+                        grid.dataSource.read();
+                        grid.refresh();
+                        }
+                    },
 
                 error:function(){
 
@@ -300,8 +306,14 @@ $(document).ready(function(){
                         notification.show({message:res.message},"error");
 
                     $("#attendancePopup").data("kendoWindow").close();
-
-                },
+                    
+                     // reload grid
+                    var grid = $("#attendanceGrid").data("kendoGrid");
+                    if(grid){
+                        grid.dataSource.read();
+                        grid.refresh();
+                        }
+                    },
 
                 error:function(){
 

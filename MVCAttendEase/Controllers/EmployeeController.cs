@@ -16,6 +16,7 @@ namespace MVCAttendEase.Controllers
     [ServiceFilter(typeof(EmployeeFilter))]
     public class EmployeeController : Controller
     {
+        private readonly IEmployeeInterface _repo;
         private readonly ILogger<EmployeeController> _logger;
         private readonly IEmployeeInterface _emp;
         private readonly CloudinaryService _cloudinaryService;
@@ -26,8 +27,13 @@ namespace MVCAttendEase.Controllers
             _emp = emp;
             _cloudinaryService = cloudinaryService;
         }
+        
+        private int GetCurrentEmpId()
+        {
+            return int.TryParse(HttpContext.Session.GetString("empId"), out var empId) ? empId : 0;
+        }
 
-        [Route("Dashboard")]
+        [HttpGet("Dashboard")]
         public IActionResult Dashboard()
         {
             return View();
@@ -131,6 +137,47 @@ namespace MVCAttendEase.Controllers
         
 
       
+
+        [HttpGet("Report")]
+        public IActionResult Report()
+        {
+            int empId = GetCurrentEmpId();
+            if (empId <= 0)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var dashboard = _emp.GetReportData(empId);
+
+            return View(dashboard);
+        }
+
+        [HttpGet("[action]")]
+        public JsonResult GetAttendances(int empId) // s is added in the GetAttendances name 
+        {
+            if (empId <= 0) empId = GetCurrentEmpId();
+            var data = _emp.GetAttendanceByEmployee(empId);
+
+            return Json(data);
+        }
+
+        [HttpGet("[action]")]
+        public JsonResult GetReportYearData(int empId, int year)
+        {
+            if (empId <= 0) empId = GetCurrentEmpId();
+            var data = _emp.GetReportYearData(empId, year);
+
+            return Json(data);
+        }
+
+        [HttpGet("[action]")]
+        public JsonResult GetAttendanceYears(int empId)
+        {
+            if (empId <= 0) empId = GetCurrentEmpId();
+            var years = _emp.GetAttendanceYears(empId);
+
+            return Json(years);
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

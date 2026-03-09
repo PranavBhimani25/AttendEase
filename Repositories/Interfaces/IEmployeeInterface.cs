@@ -22,5 +22,12 @@ namespace Repositories.Interfaces
         Task<List<vm_YearlyWorkingHours>> GetYearlyWorkingHours(int empId,int year);
 
         Task<List<vm_MonthlyWorkingHours>> GetMonthlyWorkingHours(int empId,int month,int year);
+        EmployeeModel GetEmployee(int empId);
+
+        ReportdModel GetReportData(int empId);
+
+        List<AttendanceModel> GetAttendanceByEmployee(int empId);
+        ReportYearModel GetReportYearData(int empId, int year);
+        List<int> GetAttendanceYears(int empId);
     }
 }

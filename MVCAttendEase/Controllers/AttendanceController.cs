@@ -2,9 +2,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.Interfaces;
 using Repositories.Models;
+using MVCAttendEase.Filters;
 
 namespace MVCAttendEase.Controllers
 {
+    [ServiceFilter(typeof(EmployeeFilter))]
     public class AttendanceController : Controller
     {
         private readonly IAttendanceInterface _attendanceRepo;

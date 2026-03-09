@@ -77,6 +77,12 @@ namespace MVCAttendEase.Controllers
             }
         }
 
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "Auth");
+        }
+
         public IActionResult SetSession(string role)
         {
             HttpContext.Session.SetString("Role", role);

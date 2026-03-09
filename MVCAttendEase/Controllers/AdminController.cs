@@ -136,9 +136,48 @@ namespace MVCAttendEase.Controllers
             return Ok(new{success=false,message="Status not updated"});
         }
 
+        [Route("Report")]
+         public IActionResult Report()
+        {
+            return View();
+        }
 
+         [HttpGet("GetEmployees")]
+        public async Task<IActionResult> GetEmployees()
+        {
+            var employees = await _adminRepo.GetEmployeesForReport();
+            return Ok(employees);
+        }
 
+        [HttpGet("GetEmployeeDetails")]
+        public async Task<IActionResult> GetEmployeeDetails(int empId)
+        {
+            if (empId <= 0)
+            {
+                return BadRequest(new { message = "Invalid employee id." });
+            }
 
+            var employee = await _adminRepo.GetEmployeeDetails(empId);
+
+            if (employee == null || employee.EmpId == 0)
+            {
+                return NotFound(new { message = "Employee not found." });
+            }
+
+            return Ok(employee);
+        }
+
+        [HttpGet("GetEmployeeMonthlyReportData")]
+        public async Task<IActionResult> GetEmployeeMonthlyReportData(int empId, int month, int year)
+        {
+            if (empId <= 0 || month < 1 || month > 12 || year <= 0)
+            {
+                return BadRequest(new { message = "Invalid report parameters." });
+            }
+
+            var reportData = await _adminRepo.GetEmployeeMonthlyReportData(empId, month, year);
+            return Ok(reportData);
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

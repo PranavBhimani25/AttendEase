@@ -144,6 +144,12 @@
     padding:10px;
 }
 
+.report-actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:10px;
+}
+
 </style>
 
 
@@ -151,6 +157,7 @@
 
 var selectedReportEmployeeId = 0;
 var selectedReportEmployeeName = "";
+var currentReportMeta = { empId: 0, empName: "", month: 0, year: 0 };
 
 $(document).ready(function(){
 
@@ -361,8 +368,13 @@ $(document).on("click", "#generateReportBtn", function(){
     generateMonthlyReportWindow(selectedReportEmployeeId, selectedReportEmployeeName, month, year);
 });
 
+$(document).on("click", "#downloadPdfBtn", function(){
+    downloadCurrentReportPdf();
+});
+
 function generateMonthlyReportWindow(empId, empName, month, year){
     var reportWnd = $("#monthlyReportWindow").data("kendoWindow");
+    currentReportMeta = { empId: empId, empName: empName || "", month: month, year: year };
 
     var shellHtml = `
         <div class="report-shell">
@@ -373,6 +385,9 @@ function generateMonthlyReportWindow(empId, empName, month, year){
             </div>
             <div>
                 <div id="monthlyReportGrid"></div>
+                <div class="report-actions">
+                    <button id="downloadPdfBtn" class="k-button k-button-md k-button-solid-primary">Download PDF</button>
+                </div>
             </div>
         </div>`;
 
@@ -492,15 +507,11 @@ function renderMonthlyGrid(rows){
     $("#monthlyReportGrid").kendoGrid({
         dataSource: {
             data: rows,
-            pageSize: 10
+            pageSize: rows && rows.length ? rows.length : 1
         },
-        height: 280,
-        scrollable: true,
+        scrollable: false,
         sortable: true,
-        pageable: {
-            pageSizes: [10, 20, 50],
-            buttonCount: 5
-        },
+        pageable: false,
         noRecords: {
             template: "No attendance records found for selected month."
         },
@@ -511,6 +522,54 @@ function renderMonthlyGrid(rows){
             { field: "workingHours", title: "Working Hours" },
             { field: "attendStatus", title: "Attend Status" }
         ]
+    });
+}
+
+function downloadCurrentReportPdf(){
+    var target = $("#monthlyReportContent .report-shell");
+    if (!target.length) {
+        $("#notification").data("kendoNotification").show({ message: "Report is not ready to download." }, "error");
+        return;
+    }
+
+    var button = $("#downloadPdfBtn");
+    var originalText = button.text();
+    button.prop("disabled", true).text("Generating...");
+
+    kendo.drawing.drawDOM(target, {
+        paperSize: "A4",
+        margin: "1cm",
+        landscape: true,
+        scale: 0.75,
+        multiPage: true
+    })
+    .then(function(group){
+        return kendo.drawing.exportPDF(group, {
+            paperSize: "A4",
+            margin: "1cm",
+            landscape: true,
+            multiPage: true
+        });
+    })
+    .then(function(dataURI){
+        var safeName = (currentReportMeta.empName || "Employee").replace(/[^a-zA-Z0-9_-]+/g, "_");
+        var fileName = "AttendanceReport_" + safeName + "_" + currentReportMeta.month + "-" + currentReportMeta.year + ".pdf";
+
+        // Reset button state before invoking browser save/preview flow.
+        button.prop("disabled", false).text(originalText);
+
+        kendo.saveAs({
+            dataURI: dataURI,
+            fileName: fileName
+        });
+    })
+    .catch(function(){
+        $("#notification").data("kendoNotification").show({ message: "Failed to generate PDF." }, "error");
+    })
+    .finally(function(){
+        if (button.prop("disabled")) {
+            button.prop("disabled", false).text(originalText);
+        }
     });
 }
 

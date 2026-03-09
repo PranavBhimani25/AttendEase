@@ -20,7 +20,7 @@ namespace Repositories.Implementation
 
             try
             {
-                string query = "SELECT c_empid, c_name FROM t_employees WHERE c_role='Employee';";
+                string query = "SELECT c_empid, c_name FROM t_employees WHERE c_role='Employee' order by c_empid;";
 
                 await _conn.OpenAsync();
 

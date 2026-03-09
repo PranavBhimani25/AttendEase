@@ -20,19 +20,28 @@ namespace Repositories.Implementation
             throw new NotImplementedException();
         }
 
-        public async Task<EmployeeModel> Login(LoginModel model)
+        public async Task<EmployeeModel?> Login(LoginModel model)
         {
-            var query = "SELECT c_empid,c_email,c_role,c_status FROM t_employees WHERE c_email = @Email AND c_password = @Password AND c_status = 'Active'";
+            var query = @"SELECT c_empid,c_email,c_role,c_status,c_password 
+                        FROM t_employees 
+                        WHERE c_email = @Email";
+
             try
             {
                 await _connection.OpenAsync();
+
                 using var command = new NpgsqlCommand(query, _connection);
                 command.Parameters.AddWithValue("@Email", model.c_email);
-                command.Parameters.AddWithValue("@Password", model.c_password);
 
                 using var reader = await command.ExecuteReaderAsync();
-                if(await reader.ReadAsync())
+
+                if (await reader.ReadAsync())
                 {
+                    var password = reader.GetString(reader.GetOrdinal("c_password"));
+
+                    if (password != model.c_password)
+                        return null;
+
                     return new EmployeeModel
                     {
                         EmpId = reader.GetInt32(reader.GetOrdinal("c_empid")),
@@ -41,15 +50,13 @@ namespace Repositories.Implementation
                         Status = reader.GetString(reader.GetOrdinal("c_status"))
                     };
                 }
-                else
-                {
-                    return null; 
-                }
+
+                return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during login: {ex.Message}");
-                return null; 
+                Console.WriteLine($"Login error: {ex.Message}");
+                return null;
             }
             finally
             {

@@ -33,19 +33,26 @@ namespace MVCAttendEase.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            if (model == null)
+           if (model == null)
             {
-                return BadRequest("Invalid login request");
+                return BadRequest(new { message = "Invalid login request", success = false });
             }
 
             var result = await _auth.Login(model);
 
-            if (result != null)
+
+            if (result == null)
             {
-                HttpContext.Session.SetString("Role", result.Role);
-                return Ok(new { message = "Login successful",success=true , role = result.Role, id = result.EmpId });
+                return BadRequest(new { message = "Invalid email or password", success = false });
             }
-            return BadRequest(new { message = "Invalid email or password", success = false });
+
+            if (result.Status != "Active")
+            {
+                return BadRequest(new { message = "Account is not active", success = false });
+            }
+
+            HttpContext.Session.SetString("Role", result.Role);
+            return Ok(new { message = "Login successful",success=true , role = result.Role, id = result.EmpId });
         }
       
         public IActionResult Register()

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVCAttendEase.Filters;
+using MVCAttendEase.Services;
+using Repositories.Interfaces;
+using Repositories.Models;
 
 namespace MVCAttendEase.Controllers
 {
@@ -14,10 +17,14 @@ namespace MVCAttendEase.Controllers
     public class EmployeeController : Controller
     {
         private readonly ILogger<EmployeeController> _logger;
+        private readonly IEmployeeInterface _emp;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public EmployeeController(ILogger<EmployeeController> logger)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService)
         {
             _logger = logger;
+            _emp = emp;
+            _cloudinaryService = cloudinaryService;
         }
 
         [Route("Dashboard")]
@@ -25,6 +32,105 @@ namespace MVCAttendEase.Controllers
         {
             return View();
         }
+
+        [Route("Profile")]
+        public IActionResult Profile()
+        {
+            return View();
+        }
+
+
+        [Route("GetEmployeeProfile/{id}")]
+        public async Task<IActionResult> GetEmployeeProfile(int id)
+        {
+            EmployeeModel employee = new EmployeeModel();
+            employee = await _emp.getEmployeeDetails(id);
+            return Ok(new{success = true, data = employee}) ;
+        }
+
+        [Route("GetEmployee/{id}")]
+        public async Task<IActionResult> GetEmployee(int id)
+        {
+            EmployeeModel employee = new EmployeeModel();
+            employee = await _emp.GetOne(id);
+            return Ok(new {success = true, data = employee, message = "Data Fetched Successfully"});
+        }
+
+
+        [Route("ChangePassword/{id}")]
+        [HttpPut]
+        public async Task<IActionResult> changePwd([FromBody]string password,int id)
+        {
+            if (password == null)
+            {
+                return BadRequest("Password has No Value");
+            }
+            var status=await  _emp.ChangePWD(id,password);
+            if (status == 1)
+            {
+                return Ok(new{success=true,message="Password Changed Successfully...!"});
+            }
+            else
+            {
+                return BadRequest(new {message = "There Is Some Error.", success = true});
+            }
+        }
+
+
+        [HttpPost]
+        [Route("UpdateEmployee")]
+        public async Task<IActionResult> UpdateEmployee([FromForm] UpdateEmployee emp)
+        {
+            if (emp.ProfileImage != null && emp.ProfileImage.Length > 0)
+            {
+                emp.ProfileImageUrl = await _cloudinaryService.UploadImageAsync(emp.ProfileImage);
+            }
+
+            var employee = await _emp.Update(emp);
+            if(employee > 0)
+            {
+                return Ok(new { message = "Update Employee`s Details Successfull", success = true });
+            }
+            else
+            {
+                return BadRequest(new { message = "Update Employee Data Failed", success = false });
+            }
+           
+        }
+
+
+
+        [HttpGet("GetAttendence/{empId}")]
+        public async Task<IActionResult> GetAttendance(int empId)
+        {
+            int month=DateTime.Now.Month;
+            int year=DateTime.Now.Year;
+
+            var data=await _emp.GetAttendanceByEmployee(empId,month,year);
+
+            return Ok(data);
+        }
+
+
+
+       [HttpGet("GetMonthlyWorkingHours")]
+        public async Task<IActionResult> GetMonthlyWorkingHours(int empId,int month,int year)
+        {
+            var data = await _emp.GetMonthlyWorkingHours(empId,month,year);
+
+            return Ok(data);
+        }
+
+        [HttpGet("GetYearlyWorkingHours")]
+        public async Task<IActionResult> GetYearlyWorkingHours(int empId,int year)
+        {
+            var data = await _emp.GetYearlyWorkingHours(empId,year);
+            return Ok(data);
+        }
+
+        
+
+      
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

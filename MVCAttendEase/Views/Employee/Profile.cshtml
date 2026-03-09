@@ -1,57 +1,68 @@
-@{
+@* @{
     ViewData["Title"] = "Profile Page";
     Layout = "../Shared/_EmployeeLayout.cshtml";
 }
 
 
 <style>
+    
+#calendar {
+    width: 60%;
+    height: 400px;
+}
 
+#calendar .k-calendar-view {
+    width: 100%;
+    font-size: 25px;
+}
 
-    /* Reduce height of each day cell */
-    #scheduler .k-scheduler-monthview .k-scheduler-table td{
-        height: 70px !important;
-    }
+/* Increase space between dates */
+#calendar .k-calendar-table td {
+    height: 70px;      /* increases vertical spacing */
+    padding: 10px;     /* increases spacing around numbers */
+}
 
-    /* Reduce header size (date numbers row) */
-    #scheduler .k-scheduler-monthview .k-scheduler-datecolumn{
-        height: 25px;
-    }
-
-    /* Reduce event box size */
-    #scheduler .k-event{
-        padding:2px 4px;
-        font-size:12px;
-        background-color : inherit;
-    }
-
-    .present-event{
-        background-color:green !important;
-        color:white !important;
-        text-align:center;
-        border-radius: 5px;
-    }
-
-    .absent-event{
-        background-color:red !important;
-        color:white !important;
-        text-align:center;
-        border-radius: 5px;
-    }
-
-    .weekend-event{
-        background-color:yellow !important;
-        color:black !important;
-        text-align:center;
-        border-radius: 5px;
-    }
+/* Optional: make date numbers centered */
+#calendar .k-calendar-table td span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 
 
+.present,
+.absent,
+.weekend{
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
 
+    width:30px;
+    height:30px;
 
-    .profile p{
-        font-size : 20px;
-    }
+    border-radius:50%;
+    font-weight:bold;
+}
+
+.present{
+    background-color:green;
+    color:white;
+}
+
+.absent{
+    background-color:red;
+    color:white;
+}
+
+.weekend{
+    background-color:yellow;
+    color:black;
+}
+
+.profile p{
+    font-size : 20px;
+}
 </style>
 
 
@@ -88,19 +99,24 @@
                 </button>   
             </div>
         </div>
-        <div id="calender" class="col-md-8">
+        <div id="example" class="col-md-8">
             <div class="demo-section" style="text-align: center;">
-            <div id="scheduler"></div>
+            <div id="calendar">
         </div>
     </div>
 
-    <div class="demo-section wide">
-        <div style="width:250px;margin-bottom:10px">
-            <input id="chartViewSelector" />
-        </div>
-    <div id="chart"></div>
 
-</div>
+    <div class="row">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <input id="viewType"/>
+            </div>
+        </div>
+        <div id="hoursChart"></div>
+    </div>
+    
+
+
 
 </div>
 </div>
@@ -132,274 +148,92 @@ var id = sessionStorage.getItem("userId");
 console.log("ID:", id);
 
 
-var attendanceData = [];
+
+var attendanceData=[];
+function getColor(data){
+
+    var date = data.date;
+    var today = new Date();
+
+    today.setHours(0,0,0,0);
+    date.setHours(0,0,0,0);
+
+    var day = date.getDay();
+
+    if(date > today){
+        return "<span>"+date.getDate()+"</span>";
+    }
+
+    if(day == 0 || day == 6){
+        return "<span class='weekend'>"+date.getDate()+"</span>";
+    }
+
+    for(var i=0;i<attendanceData.length;i++){
+
+        var attendDate = new Date(attendanceData[i].attendDate);
+        attendDate.setHours(0,0,0,0);
+
+        if(attendDate.getTime() == date.getTime()){
+            return "<span class='present'>"+date.getDate()+"</span>";
+        }
+    }
+
+    return "<span class='absent'>"+date.getDate()+"</span>";
+}
+
 
 $(document).ready(function () {
     loadEmployee();
     var id = sessionStorage.getItem("userId");
 
     $.get("/Employee/GetAttendence/" + id, function (data) {
+        console.log(data);
 
         attendanceData = data;
-        var events = [];
-        var today = new Date();
-        today.setHours(0,0,0,0);
-        var start = new Date(today.getFullYear(), today.getMonth()-1, 1);
-        var end = new Date(today.getFullYear(), today.getMonth()+1, 0);
-        for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            var date = new Date(d);
-            date.setHours(0,0,0,0);
-            var day = date.getDay();
-            var status = "";
-            var className = "";
-            if(date > today){
-                continue;
-            }
-            if(day == 0 || day == 6){
-                status = "Weekend";
-                className = "weekend-event";
-            }
-            else{
-                var isPresent = false;
-                for(var i=0;i<attendanceData.length;i++){
-                    var attendDate = new Date(attendanceData[i].attendDate);
-                    attendDate.setHours(0,0,0,0);
 
-                    if(attendDate.getTime() == date.getTime()){
-                        isPresent = true;
-                        break;
-                    }
-                }
-
-                if(isPresent){
-                    status = "Present";
-                    className = "present-event";
-                }
-                else{
-                    status = "Absent";
-                    className = "absent-event";
-                }
-            }
-
-            events.push({
-                start: new Date(date),
-                end: new Date(date),
-                title: status,
-                className: className,
-                isAllDay: true
-            });
-        }
-
-        $("#scheduler").kendoScheduler({
-
-            date: new Date(),
-            height: 500,
-            editable: false, 
-            views: [
-                { type: "month", selected: true }
-            ],
-
-            eventTemplate: "<div class='#: className #'>#: title #</div>",
-
-            dataSource: {
-                data: events
+        $("#calendar").kendoCalendar({
+            month: {
+                content: "#= getColor(data) #"
             }
         });
+
     });
 
 
-    //graphs
-
-        var id = sessionStorage.getItem("userId");
-        var today = new Date();
-        var month = today.getMonth() + 1;
-        var year = today.getFullYear();
-
-        $("#chartViewSelector").kendoDropDownList({
-            dataSource: [
-                { text: "Monthly Working Hours", value: "monthly" },
-                { text: "Yearly Working Hours", value: "yearly" }
-            ],
-
-            dataTextField: "text",
-            dataValueField: "value",
-            value: "monthly",
-
-            change: function () {
-
-                var selected = this.value();
-
-                if (selected === "monthly") {
-                    loadMonthlyChart();
-                }
-                else {
-                    loadYearlyChart();
-                }
-            }
-        });
-        
-         loadMonthlyChart();
-
-         function loadMonthlyChart() {
-        var attendanceDS = new kendo.data.DataSource({
-            transport: {
-                read: {
-                    url: "/Employee/GetMonthlyWorkingHours",
-                    dataType: "json",
-                    data: {
-                        empId: id,
-                        month: month,
-                        year: year
-                    }
-                }
-            }
-
-        });
-        attendanceDS.fetch(function () {
-
-            var data = this.data();
-
-            var categories = [];
-            var workingHours = [];
-
-            var daysInMonth = new Date(year, month, 0).getDate();
-            for (var d = 1; d <= daysInMonth; d++) {
-                var date = new Date(year, month - 1, d);
-                var day = date.getDay();
-                if (day === 0 || day === 6) continue;
-                var label = d + " " + kendo.toString(date, "ddd").toUpperCase();
-                categories.push(label);
-                var hours = 0;
-                for (var i = 0; i < data.length; i++) {
-                    var attendDate = new Date(data[i].date);
-                    if (attendDate.getDate() === d) {
-                        hours = data[i].workingHour;
-                        break;
-                    }
-                }
-                workingHours.push(hours);
-            }
-            createMonthlyChart(categories, workingHours);
-        });
-    }
-
-    function createMonthlyChart(categories, hours) {
-        var chart = $("#chart").data("kendoChart");
-        if(chart){
-            chart.destroy();
-            $("#chart").empty();
+    $("#viewType").kendoDropDownList({
+        dataSource: ["Daily", "Monthly"],
+        value: "Daily",
+        change: function () {
+            loadChart(this.value());
         }
-
-        $("#chart").kendoChart({
+    });
+    $("#hoursChart").kendoChart({
+        title: {
+            text: "Employee Working Hours"
+        },
+        legend: {
+            position: "bottom"
+        },
+        seriesDefaults: {
+            type: "line"
+        },
+        series: [{
+            name: "Hours",
+            data: []
+        }],
+        categoryAxis: {
+            categories: []
+        },
+        valueAxis: {
             title: {
-                text: "Monthly Working Hours (Without Holidays/Weekends)"
-            },
-            legend: {
-                position: "bottom"
-            },
-            seriesDefaults: {
-                type: "line",
-                style: "smooth"
-            },
-            series: [{
-                name: "Working Hours",
-                data: hours
-            }],
-            categoryAxis: {
-                categories: categories,
-                labels: {
-                    rotation: -45
-                }
-            },
-            valueAxis: {
-                min: 0,
-                title: {
-                    text: "Hours"
-                }
-            },
-            tooltip: {
-                visible: true,
-                template: "#= category # : #= value # hrs"
+                text: "Hours"
             }
-        });
-    }
-
-    //yearly
-
-    function loadYearlyChart() {
-        var chart = $("#chart").data("kendoChart");
-        if(chart){
-            chart.destroy();
-            $("#chart").empty();
+        },
+        tooltip: {
+            visible: true,
+            format: "{0} hours"
         }
-
-        $.get("/Employee/GetYearlyWorkingHours",
-            {
-                empId: id,
-                year: year
-            },
-            function (data) {
-                console.log("Yearly Data:", data);
-                var months = [
-            "Jan","Feb","Mar","Apr","May","Jun",
-            "Jul","Aug","Sep","Oct","Nov","Dec"
-        ];
-                 var hours = new Array(12).fill(0);
-
-                for (var i = 0; i < data.length; i++) {
-
-                    var monthIndex = data[i].month - 1; 
-                    hours[monthIndex] = data[i].totalHours;
-
-                }
-
-                createYearlyChart(months, hours);
-
-            });
-
-    }
-
-
-    function createYearlyChart(months, hours) {
-
-        $("#chart").kendoChart({
-
-            title: {
-                text: "Yearly Working Hours (Without Holidays/Weekends)"
-            },
-
-            legend: {
-                position: "bottom"
-            },
-
-            seriesDefaults: {
-                type: "column"
-            },
-
-            series: [{
-                name: "Total Working Hours",
-                data: hours
-            }],
-            categoryAxis: {
-                categories: months,
-                majorGridLines: {
-                    visible: false
-                }
-            },
-            valueAxis: {
-                min: 0,
-                title: {
-                    text: "Hours"
-                }
-            },
-            tooltip: {
-                visible: true,
-                template: "#= category # : #= value # hrs"
-            }
-        });
-
-    }
-
+    });
 
 
 
@@ -460,8 +294,7 @@ $("#updateEmployeeForm").kendoForm({
     layout:"grid",
     grid:{cols:2,gutter:15},
     items:[
-        {field:"empId", label:"empid", editor:"TextBox", 
-            editorOptions : {enable : false}},
+        {field:"empId", label:"empid", editor:"TextBox", hidden :true},
         {field:"name",label:"Name"},
         {field:"email",label:"Email",editor: "TextBox",
             editorOptions: {
@@ -598,10 +431,6 @@ $("#updateEmployeeForm").kendoForm({
     });
 
     $(document).on("click","#Passchg",function(){
-        if(!validator.validate()){
-            return; // stop if validation fails
-        }
-        
         var password=$("input[name='password']").val();
         var confpass=$("input[name='confirmpassword']").val();
         console.log(`${password} --- > ${confpass}`);
@@ -680,5 +509,24 @@ function loadEmployee(){
         });
     }
 
-</script>
+function loadChart(viewType){
+
+    $.ajax({
+        url: "/Employee/GetEmployeeHours",
+        type: "GET",
+        data: { type: viewType },
+        success: function (res) {
+
+            var chart = $("#hoursChart").data("kendoChart");
+
+            chart.options.series[0].data = res.hours;
+            chart.options.categoryAxis.categories = res.categories;
+
+            chart.refresh();
+        }
+    });
+
 }
+
+</script>
+} *@

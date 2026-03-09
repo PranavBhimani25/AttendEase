@@ -144,6 +144,12 @@
     padding:10px;
 }
 
+.chart-mode-wrap{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:8px;
+}
+
 .report-actions{
     display:flex;
     justify-content:flex-end;
@@ -381,7 +387,12 @@ function generateMonthlyReportWindow(empId, empName, month, year){
             <div id="reportCards" class="report-cards"></div>
             <div class="report-charts">
                 <div class="report-chart-box"><div id="attendancePieChart"></div></div>
-                <div class="report-chart-box"><div id="dailyHourBarChart"></div></div>
+                <div class="report-chart-box">
+                    <div class="chart-mode-wrap">
+                        <input id="workingHourChartMode" style="width:220px;" />
+                    </div>
+                    <div id="dailyHourBarChart"></div>
+                </div>
             </div>
             <div>
                 <div id="monthlyReportGrid"></div>
@@ -402,11 +413,12 @@ function generateMonthlyReportWindow(empId, empName, month, year){
         success: function(response){
             var summary = response.summary || response.Summary || {};
             var dailyHours = response.dailyHours || response.DailyHours || [];
+            var yearlyWorkingHours = response.yearlyWorkingHours || response.YearlyWorkingHours || [];
             var attendanceDetails = response.attendanceDetails || response.AttendanceDetails || [];
 
             renderReportCards(summary);
             renderAttendancePieChart(summary);
-            renderDailyHourBarChart(dailyHours);
+            initializeWorkingHourChartModes(dailyHours, yearlyWorkingHours, month, year);
             renderMonthlyGrid(normalizeAttendanceRows(attendanceDetails));
         },
         error: function(xhr){
@@ -472,13 +484,52 @@ function renderAttendancePieChart(summary){
     });
 }
 
-function renderDailyHourBarChart(dailyHours){
-    var data = dailyHours.map(function(x){
-        return {
-            dayLabel: x.day.toString(),
-            hours: x.workingHours
-        };
+function initializeWorkingHourChartModes(dailyHours, yearlyWorkingHours, month, year){
+    $("#workingHourChartMode").kendoDropDownList({
+        dataTextField: "text",
+        dataValueField: "value",
+        value: "monthly",
+        dataSource: [
+            { text: "Monthly working hours", value: "monthly" },
+            { text: "Yearly working hours", value: "yearly" }
+        ],
+        change: function(){
+            renderWorkingHourChartByMode(this.value(), dailyHours, yearlyWorkingHours, month, year);
+        }
     });
+
+    renderWorkingHourChartByMode("monthly", dailyHours, yearlyWorkingHours, month, year);
+}
+
+function renderWorkingHourChartByMode(mode, dailyHours, yearlyWorkingHours, month, year){
+    if (mode === "yearly") {
+        renderYearlyHourBarChart(yearlyWorkingHours, year);
+        return;
+    }
+
+    renderDailyHourBarChart(dailyHours, month, year);
+}
+
+function renderDailyHourBarChart(dailyHours, month, year){
+    var dayHours = {};
+    (dailyHours || []).forEach(function(x){
+        var dayNo = Number(x.day);
+        dayHours[dayNo] = Number(x.workingHours || 0);
+    });
+
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var data = [];
+
+    for (var day = 1; day <= daysInMonth; day++) {
+        var dt = new Date(year, month - 1, day);
+        var dow = dt.getDay();
+        if (dow !== 0 && dow !== 6) {
+            data.push({
+                dayLabel: day.toString(),
+                hours: Object.prototype.hasOwnProperty.call(dayHours, day) ? dayHours[day] : null
+            });
+        }
+    }
 
     $("#dailyHourBarChart").kendoChart({
         title: { text: "Daily Working Hours" },
@@ -489,17 +540,61 @@ function renderDailyHourBarChart(dailyHours){
             field: "hours",
             categoryField: "dayLabel",
             color: "#2b7cff",
+            missingValues: "gap",
             name: "Hours"
         }],
         categoryAxis: {
-            title: { text: "Days" },
+            title: { text: "Dates" },
             majorGridLines: { visible: false }
         },
         valueAxis: {
             title: { text: "Working Hours" },
             min: 0
         },
-        tooltip: { visible: true, template: "Day #= category #: #= value # hrs" }
+        tooltip: { visible: true, template: "Date #= category #: #= value # hrs" }
+    });
+}
+
+function renderYearlyHourBarChart(yearlyWorkingHours, year){
+    var monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var hoursByMonth = {};
+
+    (yearlyWorkingHours || []).forEach(function(x){
+        var monthNo = Number(x.monthNo || x.MonthNo || 0);
+        var hours = Number(x.workingHours || x.WorkingHours || 0);
+        if (monthNo >= 1 && monthNo <= 12) {
+            hoursByMonth[monthNo] = hours;
+        }
+    });
+
+    var data = monthNames.map(function(name, idx){
+        var monthNo = idx + 1;
+        return {
+            monthLabel: name,
+            hours: Object.prototype.hasOwnProperty.call(hoursByMonth, monthNo) ? hoursByMonth[monthNo] : 0
+        };
+    });
+
+    $("#dailyHourBarChart").kendoChart({
+        title: { text: "Yearly Working Hours (" + year + ")" },
+        legend: { visible: false },
+        dataSource: { data: data },
+        series: [{
+            type: "column",
+            field: "hours",
+            categoryField: "monthLabel",
+            color: "#2b7cff",
+            name: "Hours"
+        }],
+        categoryAxis: {
+            title: { text: "Months" },
+            majorGridLines: { visible: false }
+        },
+        valueAxis: {
+            title: { text: "Working Hours" },
+            min: 0
+        },
+        tooltip: { visible: true, template: "#= category #: #= value # hrs" }
     });
 }
 

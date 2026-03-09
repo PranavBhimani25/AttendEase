@@ -192,6 +192,40 @@ namespace Repositories.Implementation
                         WorkingHours = Convert.ToDecimal(dailyReader["workinghours"])
                     });
                 }
+                await dailyReader.CloseAsync();
+
+                string yearlyHourQuery = @"
+                SELECT EXTRACT(MONTH FROM c_attenddate)::int as monthno,
+                       COALESCE(SUM(" + workingHourExpr + @"),0) as workinghours
+                FROM t_attendance
+                WHERE c_empid=@empid
+                AND EXTRACT(YEAR FROM c_attenddate)=@year
+                AND EXTRACT(ISODOW FROM c_attenddate) BETWEEN 1 AND 5
+                GROUP BY EXTRACT(MONTH FROM c_attenddate)
+                ORDER BY monthno";
+
+                var yearHoursByMonth = new Dictionary<int, decimal>();
+                using var yearlyCmd = new NpgsqlCommand(yearlyHourQuery, _conn);
+                yearlyCmd.Parameters.AddWithValue("@empid", empId);
+                yearlyCmd.Parameters.AddWithValue("@year", year);
+
+                using var yearlyReader = await yearlyCmd.ExecuteReaderAsync();
+                while (await yearlyReader.ReadAsync())
+                {
+                    int monthNo = Convert.ToInt32(yearlyReader["monthno"]);
+                    decimal hours = Convert.ToDecimal(yearlyReader["workinghours"]);
+                    yearHoursByMonth[monthNo] = hours;
+                }
+
+                for (int monthNo = 1; monthNo <= 12; monthNo++)
+                {
+                    reportData.YearlyWorkingHours.Add(new YearlyWorkingHourModel
+                    {
+                        MonthNo = monthNo,
+                        MonthLabel = new DateTime(year, monthNo, 1).ToString("MMM"),
+                        WorkingHours = yearHoursByMonth.TryGetValue(monthNo, out var hours) ? hours : 0
+                    });
+                }
             }
             catch (Exception ex)
             {

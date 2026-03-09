@@ -1,0 +1,394 @@
+@model Repositories.Models.ReportdModel
+@{
+    ViewData["Title"] = "Employee Report";
+    Layout = "_EmployeeLayout";
+}
+
+
+<style>
+    body {
+        background: #f5f7fb;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .summary-row {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+.employee-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    display: flex;         /* aligns children horizontally */
+    align-items: center;   /* vertically centers image and text */
+    gap: 20px;             /* space between image and text */
+    text-align: left;      /* text left-aligned */
+}
+
+.employee-card img {
+    
+    width: 200px;          /* fixed size for image */
+    height: 200px;
+    object-fit: cover;     /* keeps image proportion correct */
+    margin-bottom: 0;      /* remove old margin */
+}
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .chart-box {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .grid-box {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    #chartp,
+    #chartl,
+    #taskChart,
+    #chart {
+        height: 350px;
+    }
+
+    .year-cards {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .year-card {
+        width: 120px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: 0.2s;
+    }
+
+    .year-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .year-card.active {
+        border: 2px solid #0078d4;
+    }
+</style>
+
+<h2>Employee Report</h2>
+
+<!-- Employee Details -->
+
+<div class="employee-card">
+    <img src="@Model.Employee.ProfileImage" width="100" />
+    <div>
+    <p><b>Name:</b> @Model.Employee.Name</p>
+    <p><b>Email:</b> @Model.Employee.Email</p>
+    <p><b>Gender:</b> @Model.Employee.Gender</p>
+    <p><b>Role:</b> @Model.Employee.Role</p>
+    </div>
+</div>
+
+<div class="summary-row">
+
+    <div class="summary-card">
+        <h4>Total Present</h4>
+        <h2 id="presentCount">@Model.TotalPresent</h2>
+    </div>
+
+    <div class="summary-card">
+        <h4>Total Absent</h4>
+        <h2 id="absentCount">@Model.TotalAbsent</h2>
+    </div>
+
+    <div class="summary-card">
+        <h4>Total Working Hours</h4>
+        <h2 id="totalHours">@Model.TotalHours</h2>
+    </div>
+
+</div>
+
+<div id="yearCards" class="year-cards"></div>
+
+<!-- Charts -->
+
+<div class="chart-grid">
+
+    <div class="chart-box">
+        <h3>Work Type Distribution</h3>
+        <div id="chartp"></div>
+    </div>
+
+    <div class="chart-box">
+        <h3>Attendance Trend</h3>
+        <div id="chartl"></div>
+    </div>
+
+</div>
+
+<div class="chart-grid">
+
+    <div class="chart-box">
+        <h3>Monthly Task Work Distribution</h3>
+        <div id="taskChart"></div>
+    </div>
+
+    <div class="chart-box">
+        <h3>Attendance Status</h3>
+        <div id="chart"></div>
+    </div>
+
+</div>
+
+<!-- Grid -->
+
+<div class="grid-box">
+    <h3>Employee Work Details</h3>
+    <div id="grid"></div>
+</div>
+
+@section Scripts {
+
+<script src="~/lib/kendo/kendo.all.min.js"></script>
+
+<script>
+
+$(document).ready(function () {
+
+    $("#chartp").kendoChart({
+        seriesDefaults: {
+            labels: {
+                visible: true,
+                background: "transparent",
+                template: "#= category #: #= value#"
+            }
+        },
+        series: [{
+            type: "pie",
+        }],
+        tooltip: { visible: true }
+    });
+
+    $("#chartl").kendoChart({
+        legend: { position: "top" },
+        seriesDefaults: { type: "line" },tooltip: { visible: true },
+        categoryAxis: {
+            categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        }
+    });
+
+    $("#taskChart").kendoChart({
+        legend: { position: "top" },
+        seriesDefaults: { type: "column" },tooltip: { visible: true },
+        categoryAxis: {
+            categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        }
+    });
+
+    $("#chart").kendoChart({
+        legend: { position: "top" },
+        seriesDefaults: { type: "column", stack: true },tooltip: { visible: true },
+        categoryAxis: {
+            categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        }
+    });
+
+    /* GRID */
+
+    $("#grid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/Employee/GetAttendance?empId=@Model.Employee.EmpId",
+                    dataType: "json"
+                }
+            },
+            pageSize: 5
+        },
+        height: 350,
+        sortable: true,
+        pageable: true,
+        filterable: true,
+        columns: [
+            { field: "attendDate", title: "Date", template: "#= kendo.toString(kendo.parseDate(attendDate), 'yyyy-MM-dd') #" },
+            { field: "clockInHour", title: "Clock In Hour" },
+            { field: "clockInMin", title: "Clock In Min" },
+            { field: "clockOutHour", title: "Clock Out Hour" },
+            { field: "clockOutMin", title: "Clock Out Min" },
+            { field: "workingHour", title: "Working Hours" },
+            { field: "workType", title: "Work Type" },
+            { field: "taskType", title: "Task Type" },
+            { field: "attendStatus", title: "Status" }
+        ]
+    });
+
+    loadYears();
+
+    function loadDashboard(year) {
+
+        var selectedYear = parseInt(year, 10);
+
+        $.ajax({
+            url: "/Employee/GetReportYearData",
+            data: {
+                empId: @Model.Employee.EmpId,
+                year: selectedYear
+            },
+
+            success: function (data) {
+
+                $("#presentCount").text(data.present);
+                $("#absentCount").text(data.absent);
+                $("#totalHours").text(data.totalHours + " hrs");
+
+                var pie = $("#chartp").data("kendoChart");
+
+                pie.setOptions({
+                    series: [{
+                        type: "pie",
+                        data: [
+                            { category: "Remote", value: data.remote },
+                            { category: "Office", value: data.office },
+                            { category: "Field", value: data.field }
+                        ]
+                    }]
+                });
+
+                var trend = $("#chartl").data("kendoChart");
+
+                var now = new Date();
+                var currentYear = now.getFullYear();
+                var currentMonthIndex = now.getMonth();
+
+                var presentMonthly = data.presentMonthly ? data.presentMonthly.slice() : [];
+                var absentMonthly = data.absentMonthly ? data.absentMonthly.slice() : [];
+
+                if (selectedYear === currentYear) {
+
+                    for (var i = currentMonthIndex + 1; i < 12; i++) {
+                        presentMonthly[i] = null;
+                        absentMonthly[i] = null;
+                    }
+
+                } else if (selectedYear > currentYear) {
+
+                    for (var i = 0; i < 12; i++) {
+                        presentMonthly[i] = null;
+                        absentMonthly[i] = null;
+                    }
+
+                }
+
+                trend.setOptions({
+                    series: [
+                        { name: "Present", data: presentMonthly },
+                        { name: "Absent", data: absentMonthly }
+                    ]
+                });
+
+                var task = $("#taskChart").data("kendoChart");
+
+                task.setOptions({
+                    series: [
+                        { name: "Developing", data: data.developing },
+                        { name: "Designing", data: data.designing },
+                        { name: "Research", data: data.research }
+                    ]
+                });
+
+                var status = $("#chart").data("kendoChart");
+
+                status.setOptions({
+                    series: [
+                        { name: "Regular", data: data.regular },
+                        { name: "EarlyOut", data: data.earlyOut },
+                        { name: "LateIn", data: data.lateIn }
+                    ]
+                });
+
+                var grid = $("#grid").data("kendoGrid");
+
+                grid.dataSource.data([]);
+                grid.dataSource.data(data.gridData);
+
+            }
+        });
+
+    }
+
+    function loadYears() {
+
+        $.ajax({
+            url: "/Employee/GetAttendanceYears",
+            data: { empId: @Model.Employee.EmpId },
+
+            success: function (years) {
+
+                var yearHtml = "";
+
+                years.forEach(function (year, index) {
+
+                    yearHtml +=
+                        '<div class="k-card year-card' + (index == 0 ? ' active' : '') + '" data-year="' + year + '">' +
+                            '<div class="k-card-body">' +
+                                '<h3>' + year + '</h3>' +
+                            '</div>' +
+                        '</div>';
+
+                });
+
+                $("#yearCards").html(yearHtml);
+
+                if (years.length > 0) {
+                    loadDashboard(years[0]);
+                }
+
+                $(".year-card").click(function () {
+
+                    $(".year-card").removeClass("active");
+                    $(this).addClass("active");
+
+                    var selectedYear = $(this).data("year");
+
+                    loadDashboard(selectedYear);
+
+                });
+
+            }
+        });
+
+    }
+
+});
+
+</script>
+
+}

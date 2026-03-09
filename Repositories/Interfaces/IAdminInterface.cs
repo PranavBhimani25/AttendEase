@@ -23,5 +23,12 @@ namespace Repositories.Interfaces
         Task<List<EmployeeModel>> ListEmployee();
 
         Task<int> UpdateEmpStatus(int id,string status);
-    }
+
+        Task<List<EmployeeReportGridModel>> GetEmployeesForReport();
+
+        Task<MonthlyReportModel> GetEmployeeMonthlyReport(int empId, int month, int year);
+        Task<AdminMonthlyReportDataModel> GetEmployeeMonthlyReportData(int empId, int month, int year);
+
+        Task<EmployeeModel> GetEmployeeDetails(int empId);
+        }
 }

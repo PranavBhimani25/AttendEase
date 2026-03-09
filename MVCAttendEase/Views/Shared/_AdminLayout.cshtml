@@ -1,4 +1,3 @@
-﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
     <title>@ViewData["Title"] - Admin</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/lib/kendo/kendo.common.min.css" />
+    @* <link rel="stylesheet" href="~/lib/kendo/kendo.common.min.css" /> *@
     <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" />
     <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -25,7 +24,7 @@
 
         <ul class="k-list-group">
             <li class="k-list-group-item">
-                <span class="k-icon  k-i-home"></span>
+                <span class="k-icon k-i-home"></span>
                 <a asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
             </li>
             <li class="k-list-group-item">

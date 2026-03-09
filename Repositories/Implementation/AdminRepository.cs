@@ -116,7 +116,8 @@ namespace Repositories.Implementation
                 FROM t_attendance
                 WHERE c_empid=@empid
                 AND EXTRACT(MONTH FROM c_attenddate)=@month
-                AND EXTRACT(YEAR FROM c_attenddate)=@year";
+                AND EXTRACT(YEAR FROM c_attenddate)=@year
+                AND EXTRACT(ISODOW FROM c_attenddate) BETWEEN 1 AND 5";
 
                 using var cmd = new NpgsqlCommand(query, _conn);
 
@@ -135,8 +136,8 @@ namespace Repositories.Implementation
                     report.TotalWorkingHours = Convert.ToDecimal(reader["totalworkinghours"]);
                 }
 
-                int totalDays = DateTime.DaysInMonth(year, month);
-                report.AbsentDays = totalDays - report.PresentDays;
+                int workingDays = GetWorkingDaysInMonth(year, month);
+                report.AbsentDays = Math.Max(0, workingDays - report.PresentDays);
             }
             catch (Exception ex)
             {
@@ -173,6 +174,7 @@ namespace Repositories.Implementation
                 WHERE c_empid=@empid
                 AND EXTRACT(MONTH FROM c_attenddate)=@month
                 AND EXTRACT(YEAR FROM c_attenddate)=@year
+                AND EXTRACT(ISODOW FROM c_attenddate) BETWEEN 1 AND 5
                 GROUP BY EXTRACT(DAY FROM c_attenddate)
                 ORDER BY dayno";
 
@@ -235,6 +237,7 @@ namespace Repositories.Implementation
                 WHERE a.c_empid = @empid
                   AND a.c_attenddate >= @monthStart
                   AND a.c_attenddate < @monthEnd
+                  AND EXTRACT(ISODOW FROM a.c_attenddate) BETWEEN 1 AND 5
                 ORDER BY a.c_attenddate";
 
                 using var detailsCmd = new NpgsqlCommand(detailsQuery, _conn);
@@ -298,6 +301,23 @@ namespace Repositories.Implementation
             }
 
             return string.Empty;
+        }
+
+        private static int GetWorkingDaysInMonth(int year, int month)
+        {
+            int daysInMonth = DateTime.DaysInMonth(year, month);
+            int workingDays = 0;
+
+            for (int day = 1; day <= daysInMonth; day++)
+            {
+                var currentDate = new DateTime(year, month, day);
+                if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    workingDays++;
+                }
+            }
+
+            return workingDays;
         }
     }
 }

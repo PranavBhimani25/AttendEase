@@ -51,9 +51,9 @@ namespace MVCAttendEase.Controllers
                 return BadRequest(new { message = "Account is not active", success = false });
             }
 
-            HttpContext.Session.SetString("Role", result.Role?.Trim() ?? string.Empty);
-            HttpContext.Session.SetString("empId", result.EmpId.ToString());
-            return Ok(new { message = "Login successful",success=true , role = result.Role, id = result.EmpId });
+                HttpContext.Session.SetString("Role", result.Role?.Trim() ?? string.Empty);
+                HttpContext.Session.SetString("empId", result.EmpId.ToString());
+                return Ok(new { message = "Login successful",success=true , role = result.Role, id = result.EmpId });
         }
       
         public IActionResult Register()

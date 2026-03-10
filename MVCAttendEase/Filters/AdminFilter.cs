@@ -15,6 +15,7 @@ namespace MVCAttendEase.Filters
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var role = context.HttpContext.Session.GetString("Role");
+            var empId = context.HttpContext.Session.GetString("empId");
             if (role != "Admin")
             {
                 context.Result = new Microsoft.AspNetCore.Mvc.RedirectToActionResult("Login", "Auth", null);

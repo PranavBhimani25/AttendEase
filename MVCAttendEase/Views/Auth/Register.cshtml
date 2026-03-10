@@ -168,7 +168,7 @@
                         processData: false,
                         success:function(response){
                             if(response.success){
-                                $("#notification").data("kendoNotification").show({message:"Registration successful! Redirecting to login..."}, "success");
+                                $("#notification").data("kendoNotification").show("Registration successful! Redirecting to login..."    , "success");
                                 setTimeout(function(){
                                     window.location.href = "/Auth/Login";
                                 }, 1500);

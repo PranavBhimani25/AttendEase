@@ -150,16 +150,16 @@ namespace Repositories.Implementation
 
 
 
-        public async Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId,int month,int year)
+        public async Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId,int year)
         {
             List<vm_AttendenceUser> list=new List<vm_AttendenceUser>();
 
-            var qry=@"SELECT c_attendid,c_empid,c_attenddate FROM t_attendance WHERE c_empid=@empid AND EXTRACT(MONTH FROM c_attenddate)=@month AND EXTRACT(YEAR FROM c_attenddate)=@year";
+            var qry=@"SELECT c_attendid,c_empid,c_attenddate FROM t_attendance WHERE c_empid=@empid AND EXTRACT(YEAR FROM c_attenddate)=@year";
             try
             {
                 NpgsqlCommand cmd=new NpgsqlCommand(qry,_conn);
                 cmd.Parameters.AddWithValue("@empid",empId);
-                cmd.Parameters.AddWithValue("@month",month);
+                // cmd.Parameters.AddWithValue("@month",month);
                 cmd.Parameters.AddWithValue("@year",year);
 
                 await _conn.OpenAsync();

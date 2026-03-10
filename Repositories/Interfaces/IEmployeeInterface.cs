@@ -17,7 +17,7 @@ namespace Repositories.Interfaces
 
         Task<int> Update(UpdateEmployee emp);
 
-        Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId,int month,int year);
+        Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId,int year);
 
         Task<List<vm_YearlyWorkingHours>> GetYearlyWorkingHours(int empId,int year);
 

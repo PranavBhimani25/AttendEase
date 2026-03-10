@@ -112,7 +112,7 @@ namespace MVCAttendEase.Controllers
             int month=DateTime.Now.Month;
             int year=DateTime.Now.Year;
 
-            var data=await _emp.GetAttendanceByEmployee(empId,month,year);
+            var data=await _emp.GetAttendanceByEmployee(empId,year);
 
             return Ok(data);
         }

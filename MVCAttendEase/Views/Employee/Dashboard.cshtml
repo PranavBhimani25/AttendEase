@@ -144,7 +144,7 @@ $(document).ready(function () {
         var events = [];
         var today = new Date();
         today.setHours(0,0,0,0);
-        var start = new Date(today.getFullYear(), today.getMonth()-1, 1);
+        var start = new Date(today.getFullYear(), today.getMonth()-2, 1);
         var end = new Date(today.getFullYear(), today.getMonth()+1, 0);
         for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             var date = new Date(d);

@@ -14,6 +14,7 @@ namespace MVCAttendEase.Controllers
 {
     [Route("[controller]")]
     [ServiceFilter(typeof(EmployeeFilter))]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class EmployeeController : Controller
     {
         private readonly IEmployeeInterface _repo;

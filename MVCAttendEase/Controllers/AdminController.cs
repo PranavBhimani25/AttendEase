@@ -9,6 +9,7 @@ using MVCAttendEase.Filters;
 using MVCAttendEase.Models;
 using MVCAttendEase.Services;
 using Repositories.Interfaces;
+using Repositories.Models;
 using StackExchange.Redis;
 
 namespace MVCAttendEase.Controllers
@@ -209,6 +210,41 @@ namespace MVCAttendEase.Controllers
 
             var reportData = await _adminRepo.GetEmployeeMonthlyReportData(empId, month, year);
             return Ok(reportData);
+        }
+
+        [HttpGet("SearchAttendance")]
+        public async Task<IActionResult> SearchAttendance(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return Ok(new List<AdminReportSearchModel>());
+
+            var result = await _elastic.SearchAttendanceByName(name);
+
+            return Ok(new
+            {
+                success = true,
+                data = result,
+                total = result.Count
+            });
+        }
+
+
+        // 🔍 Employee Search (Name + Status)
+        [HttpGet("SearchEmployee")]
+        public async Task<IActionResult> SearchEmployee(string name, string status)
+        {
+            // Default handling
+            name = name ?? "";
+            status = string.IsNullOrEmpty(status) ? "Active" : status;
+
+            var result = await _elastic.SearchEmployee(name, status);
+
+            return Ok(new
+            {
+                success = true,
+                data = result,
+                total = result.Count
+            });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -108,4 +108,76 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
 
+async Task IndexElasticData()
+{
+    using var scope = app.Services.CreateScope();
+
+    var es = scope.ServiceProvider.GetRequiredService<ElasticsearchService>();
+    var adminRepo = scope.ServiceProvider.GetRequiredService<IAdminInterface>();
+    var employeeRepo = scope.ServiceProvider.GetRequiredService<IEmployeeInterface>();
+
+    // ✅ Create Index
+    await es.CreateAttendanceIndexAsync();
+    await es.CreateEmployeeIndexAsync();
+
+    // ================= EMPLOYEE DATA =================
+    var employeeList = await adminRepo.ListEmployee();
+
+    // ================= ATTENDANCE DATA =================
+    var attendanceList = new List<AttendanceModel>();
+
+    foreach (var emp in employeeList)
+    {
+        var empAttendance = employeeRepo.GetAttendanceByEmployee(emp.EmpId);
+        attendanceList.AddRange(empAttendance);
+    }
+
+    // ================= ATTENDANCE INDEX =================
+    var attendanceData = from a in attendanceList
+                         join e in employeeList
+                         on a.EmpId equals e.EmpId
+                         select new AdminReportSearchModel
+                         {
+                             AttendId = a.AttendId,
+                             EmpId = a.EmpId,
+                             EmployeeName = e.Name,
+                             AttendDate = a.AttendDate,
+                             AttendStatus = a.AttendStatus,
+                             WorkType = a.WorkType,
+                             TaskType = a.TaskType
+                         };
+
+    foreach (var item in attendanceData)
+    {
+        await es.IndexAttendanceAsync(item);
+    }
+
+    // ================= EMPLOYEE INDEX =================
+    var employeeIndexData = employeeList.Select(e => new EmployeeSearchIndex
+    {
+        EmpId = e.EmpId,
+        Name = e.Name,
+        Email = e.Email,
+        Gender = e.Gender,
+        Status = e.Status,
+        Role = e.Role,
+
+        // You can improve this later
+        TotalWorkingHours = 0,
+        TotalDaysPresent = 0,
+        LateInCount = 0,
+        EarlyOutCount = 0,
+        LastAttendDate = DateTime.Now
+    });
+
+    foreach (var emp in employeeIndexData)
+    {
+        await es.IndexEmployeeAsync(emp);
+    }
+
+    Console.WriteLine("✅ Elasticsearch indexing completed");
+}
+
+ 
+
 app.Run();

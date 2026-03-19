@@ -7,6 +7,19 @@
     Employee List
 </div>
 
+<div class="search-top-right">
+    <input type="text" id="searchName" placeholder="Search Employee..." 
+           class="k-textbox" />
+
+    <button class="k-button k-button-md k-button-solid-primary" onclick="searchAttendance()">
+        🔍
+    </button>
+
+    <button class="k-button k-button-md k-button-outline" onclick="resetSearch()">
+        Reset
+    </button>
+</div>
+
 
 <div class="task-container">
     <div id="employeeGrid"></div>
@@ -34,12 +47,22 @@
     font-size:36px;
     font-weight:600;
     margin-bottom:20px;
+    position: relative; 
 }
 
+.search-top-right{
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
 
-
-
-
+.search-top-right input{
+    width: 220px;
+    border-radius: 8px;
+}
 
 
 /* HEADER */
@@ -667,6 +690,59 @@ function downloadCurrentReportPdf(){
         }
     });
 }
+
+// ================= 🔥 ELASTICSEARCH SEARCH START =================
+
+// 🔍 Search function
+function searchAttendance() {
+    let name = $("#searchName").val();
+
+    if (!name) {
+        alert("Please enter name");
+        return;
+    }
+
+    $.ajax({
+        url: "/Admin/SearchAttendance",
+        type: "GET",
+        data: { name: name },
+        success: function(res) {
+
+            let grid = $("#employeeGrid").data("kendoGrid");
+
+           if (res.success) {
+                console.log(res.data)
+                // 🔥 ADD THIS MAPPING
+                let mappedData = res.data.map(x => ({
+                    empId: x.empId,
+                    name: x.employeeName // 🔥 FIX HERE
+                }));
+
+                grid.dataSource.data(mappedData);
+
+            } else {
+                grid.dataSource.data([]);
+            }
+        },
+        error: function() {
+            alert("Search failed");
+        }
+    });
+}
+
+
+// 🔄 Reset Grid
+function resetSearch() {
+
+    let grid = $("#employeeGrid").data("kendoGrid");
+
+    grid.dataSource.transport.options.read.url = "/Admin/GetEmployees";
+    grid.dataSource.read();
+
+    $("#searchName").val("");
+}
+
+// ================= 🔥 ELASTICSEARCH SEARCH END =================
 
 </script>
 

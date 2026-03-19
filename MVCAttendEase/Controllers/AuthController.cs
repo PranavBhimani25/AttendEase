@@ -15,14 +15,16 @@ namespace MVCAttendEase.Controllers
     public class AuthController : Controller
     {
         private readonly CloudinaryService _cloudinaryService;
+        private readonly MailService _mailService;
         private readonly IAuthInterface _auth;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(ILogger<AuthController> logger, IAuthInterface auth, CloudinaryService cloudinaryService)
+        public AuthController(ILogger<AuthController> logger, IAuthInterface auth, CloudinaryService cloudinaryService, MailService mailService)
         {
             _logger = logger;
             _auth = auth;
             _cloudinaryService = cloudinaryService;
+            _mailService = mailService;
         }
 
         public IActionResult Login()
@@ -77,6 +79,27 @@ namespace MVCAttendEase.Controllers
             var employee = await _auth.Register(model);
             if(employee > 0)
             {
+                string body = $@"Dear {model.c_name}, <br><br>
+
+                                    Thank you for registering with our Attendance Management System. <br>
+                                    Your registration has been completed successfully. 🎉 <br><br>
+
+                                    Please note that your account is currently under review. 
+                                    You will be able to login only after an administrator activates your account. <br><br>
+
+                                    Once your account is activated, you will receive a confirmation, 
+                                    and then you can access the system using your credentials. <br><br>
+
+                                    If you have any questions or need assistance, feel free to contact us. <br><br>
+
+                                    Best regards, <br>
+                                    Admin Team <br>
+                                    AttendEase System
+                                    ";
+                string subject = "Registration Successfully";
+
+                _mailService.SendEmail(model.c_email, subject, body);
+
                 return Ok(new { message = "Registration successful", success = true });
             }
             else

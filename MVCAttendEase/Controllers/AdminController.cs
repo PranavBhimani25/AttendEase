@@ -6,25 +6,57 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVCAttendEase.Filters;
+using MVCAttendEase.Models;
+using MVCAttendEase.Services;
 using Repositories.Interfaces;
+using StackExchange.Redis;
 
 namespace MVCAttendEase.Controllers
 {
     [Route("[controller]")]
     [ServiceFilter(typeof(AdminFilter))]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AdminController : Controller
     {
 
         private readonly IAdminInterface _adminRepo;
+        private readonly RedisService   _redisService;
+        private readonly RabbitMQService _rabbit;
+        private readonly ElasticsearchService _elastic;
 
-        public AdminController(IAdminInterface adminRepository)
+        public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit, ElasticsearchService elastic)
         {
             _adminRepo=adminRepository;
+            _redisService = redisService;
+            _rabbit = rabbit;
+            _elastic = elastic;
         }
 
         [Route("Dashboard")]
         public async Task<IActionResult> Dashboard()
         {
+            // await _redisService.SetAsync("test", "This test valueansdbbs ");
+
+            // var msg = new ChatMessage
+            // {
+            //     Sender = "Pranav",
+            //     Receiver = "Dev",
+            //     Message = "Hello",
+            //     Timestamp = DateTime.UtcNow
+            // };
+
+             var data = new
+            {
+                Message = "Hello Elasticsearch 🚀",
+                Time = DateTime.UtcNow
+            };
+            await _elastic.CreateIndexAsync("attendance_logs");
+
+            await _elastic.IndexAsync(data);
+
+            // await _rabbit.SendMessageAsync("Dev", msg);
+
+
             return View();
         }
 

@@ -1,9 +1,12 @@
+using Microsoft.Extensions.Options;
 using MVCAttendEase.Filters;
+using MVCAttendEase.Models;
 using MVCAttendEase.Services;
 using Npgsql;
 using Repositories.Implementation;
 using Repositories.Interfaces;
 using Repositories.Models;
+using StackExchange.Redis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +17,55 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<AdminFilter>();
 builder.Services.AddScoped<EmployeeFilter>();
 builder.Services.AddScoped<CloudinaryService>();
+
+// ===================Radis Configuration===================
+builder.Services.AddScoped<RedisService>();
+
+builder.Services.Configure<RedisConfig>(
+    builder.Configuration.GetSection("Redis")
+);
+
+// var redisTest = builder.Configuration.GetSection("Redis").Get<RedisConfig>();
+// Console.WriteLine("==== REDIS CONFIG ====");
+// Console.WriteLine(redisTest.Host);
+// Console.WriteLine(redisTest.Port);
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = sp.GetRequiredService<IOptions<RedisConfig>>().Value;
+
+    if (string.IsNullOrEmpty(config.Host))
+        throw new Exception("Redis Host is NULL ❌");
+
+    var options = new ConfigurationOptions
+    {
+        EndPoints = { { config.Host, config.Port } },
+        Password = config.Password,
+        Ssl = config.Ssl,
+        AbortOnConnectFail = false,
+        ConnectTimeout = 10000,
+        SyncTimeout = 10000
+    };
+
+    return ConnectionMultiplexer.Connect(options);
+});
+
+// ===================RabbitMQ Configuration===================
+
+builder.Services.Configure<RabbitMQConfig>(
+    builder.Configuration.GetSection("RabbitMQ")
+);
+
+builder.Services.AddScoped<RabbitMQService>();
+
+// ===================Elasticsearch Configuration===================
+builder.Services.Configure<ElasticsearchConfig>(
+    builder.Configuration.GetSection("Elasticsearch")
+);
+builder.Services.AddScoped<ElasticsearchService>();
+
+var test = builder.Configuration.GetSection("Elasticsearch").Get<ElasticsearchConfig>();
+Console.WriteLine(test.Url);
 
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 builder.Services.AddScoped<IAdminInterface, AdminRepository>();

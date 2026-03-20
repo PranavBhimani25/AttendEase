@@ -2,147 +2,77 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AttendEase</title>
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Kendo -->
-    <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
-
-    <!-- Icons -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Kendo UI Nordic Theme -->
+    <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
 
     <style>
-        body {
-            margin: 0;
+        /* ─── FOUNDATION ─── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary:   #6366F1;
+            --secondary: #8B5CF6;
+            --accent:    #EC4899;
+            --success:   #6EE7B7;
+            --text-dark: #0F172A;
+            --text-mid:  #475569;
+            --text-soft: #94A3B8;
+            --border:    #E2E8F0;
+            --surface:   #F8FAFC;
+        }
+
+        html, body {
+            height: 100%;
             font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ===== MAIN SPLIT LAYOUT ===== */
-        .login-wrapper {
-            display: flex;
-            height: 100vh;
-        }
+        /* ─── KENDO GLOBAL OVERRIDES ─── */
 
-        /* LEFT SIDE */
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, #1E3A8A, #3B82F6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        /* Remove Kendo's default fieldset wrapper look */
+        .k-form fieldset { border: none; padding: 0; margin: 0; }
+        .k-form legend   { display: none; }
 
-        .login-left img {
-            width: 70%;
-            max-width: 420px;
-        }
+        /* Notification polish */
+        .k-notification-group { z-index: 9999 !important; }
+        .k-notification        { border-radius: 12px !important; font-family: 'Poppins', sans-serif !important; font-size: 13px !important; }
+        .k-notification-success { background: #ECFDF5 !important; border-color: #A7F3D0 !important; color: #065F46 !important; }
+        .k-notification-error   { background: #FEF2F2 !important; border-color: #FECACA !important; color: #991B1B !important; }
 
-        /* RIGHT SIDE */
-        .login-right {
-            flex: 1;
-            background: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        /* Remove Kendo's bold form labels default */
+        .k-form .k-form-label { font-weight: 600 !important; }
 
-        /* CARD */
-        .login-card {
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-        }
+        /* Ensure inputs don't have Kendo's default box-shadow on focus (we handle it) */
+        .k-input:focus, .k-textbox:focus { outline: none !important; }
 
-        /* ICON */
-        .user-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: auto;
-            font-size: 24px;
-            color: #334155;
-        }
-
-        /* TEXT */
-        .welcome-text {
-            margin: 20px 0;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        /* INPUT FIX */
-        .k-textbox {
-            border-radius: 25px !important;
-            height: 45px;
-        }
-
-        /* BUTTON */
-        .k-button.k-primary {
-            border-radius: 25px !important;
-            height: 45px;
-            background: linear-gradient(to right, #1E3A8A, #60A5FA);
-            border: none;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .k-button.k-primary:hover {
-            transform: scale(1.05);
-        }
-
-        /* LINKS */
-        .forgot-text {
-            text-align: right;
-            margin-top: 5px;
-        }
-
-        .forgot-text a {
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        .register-text {
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
-        .register-text a {
-            color: #2563eb;
-            font-weight: 500;
-        }
-
-        /* RESPONSIVE */
-        @@media (max-width: 768px) {
-            .login-wrapper {
-                flex-direction: column;
-            }
-
-            .login-left {
-                height: 200px;
-            }
-        }
+        /* ─── CUSTOM SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
     </style>
 </head>
 
 <body>
-
     @RenderBody()
 
-    <!-- Scripts -->
+    <!-- jQuery -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap JS (optional) -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Kendo All -->
     <script src="~/lib/kendo/kendo.all.min.js"></script>
 
     @RenderSection("Scripts", required: false)
-
 </body>
 </html>

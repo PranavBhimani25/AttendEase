@@ -3,162 +3,641 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="login-wrapper">
+<div class="auth-wrapper">
 
-    <!-- LEFT -->
-    <div class="login-left">
+    <!-- ════════════ LEFT PANEL ════════════ -->
+    <div class="auth-left">
+        <div class="left-content">
+            <div class="brand-logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.2"/>
+                        <path d="M14 6L20 10V18L14 22L8 18V10L14 6Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                        <circle cx="14" cy="14" r="3" fill="white" fill-opacity="0.6"/>
+                    </svg>
+                </div>
+                <span class="brand-name">AttendEase</span>
+            </div>
+
+            <div class="illustration-wrap">
+                <svg viewBox="0 0 480 380" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-svg">
+                    <circle cx="240" cy="190" r="160" fill="white" fill-opacity="0.06"/>
+                    <circle cx="240" cy="190" r="120" fill="white" fill-opacity="0.06"/>
+                    <rect x="100" y="70" width="280" height="200" rx="20" fill="white" fill-opacity="0.12"/>
+                    <rect x="100" y="70" width="280" height="50" rx="20" fill="white" fill-opacity="0.15"/>
+                    <rect x="100" y="100" width="280" height="20" fill="white" fill-opacity="0.08"/>
+                    <circle cx="125" cy="95" r="6" fill="#FF6B9D"/>
+                    <circle cx="147" cy="95" r="6" fill="#FFD93D"/>
+                    <circle cx="169" cy="95" r="6" fill="#6BCB77"/>
+                    <rect x="200" y="88" width="100" height="10" rx="5" fill="white" fill-opacity="0.4"/>
+                    <rect x="120" y="138" width="55" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+                    <rect x="185" y="138" width="55" height="38" rx="10" fill="#A78BFA" fill-opacity="0.7"/>
+                    <rect x="250" y="138" width="55" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+                    <rect x="315" y="138" width="55" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+                    <rect x="120" y="186" width="55" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+                    <rect x="185" y="186" width="55" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+                    <rect x="250" y="186" width="55" height="38" rx="10" fill="#6EE7B7" fill-opacity="0.6"/>
+                    <rect x="315" y="186" width="55" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+                    <rect x="130" y="150" width="35" height="5" rx="2.5" fill="white" fill-opacity="0.5"/>
+                    <rect x="130" y="160" width="25" height="4" rx="2" fill="white" fill-opacity="0.3"/>
+                    <rect x="195" y="150" width="35" height="5" rx="2.5" fill="white" fill-opacity="0.9"/>
+                    <rect x="195" y="160" width="25" height="4" rx="2" fill="white" fill-opacity="0.6"/>
+                    <rect x="260" y="150" width="35" height="5" rx="2.5" fill="white" fill-opacity="0.5"/>
+                    <rect x="260" y="160" width="25" height="4" rx="2" fill="white" fill-opacity="0.3"/>
+                    <rect x="325" y="150" width="35" height="5" rx="2.5" fill="white" fill-opacity="0.5"/>
+                    <rect x="325" y="160" width="25" height="4" rx="2" fill="white" fill-opacity="0.3"/>
+                    <circle cx="212" cy="157" r="8" fill="white" fill-opacity="0.3"/>
+                    <path d="M208 157L211 160L216 153" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="277" cy="193" r="8" fill="white" fill-opacity="0.3"/>
+                    <path d="M273 193L276 196L281 189" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="310" y="40" width="120" height="55" rx="14" fill="white" fill-opacity="0.18"/>
+                    <text x="322" y="63" fill="white" fill-opacity="0.6" font-size="10" font-family="sans-serif">Attendance</text>
+                    <text x="322" y="83" fill="white" font-size="20" font-family="sans-serif" font-weight="bold">94%</text>
+                    <circle cx="415" cy="60" r="10" fill="#6EE7B7" fill-opacity="0.7"/>
+                    <path d="M411 60L414 63L419 57" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="50" y="280" width="140" height="55" rx="14" fill="white" fill-opacity="0.18"/>
+                    <circle cx="72" cy="308" r="14" fill="#A78BFA" fill-opacity="0.7"/>
+                    <path d="M68 307C68 304.791 69.791 303 72 303C74.209 303 76 304.791 76 307C76 309.209 74.209 311 72 311C69.791 311 68 309.209 68 307Z" fill="white"/>
+                    <path d="M64 318C64 314.686 67.134 312 71 312H73C76.866 312 80 314.686 80 318" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                    <rect x="92" y="300" width="82" height="8" rx="4" fill="white" fill-opacity="0.7"/>
+                    <rect x="92" y="314" width="60" height="7" rx="3.5" fill="white" fill-opacity="0.4"/>
+                    <circle cx="80" cy="90" r="5" fill="#FF6B9D" fill-opacity="0.7"/>
+                    <circle cx="60" cy="200" r="8" fill="#6366F1" fill-opacity="0.5"/>
+                    <circle cx="420" cy="240" r="6" fill="#A78BFA" fill-opacity="0.6"/>
+                    <circle cx="400" cy="300" r="4" fill="#FFD93D" fill-opacity="0.7"/>
+                    <line x1="240" y1="270" x2="240" y2="310" stroke="white" stroke-opacity="0.2" stroke-width="1.5" stroke-dasharray="4 4"/>
+                    <rect x="155" y="295" width="170" height="40" rx="20" fill="white" fill-opacity="0.18"/>
+                    <circle cx="178" cy="315" r="9" fill="#6EE7B7" fill-opacity="0.8"/>
+                    <path d="M174 315L177 318L182 312" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="194" y="308" width="90" height="7" rx="3.5" fill="white" fill-opacity="0.7"/>
+                    <rect x="194" y="320" width="65" height="6" rx="3" fill="white" fill-opacity="0.4"/>
+                </svg>
+            </div>
+
+            <div class="left-text">
+                <h2>Manage Your Team's Attendance</h2>
+                <p>Streamlined tracking, real-time insights, and effortless reporting — all in one place.</p>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-chip">
+                    <span class="stat-num">500+</span>
+                    <span class="stat-label">Teams</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-chip">
+                    <span class="stat-num">99.9%</span>
+                    <span class="stat-label">Uptime</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-chip">
+                    <span class="stat-num">24/7</span>
+                    <span class="stat-label">Support</span>
+                </div>
+            </div>
+        </div>
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
     </div>
 
-    <!-- RIGHT -->
-    <div class="login-right">
+    <!-- ════════════ RIGHT PANEL ════════════ -->
+    <div class="auth-right">
+        <div class="auth-card" id="loginCard">
 
-        <div class="login-card">
-
-            <div class="user-icon">
-                <i class="fa fa-user"></i>
+            <div class="card-header">
+                <div class="avatar-ring">
+                    <div class="avatar-inner">
+                        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+                            <path d="M13 4C10.239 4 8 6.239 8 9C8 11.761 10.239 14 13 14C15.761 14 18 11.761 18 9C18 6.239 15.761 4 13 4Z" fill="#6366F1"/>
+                            <path d="M5 21C5 17.134 8.686 14 13 14C17.314 14 21 17.134 21 21" stroke="#6366F1" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="card-title">Welcome Back</h1>
+                <p class="card-subtitle">Sign in to your AttendEase account</p>
             </div>
 
-            <h2 class="welcome-text">WELCOME</h2>
+            <!-- ══ PLAIN HTML FORM — sends c_email / c_password exactly as LoginModel expects ══ -->
+            <form id="loginForm" novalidate autocomplete="off">
 
-            <form id="loginForm"></form>
+                <!-- Email -->
+                <div class="field-group">
+                    <label class="field-label" for="log_email">
+                        <i class="fa fa-envelope lbl-icon"></i> Email Address
+                    </label>
+                    <div class="input-wrap">
+                        <i class="fa fa-envelope fi"></i>
+                        <input id="log_email"
+                               name="c_email"
+                               type="email"
+                               class="fi-input"
+                               placeholder="you@company.com"
+                               autocomplete="email" />
+                        <i class="fa fa-check vtick" id="tk_email"></i>
+                    </div>
+                    <span class="err" id="e_email"></span>
+                </div>
 
-            <div class="forgot-text">
-                <a href="/Auth/ForgetPassword">Forgot Password?</a>
-            </div>
+                <!-- Password -->
+                <div class="field-group">
+                    <label class="field-label" for="log_pw">
+                        <i class="fa fa-lock lbl-icon"></i> Password
+                    </label>
+                    <div class="input-wrap">
+                        <i class="fa fa-lock fi"></i>
+                        <input id="log_pw"
+                               name="c_password"
+                               type="password"
+                               class="fi-input"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" />
+                        <button type="button" class="eye-btn" data-tid="log_pw">
+                            <i class="fa fa-eye-slash"></i>
+                        </button>
+                    </div>
+                    <span class="err" id="e_pw"></span>
+                </div>
+
+                <!-- Forgot password -->
+                <div class="form-extras">
+                    <a href="/Auth/ForgetPassword" class="link-forgot">
+                        <i class="fa fa-circle-question"></i> Forgot Password?
+                    </a>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-submit" id="loginBtn">
+                    <span class="btext">
+                        <i class="fa fa-right-to-bracket"></i>&nbsp; Sign In
+                    </span>
+                    <span class="bspinner"></span>
+                </button>
+
+            </form>
+            <!-- ════════════════════════════════════════ -->
 
             <div id="notification"></div>
 
-            <div class="register-text">
-                Don’t have an account?
-                <a href="/Auth/Register">Register</a>
+            <div class="divider"><span>or</span></div>
+
+            <div class="switch-auth">
+                Don't have an account?
+                <a href="/Auth/Register" class="link-primary">Create Account →</a>
             </div>
 
-        </div>
+        </div><!-- /.auth-card -->
+    </div><!-- /.auth-right -->
 
-    </div>
+</div><!-- /.auth-wrapper -->
 
-</div>
+@section Scripts {
+<style>
+/* ─────────────────────────────────────────
+   RESET
+───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Poppins', sans-serif; overflow: hidden; }
 
+/* ─────────────────────────────────────────
+   WRAPPER
+───────────────────────────────────────── */
+.auth-wrapper { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
 
-@section Scripts{
-    <style>
-        .login-left {
-            flex: 1;
+/* ─────────────────────────────────────────
+   LEFT PANEL
+───────────────────────────────────────── */
+.auth-left {
+    flex: 0 0 48%;
+    background: linear-gradient(135deg, #312E81 0%, #4F46E5 35%, #7C3AED 70%, #9D174D 100%);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px;
+}
+.blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .25; pointer-events: none; }
+.blob-1 { width: 400px; height: 400px; background: #A78BFA; top: -100px; right: -80px;
+    animation: bF 8s ease-in-out infinite alternate; }
+.blob-2 { width: 300px; height: 300px; background: #F472B6; bottom: -80px; left: -60px;
+    animation: bF 10s ease-in-out infinite alternate-reverse; }
+@@keyframes bF {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(20px,-20px) scale(1.05); }
+}
+.left-content {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 440px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 24px;
+}
+.brand-logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+    width: 40px; height: 40px; background: rgba(255,255,255,.15);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.2);
+}
+.brand-name { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+.illustration-wrap { width: 100%; animation: fU 6s ease-in-out infinite alternate; }
+.hero-svg { width: 100%; height: auto; }
+@@keyframes fU { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+.left-text h2 { color: #fff; font-size: 22px; font-weight: 700; line-height: 1.35; margin-bottom: 8px; }
+.left-text p  { color: rgba(255,255,255,.65); font-size: 14px; line-height: 1.7; }
+.stats-row {
+    display: flex; align-items: center; gap: 20px;
+    background: rgba(255,255,255,.1); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.15); border-radius: 16px; padding: 14px 22px;
+}
+.stat-chip { display: flex; flex-direction: column; align-items: center; }
+.stat-num   { color: #fff; font-size: 17px; font-weight: 700; line-height: 1; }
+.stat-label { color: rgba(255,255,255,.55); font-size: 11px; margin-top: 3px; }
+.stat-divider { width: 1px; height: 30px; background: rgba(255,255,255,.2); }
 
-            background: url('https://res.cloudinary.com/dvs3znyc7/image/upload/v1773998933/WhatsApp_Image_2026-03-20_at_2.57.47_PM_yenyfh.jpg');
+/* ─────────────────────────────────────────
+   RIGHT PANEL
+───────────────────────────────────────── */
+.auth-right {
+    flex: 1; background: #F1F5F9;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 24px; position: relative;
+}
+.auth-right::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 70% 20%, rgba(99,102,241,.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(139,92,246,.06) 0%, transparent 60%);
+}
 
-            background-size: cover;       /* 🔥 fill entire area */
-            background-position: center;  /* center image */
-            background-repeat: no-repeat;
+/* ─────────────────────────────────────────
+   CARD
+───────────────────────────────────────── */
+.auth-card {
+    width: 100%; max-width: 420px;
+    background: #fff; border-radius: 24px;
+    padding: 40px 38px 36px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 20px 60px -10px rgba(99,102,241,.15);
+    border: 1px solid rgba(99,102,241,.08);
+    animation: cIn .6s cubic-bezier(.16,1,.3,1) both;
+    transition: box-shadow .3s, transform .3s;
+}
+@@keyframes cIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.auth-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 30px 80px -10px rgba(99,102,241,.22);
+    transform: translateY(-2px);
+}
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
+/* ─────────────────────────────────────────
+   CARD HEADER
+───────────────────────────────────────── */
+.card-header { text-align: center; margin-bottom: 28px; }
+.avatar-ring {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 8px 25px rgba(99,102,241,.35);
+    position: relative;
+}
+.avatar-ring::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    opacity: .15; animation: pR 2.5s ease-in-out infinite;
+}
+@@keyframes pR {
+    0%,100% { transform: scale(1); opacity: .15; }
+    50%      { transform: scale(1.12); opacity: .05; }
+}
+.avatar-inner {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+}
+.card-title    { font-size: 23px; font-weight: 700; color: #0F172A; margin-bottom: 6px; letter-spacing: -.3px; }
+.card-subtitle { font-size: 13.5px; color: #94A3B8; }
+
+/* ─────────────────────────────────────────
+   FORM
+───────────────────────────────────────── */
+#loginForm { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+
+/* ─────────────────────────────────────────
+   FIELD GROUP  (same as Register)
+───────────────────────────────────────── */
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+    font-size: 11.5px; font-weight: 600; color: #475569;
+    display: flex; align-items: center; gap: 5px; letter-spacing: .1px;
+}
+.lbl-icon { color: #6366F1; font-size: 10.5px; }
+
+/* ─────────────────────────────────────────
+   INPUT WRAP  (same as Register)
+───────────────────────────────────────── */
+.input-wrap { position: relative; display: flex; align-items: center; width: 100%; }
+
+.fi {
+    position: absolute; left: 13px;
+    color: #CBD5E1; font-size: 13px;
+    pointer-events: none; z-index: 2; transition: color .2s;
+}
+.input-wrap:focus-within .fi { color: #6366F1; }
+
+.fi-input {
+    width: 100%; height: 48px;
+    padding: 0 42px 0 40px;
+    border: 1.5px solid #E2E8F0; border-radius: 12px;
+    background: #F8FAFC;
+    font-family: 'Poppins', sans-serif; font-size: 13.5px; color: #0F172A;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.fi-input::placeholder { color: #C8D3E0; font-size: 13px; }
+.fi-input:focus {
+    border-color: #6366F1; background: #fff;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+}
+
+/* Validation states */
+.fi-input.is-valid   { border-color: #10B981 !important; background: #fff; }
+.fi-input.is-invalid {
+    border-color: #EF4444 !important; background: #FFF5F5;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.08) !important;
+}
+
+/* Valid tick */
+.vtick {
+    position: absolute; right: 13px;
+    color: #10B981; font-size: 12px;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+}
+.vtick.on { opacity: 1; }
+
+/* Eye button */
+.eye-btn {
+    position: absolute; right: 10px;
+    background: none; border: none; cursor: pointer;
+    color: #CBD5E1; font-size: 13px; padding: 4px;
+    transition: color .2s; z-index: 2;
+}
+.eye-btn:hover { color: #6366F1; }
+
+/* ─────────────────────────────────────────
+   ERROR MESSAGE  (same as Register)
+───────────────────────────────────────── */
+.err {
+    font-size: 11px; color: #EF4444; font-weight: 500; min-height: 16px;
+    display: flex; align-items: center; gap: 4px;
+}
+
+/* ─────────────────────────────────────────
+   FORGOT PASSWORD LINK
+───────────────────────────────────────── */
+.form-extras { display: flex; justify-content: flex-end; margin-top: -4px; }
+.link-forgot {
+    font-size: 12.5px; color: #94A3B8; font-weight: 500;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    transition: color .2s;
+}
+.link-forgot:hover { color: #6366F1; }
+
+/* ─────────────────────────────────────────
+   SUBMIT BUTTON  (same as Register)
+───────────────────────────────────────── */
+.btn-submit {
+    width: 100%; height: 50px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff; border: none; border-radius: 14px;
+    font-family: 'Poppins', sans-serif; font-size: 14.5px; font-weight: 600;
+    cursor: pointer; letter-spacing: .4px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 4px 15px rgba(99,102,241,.4);
+    position: relative; overflow: hidden; margin-top: 4px;
+}
+.btn-submit::before {
+    content: ''; position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+    transition: left .5s;
+}
+.btn-submit:hover::before { left: 100%; }
+.btn-submit:hover  { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,.5); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: .75; cursor: not-allowed; transform: none; }
+
+.bspinner {
+    display: none; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,.35);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+.btn-submit.loading .btext    { display: none; }
+.btn-submit.loading .bspinner { display: block; }
+@@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────────
+   DIVIDER + SWITCH
+───────────────────────────────────────── */
+.divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 22px 0 0; color: #CBD5E1; font-size: 12px; font-weight: 500;
+}
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #E2E8F0; }
+
+.switch-auth { text-align: center; font-size: 13.5px; color: #64748B; margin-top: 14px; }
+.link-primary {
+    color: #6366F1; font-weight: 600;
+    text-decoration: none; margin-left: 5px; transition: color .2s;
+}
+.link-primary:hover { color: #4F46E5; }
+
+/* ─────────────────────────────────────────
+   SHAKE ANIMATION
+───────────────────────────────────────── */
+@@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-9px); }
+    40%      { transform: translateX(9px); }
+    60%      { transform: translateX(-6px); }
+    80%      { transform: translateX(6px); }
+}
+.shake { animation: shake .45s ease !important; }
+
+/* ─────────────────────────────────────────
+   KENDO NOTIFICATION
+───────────────────────────────────────── */
+.k-notification-group { z-index: 9999 !important; }
+.k-notification { border-radius: 12px !important; font-family: 'Poppins', sans-serif !important; font-size: 13px !important; }
+.k-notification-success { background: #ECFDF5 !important; border-color: #A7F3D0 !important; color: #065F46 !important; }
+.k-notification-error   { background: #FEF2F2 !important; border-color: #FECACA !important; color: #991B1B !important; }
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@@media (max-width: 900px)  { .auth-left { display: none; } .auth-right { flex: 1; } }
+@@media (max-width: 480px)  { .auth-card { padding: 32px 22px; border-radius: 18px; } }
+</style>
 
 <script>
-    $(document).ready(function () {
+$(document).ready(function () {
 
-        $("#notification").kendoNotification({
-            position: {
-                pinned: true,
-                top: 30,
-                right: 30
-            },
-            autoHideAfter: 1500
-        });
+    /* ── Kendo Notification ── */
+    var notify = $("#notification").kendoNotification({
+        position: { pinned: true, top: 24, right: 24 },
+        autoHideAfter: 3000,
+        animation: {
+            open:  { effects: "slideIn:down fade:in", duration: 300 },
+            close: { duration: 200 }
+        }
+    }).data("kendoNotification");
 
-        $("#loginForm").kendoForm({
+    function toast(msg, type) { notify.show(msg, type || "info"); }
 
-            formData: {
-                c_email: "",
-                c_password: ""
-            },
+    /* ════════════════════════════════════════
+       HELPERS  (same pattern as Register)
+    ════════════════════════════════════════ */
+    function setErr(inputId, errId, tickId, msg) {
+        $("#" + inputId).removeClass("is-valid").addClass("is-invalid");
+        $("#" + errId).html('<i class="fa fa-exclamation-circle"></i>&nbsp;' + msg);
+        if (tickId) { $("#" + tickId).removeClass("on"); }
+    }
 
-            items: [
-                {
-                    field: "email",
-                    label: "Email",
-                    validation: {
-                        required: { message: "Email is required" },
-                        email: { message: "Invalid email format" }
-                    },
-                    editor: function (container, options) {
-                        $('<input name="' + options.field + '" type="email"/>')
-                            .appendTo(container)
-                            .kendoTextBox({
-                                placeholder: "Enter your email"
-                            });
-                    }
-                },
-                {
-                    field: "password",
-                    label: "Password",
-                    validation: {
-                        required: { message: "Password is required" }
-                    },
-                    editor: function (container, options) {
-                        $('<input name="' + options.field + '" type="password"/>')
-                            .appendTo(container)
-                            .kendoTextBox({
-                                placeholder: "Enter password"
-                            });
-                    }
+    function setOk(inputId, errId, tickId) {
+        $("#" + inputId).removeClass("is-invalid").addClass("is-valid");
+        $("#" + errId).text("");
+        if (tickId) { $("#" + tickId).addClass("on"); }
+    }
+
+    function clearState(inputId, errId, tickId) {
+        $("#" + inputId).removeClass("is-valid is-invalid");
+        if (errId)  { $("#" + errId).text(""); }
+        if (tickId) { $("#" + tickId).removeClass("on"); }
+    }
+
+    /* ════════════════════════════════════════
+       VALIDATORS
+    ════════════════════════════════════════ */
+    function validateEmail() {
+        var v = $.trim($("#log_email").val());
+        var re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        if (!v)          { setErr("log_email", "e_email", "tk_email", "Email address is required");    return false; }
+        if (!re.test(v)) { setErr("log_email", "e_email", "tk_email", "Enter a valid email address"); return false; }
+        setOk("log_email", "e_email", "tk_email");
+        return true;
+    }
+
+    function validatePassword() {
+        var v = $("#log_pw").val();
+        if (!v)         { setErr("log_pw", "e_pw", null, "Password is required");                    return false; }
+        if (v.length < 6) { setErr("log_pw", "e_pw", null, "Password must be at least 6 characters"); return false; }
+        /* Clear invalid state — no green tick on password (security UX) */
+        $("#log_pw").removeClass("is-invalid").addClass("is-valid");
+        $("#e_pw").text("");
+        return true;
+    }
+
+    /* ── Real-time listeners ── */
+    $("#log_email")
+        .on("input", function () { if ($(this).val()) validateEmail(); })
+        .on("blur",  validateEmail);
+
+    $("#log_pw")
+        .on("input", function () { if ($(this).val()) validatePassword(); })
+        .on("blur",  validatePassword);
+
+    /* ════════════════════════════════════════
+       EYE TOGGLE
+    ════════════════════════════════════════ */
+    $(".eye-btn").on("click", function () {
+        var id   = $(this).data("tid");
+        var $ico = $(this).find("i");
+        if ($("#" + id).attr("type") === "password") {
+            $("#" + id).attr("type", "text");
+            $ico.removeClass("fa-eye-slash").addClass("fa-eye");
+        } else {
+            $("#" + id).attr("type", "password");
+            $ico.removeClass("fa-eye").addClass("fa-eye-slash");
+        }
+    });
+
+    /* ════════════════════════════════════════
+       CARD SHAKE
+    ════════════════════════════════════════ */
+    function shakeCard() {
+        var $c = $("#loginCard");
+        $c.addClass("shake");
+        setTimeout(function () { $c.removeClass("shake"); }, 500);
+    }
+
+    /* ════════════════════════════════════════
+       FORM SUBMIT
+       Sends JSON: { c_email, c_password }
+       — exactly matching LoginModel on the server
+    ════════════════════════════════════════ */
+    $("#loginForm").on("submit", function (e) {
+        e.preventDefault();
+
+        /* Run ALL validators (bitwise & avoids short-circuit so every field shows its error) */
+        var ok = validateEmail() & validatePassword();
+
+        if (!ok) {
+            shakeCard();
+            toast("Please fix the errors above before signing in", "error");
+            return;
+        }
+
+        var btn = $("#loginBtn");
+        btn.addClass("loading").prop("disabled", true);
+
+        /* ↓↓↓  CRITICAL: field names must match LoginModel exactly ↓↓↓ */
+        var payload = {
+            c_email:    $.trim($("#log_email").val()),
+            c_password: $("#log_pw").val()
+        };
+        /* ↑↑↑  c_email + c_password  →  [FromBody] LoginModel  ↑↑↑ */
+
+        $.ajax({
+            url:         "/Auth/Login",
+            method:      "POST",
+            data:        JSON.stringify(payload),
+            contentType: "application/json",   /* required for [FromBody] */
+
+            success: function (response) {
+                btn.removeClass("loading").prop("disabled", false);
+
+                if (response.success) {
+                    toast("Login successful! Redirecting…", "success");
+                    sessionStorage.setItem("userRole", response.role);
+                    sessionStorage.setItem("userId",   response.id);
+                    var dest = response.role === "Admin"
+                        ? "/Admin/Dashboard"
+                        : "/Employee/Dashboard";
+                    setTimeout(function () { window.location.href = dest; }, 1500);
+
+                } else {
+                    /* Server returned 200 but success=false (shouldn't happen per controller, but safe guard) */
+                    setErr("log_email", "e_email", "tk_email", "Invalid email or password");
+                    setErr("log_pw",    "e_pw",    null,       "Invalid email or password");
+                    shakeCard();
+                    toast(response.message || "Invalid email or password", "error");
                 }
-            ],
+            },
 
-            buttonsTemplate: `
-                <button type="submit" class="k-button k-primary w-100">
-                    LOGIN
-                </button>
-            `,
+            /* 400 Bad Request comes here — controller returns BadRequest() for wrong creds */
+            error: function (xhr) {
+                btn.removeClass("loading").prop("disabled", false);
 
-            submit: function (e) {
-                e.preventDefault();
+                var msg = "Invalid email or password";
+                try {
+                    var json = JSON.parse(xhr.responseText);
+                    if (json && json.message) { msg = json.message; }
+                } catch (ex) { /* ignore parse error */ }
 
-                var formdata = {
-                    c_email: e.model.email,
-                    c_password: e.model.password
-                };
-
-                $.ajax({
-                    url: "/Auth/Login",
-                    method: "POST",
-                    data: JSON.stringify(formdata),
-                    contentType: "application/json",
-
-                    success: function (response) {
-
-                        if (response.success) {
-                            $("#notification").data("kendoNotification")
-                                .show("Login successful!", "success");
-
-                            sessionStorage.setItem("userRole", response.role);
-                            sessionStorage.setItem("userId", response.id);
-
-                            if (response.role === "Admin") {
-                                setTimeout(() => window.location.href = "/Admin/Dashboard", 1500);
-                            } else {
-                                setTimeout(() => window.location.href = "/Employee/Dashboard", 1500);
-                            }
-
-                        } else {
-                            $("#notification")
-                                .data("kendoNotification")
-                                .show("Invalid credentials", "error");
-                        }
-                    },
-
-                    error: function () {
-                        $("#notification")
-                            .data("kendoNotification")
-                            .show("Login failed", "error");
-                    }
-                });
+                setErr("log_email", "e_email", "tk_email", msg);
+                setErr("log_pw",    "e_pw",    null,       msg);
+                shakeCard();
+                toast(msg, "error");
             }
         });
-
     });
+
+});
 </script>
 }

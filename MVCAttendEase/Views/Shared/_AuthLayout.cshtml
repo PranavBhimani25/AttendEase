@@ -4,92 +4,145 @@
     <meta charset="utf-8" />
     <title>@ViewData["Title"] - AttendEase</title>
 
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MVCAttendEase.styles.css" asp-append-version="true" />
-    @* <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" /> *@
+
+    <!-- Kendo -->
     <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
 
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-
-        body{
+        body {
+            margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg,#1E3A8A,#3B82F6);
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:flex-start;   /* changed */
-            padding-top:60px;         /* space from top */
-            padding-bottom:60px;
         }
 
-        .auth-container{
-            width:100%;
-            max-width:520px;
+        /* ===== MAIN SPLIT LAYOUT ===== */
+        .login-wrapper {
+            display: flex;
+            height: 100vh;
         }
 
-        .auth-card{
-            background:white;
-            padding:35px;
-            border-radius:12px;
-            box-shadow:0 12px 30px rgba(0,0,0,0.2);
+        /* LEFT SIDE */
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .auth-title{
-            text-align:center;
-            font-size:28px;
-            font-weight:600;
-            margin-bottom:10px;
-            color:#1E3A8A;
+        .login-left img {
+            width: 70%;
+            max-width: 420px;
         }
 
-        .auth-subtitle{
-            text-align:center;
-            color:#777;
-            margin-bottom:30px;
+        /* RIGHT SIDE */
+        .login-right {
+            flex: 1;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .auth-footer{
-            text-align:center;
-            margin-top:20px;
+        /* CARD */
+        .login-card {
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
         }
 
-        .auth-footer a{
-            color:#3B82F6;
-            text-decoration:none;
-            font-weight:500;
+        /* ICON */
+        .user-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            font-size: 24px;
+            color: #334155;
         }
 
-        .k-button{
-            background:#3B82F6;
-            border:none;
+        /* TEXT */
+        .welcome-text {
+            margin: 20px 0;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
-        .k-button:hover{
-            background:#1E40AF;
+        /* INPUT FIX */
+        .k-textbox {
+            border-radius: 25px !important;
+            height: 45px;
         }
 
+        /* BUTTON */
+        .k-button.k-primary {
+            border-radius: 25px !important;
+            height: 45px;
+            background: linear-gradient(to right, #1E3A8A, #60A5FA);
+            border: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .k-button.k-primary:hover {
+            transform: scale(1.05);
+        }
+
+        /* LINKS */
+        .forgot-text {
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .forgot-text a {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .register-text {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .register-text a {
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        /* RESPONSIVE */
+        @@media (max-width: 768px) {
+            .login-wrapper {
+                flex-direction: column;
+            }
+
+            .login-left {
+                height: 200px;
+            }
+        }
     </style>
-
 </head>
 
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            @RenderBody()
-        </div>
-    </div>
+
+    @RenderBody()
+
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/kendo/kendo.all.min.js"></script>
 
-
-    @RenderSection("Scripts",required:false)
+    @RenderSection("Scripts", required: false)
 
 </body>
-
 </html>

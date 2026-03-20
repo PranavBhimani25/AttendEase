@@ -3,137 +3,161 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="auth-title">
-    AttendEase
+<div class="login-wrapper">
+
+    <!-- LEFT -->
+    <div class="login-left">
+    </div>
+
+    <!-- RIGHT -->
+    <div class="login-right">
+
+        <div class="login-card">
+
+            <div class="user-icon">
+                <i class="fa fa-user"></i>
+            </div>
+
+            <h2 class="welcome-text">WELCOME</h2>
+
+            <form id="loginForm"></form>
+
+            <div class="forgot-text">
+                <a href="/Auth/ForgotPassword">Forgot Password?</a>
+            </div>
+
+            <div id="notification"></div>
+
+            <div class="register-text">
+                Don’t have an account?
+                <a href="/Auth/Register">Register</a>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
-
-<div class="auth-subtitle">
-    Employee Attendance System
-</div>
-
-<form id="loginForm"></form>
-
-<div class="auth-footer">
-    Don't have an account?
-    <a href="/Auth/Register">Register</a>
-</div>
-
-<div id="notification"></div>
 
 @section Scripts{
+    <style>
+        .login-left {
+            flex: 1;
 
-    <script>
+            background: url('https://res.cloudinary.com/dvs3znyc7/image/upload/v1773998933/WhatsApp_Image_2026-03-20_at_2.57.47_PM_yenyfh.jpg');
 
-        $(document).ready(function(){
-            $("#notification").kendoNotification({
-                position: {
-                    pinned: true,
-                    top: 30,
-                    right: 30
-                },
-                autoHideAfter: 1500,
-                stacking: "down",
-                templates: [
-                    {
-                        type: "error",
-                        template: "<div class='k-notification-error'>#: message #</div>"
-                    }
-                ]
-            });
+            background-size: cover;       /* 🔥 fill entire area */
+            background-position: center;  /* center image */
+            background-repeat: no-repeat;
 
-            $("#loginForm").kendoForm({
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 
-                formData:{
-                    c_email:"",
-                    c_password:""
-                },
+<script>
+    $(document).ready(function () {
 
-                items:[
+        $("#notification").kendoNotification({
+            position: {
+                pinned: true,
+                top: 30,
+                right: 30
+            },
+            autoHideAfter: 1500
+        });
 
-                    {
-                        field:"email",
-                        label:"Email",
-                        validation:{ required: { message: "Email is required" }, email: { message: "Invalid email format" } },
-                        editor:function(container,options){
-                            $('<input required="required" name="'+options.field+'" type="email"/>')
+        $("#loginForm").kendoForm({
+
+            formData: {
+                c_email: "",
+                c_password: ""
+            },
+
+            items: [
+                {
+                    field: "email",
+                    label: "Email",
+                    validation: {
+                        required: { message: "Email is required" },
+                        email: { message: "Invalid email format" }
+                    },
+                    editor: function (container, options) {
+                        $('<input name="' + options.field + '" type="email"/>')
                             .appendTo(container)
                             .kendoTextBox({
-                                placeholder:"Enter your email"
+                                placeholder: "Enter your email"
                             });
+                    }
+                },
+                {
+                    field: "password",
+                    label: "Password",
+                    validation: {
+                        required: { message: "Password is required" }
+                    },
+                    editor: function (container, options) {
+                        $('<input name="' + options.field + '" type="password"/>')
+                            .appendTo(container)
+                            .kendoTextBox({
+                                placeholder: "Enter password"
+                            });
+                    }
+                }
+            ],
+
+            buttonsTemplate: `
+                <button type="submit" class="k-button k-primary w-100">
+                    LOGIN
+                </button>
+            `,
+
+            submit: function (e) {
+                e.preventDefault();
+
+                var formdata = {
+                    c_email: e.model.email,
+                    c_password: e.model.password
+                };
+
+                $.ajax({
+                    url: "/Auth/Login",
+                    method: "POST",
+                    data: JSON.stringify(formdata),
+                    contentType: "application/json",
+
+                    success: function (response) {
+
+                        if (response.success) {
+                            $("#notification").data("kendoNotification")
+                                .show("Login successful!", "success");
+
+                            sessionStorage.setItem("userRole", response.role);
+                            sessionStorage.setItem("userId", response.id);
+
+                            if (response.role === "Admin") {
+                                setTimeout(() => window.location.href = "/Admin/Dashboard", 1500);
+                            } else {
+                                setTimeout(() => window.location.href = "/Employee/Dashboard", 1500);
+                            }
+
+                        } else {
+                            $("#notification")
+                                .data("kendoNotification")
+                                .show("Invalid credentials", "error");
                         }
                     },
 
-                    {
-                        field:"password",
-                        label:"Password",
-                        validator:{required: { message: "Password is required" }},
-                        editor:function(container,options){
-                            $('<input required="required" name="'+options.field+'" type="password"/>')
-                            .appendTo(container)
-                            .kendoTextBox({
-                                placeholder:"Enter password"
-                            });
-                        }
+                    error: function () {
+                        $("#notification")
+                            .data("kendoNotification")
+                            .show("Login failed", "error");
                     }
-
-                ],
-
-                buttonsTemplate:`
-                    <button type="submit" class="k-button k-primary w-100">
-                        Login
-                    </button>
-                `,
-
-                submit:function(e){
-                    e.preventDefault();
-                        var formdata = {
-                            c_email: e.model.email,
-                            c_password: e.model.password
-                        }
-
-                        $.ajax({
-                            url: "/Auth/Login",
-                            method: "POST",
-                            data: JSON.stringify(formdata),
-                            contentType: "application/json",
-
-                            success:function(response){
-                                debugger;
-
-                                if (response.success) {
-                                    $("#notification").data("kendoNotification")
-                                    .show("Login successful!", "success");                                   
-                                    sessionStorage.setItem("userRole", response.role); // Store role in sessionStorage
-                                    sessionStorage.setItem("userId", response.id); // Store name in sessionStorage
-                                    if(response.role === "Admin"){
-                                        setTimeout(function(){
-                                            window.location.href = "/Admin/Dashboard";
-                                        }, 1500);
-                                    }else{
-                                        setTimeout(()=>window.location.href="/Employee/Dashboard",1500);
-                                    }
-
-                                } else {
-                                    $("#notification")
-                                        .data("kendoNotification")
-                                        .show({message:"Invalid credentials"},"error");
-                                }
-                            },
-
-                            error:function(xhr){
-                                var message = "Login failed";
-                                if (xhr.responseJSON && xhr.responseJSON.message)
-                                    message = xhr.responseJSON.message;
-
-                                $("#notification")
-                                    .data("kendoNotification")
-                                    .show({message:message},"error");
-                            }
-
-                    });    
-                }
-            });
+                });
+            }
         });
 
-    </script>
+    });
+</script>
 }

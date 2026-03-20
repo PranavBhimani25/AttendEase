@@ -1,207 +1,361 @@
 @{
-    ViewData["Title"] = "Register";
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Register";
 }
-<div class="auth-title">
-    AttendEase
-</div>
-<div class="auth-subtitle">
-    Employee Attendance System
-</div>
-<form id="registerForm"></form>
-<div class="auth-footer">
-    Already have an account?
-    <a href="/Auth/Login">Login</a>
+
+<div class="login-wrapper">
+    <div class="login-left">
+        </div>
+
+    <div class="login-right">
+        <div class="login-card registration-card">
+            <div class="user-icon">
+                <i class="fa fa-user-plus"></i>
+            </div>
+
+            <h2 class="welcome-text">CREATE ACCOUNT</h2>
+
+            <form id="registerForm"></form>
+
+            <div id="notification"></div>
+
+            <div class="register-text">
+                Already have an account?
+                <a href="/Auth/Login">Login</a>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div id="notification"></div>
-
-@section Scripts{
+@section Scripts {
     <style>
-        .auth-card{
-            width:auto;
-            height:  ;
-            background:white;
-            padding:40px;
-            border-radius:12px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.2);
+        /* Ensures the left side fills the space with your specific image */
+        .login-left {
+            flex: 1.2; /* Slightly wider left side for the illustration */
+            background: url('https://res.cloudinary.com/dvs3znyc7/image/upload/v1773998933/WhatsApp_Image_2026-03-20_at_2.57.47_PM_yenyfh.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
         }
+
+        /* Adjusting the card to handle two columns */
+        .registration-card {
+            width: 90%;
+            max-width: 650px; /* Wider card to fit two columns */
+            padding: 20px 30px;
+        }
+
+        /* Kendo Form Grid Layout Overrides */
+        .k-form-layout.k-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two equal columns */
+            gap: 15px 25px;
+        }
+
+        /* Make full-width items (like the button) span both columns */
+        .form-button-container {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .k-form-field {
+            margin-bottom: 0px !important;
+        }
+
+        /* Responsive: Stack columns on very small screens */
+        @@media (max-width: 768px) {
+            .k-form-layout.k-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-button-container {
+                grid-column: span 1;
+            }
+        }
+
+        /* Fix the Profile Image Upload button height and alignment */
+        .profile-upload-wrapper .k-upload {
+            background-color: #fff;
+            border: 1px solid #ced4da; /* Matches Kendo TextBox border */
+            border-radius: 20px;       /* Matches your rounded design */
+            padding: 2px 10px;
+            height: 38px;              /* Matches Full Name/Email height */
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-upload-wrapper .k-upload-button {
+            border: none;
+            background: none;
+            color: #6c757d;
+            font-size: 14px;
+            width: 100%;
+            text-align: left;
+            justify-content: flex-start;
+        }
+
+        /* Hide the 'Drop files here' text and status icons for a cleaner look */
+        .profile-upload-wrapper .k-dropzone-hint, 
+        .profile-upload-wrapper .k-upload-status {
+            display: none !important;
+        }
+
+        /* Ensures the REGISTER button spans the whole bottom row if needed */
+        .form-button-container {
+            grid-column: span 2;
+            padding-top: 15px;
+        }
+
+        /* Fix the Profile Image Upload container overflow */
+.profile-upload-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.profile-upload-wrapper .k-upload {
+    width: 100% !important;
+    background-color: #fff !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 20px !important;
+    height: 38px !important;
+    overflow: hidden; /* 🔥 Prevents internal elements from leaking out */
+}
+
+.profile-upload-wrapper .k-dropzone {
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    background: transparent !important;
+}
+
+/* Style the button inside the wrapper to look like a placeholder */
+.profile-upload-wrapper .k-upload-button {
+    border: none !important;
+    background: #e9ecef !important; /* Light gray like your input focus */
+    color: #495057 !important;
+    margin: 0 !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    padding: 0 15px !important;
+    font-size: 13px !important;
+}
+
+/* This is likely what is leaking out in your screenshot - we hide it */
+.profile-upload-wrapper .k-upload-status,
+.profile-upload-wrapper .k-upload-status-total {
+    display: none !important;
+}
+
+/* Ensure the text "No file chosen" stays inside */
+.profile-upload-wrapper .k-placeholder {
+    padding-left: 10px;
+    font-size: 13px;
+    color: #6c757d;
+}
     </style>
+
     <script>
-        $(document).ready(function(){
-            $("#notification").kendoNotification({
-                postion: {
-                    pinned: true,
-                    top: 30,
-                    right: 30
-                },
-                autoHideAfter: 1500,
-                stacking: "down",
-                templates:[
-                    {
-                        type:"error",
-                        template:"<div class='k-notification-error'>#: message #</div>"
-                    }
-                ]
-            });
+$(document).ready(function () {
 
-            $("#registerForm").kendoForm({
-                items:[
-                {
-                    field:"name",
-                    label:"Full Name",
-                    validation:{ required: { message: "Full name is required" } },
-                    editor:function(container,options){
-                        $('<input required="required" name="'+options.field+'" type="text"/>')
-                        .appendTo(container)
-                        .kendoTextBox({
-                            placeholder:"Enter your full name"
-                        })
-                    }
-                },
-                {
-                    field:"email",
-                    label:"Email",
-                    validation:{ required: { message: "Email is required" }, email: { message: "Invalid email format" } },
-                    editor:function(container,options){
-                        $('<input required="required" name="'+options.field+'" type="email"/>')
-                        .appendTo(container)
-                        .kendoTextBox({
-                            placeholder:"Enter your email"
-                        })
-                    }
-                },
-                {
-                    field:"password",
-                    label:"Password",
-                    validation:{ required: { message: "Password is required" }, minLength: { message: "Password must be at least 6 characters", value: 6 } },
-                    editor:function(container,options){
-                        $('<input required="required" name="'+options.field+'" type="password"/>')
-                        .appendTo(container)
-                        .kendoTextBox({
-                            placeholder:"Enter your password"
-                        })
-                    }
-                },
-                {
-                    field:"confirm_password",
-                    label:"Confirm Password",
-                    validation:{ required: { message: "Please confirm your password" }, minLength: { message: "Password must be at least 6 characters", value: 6 } },
-                    editor:function(container,options){
-                        $('<input required="required" name="'+options.field+'" type="password"/>')
-                        .appendTo(container)
-                        .kendoTextBox({
-                            placeholder:"Confirm your password"
-                        })
-                    }
-                },
-                {
-                    field: "gender",
-                    label: "Gender",
-                    editor: function (container, options){
-                        $("<select name='" + options.field + "'></select>")
-                            .appendTo(container)
-                            .kendoDropDownList({
-                                optionLabel: "Select gender",
-                                dataTextField: "text",
-                                dataValueField: "value",
-                                dataSource: [
-                                    { text: "Male", value: "Male" },
-                                    { text: "Female", value: "Female" },
-                                    { text: "Other", value: "Other" }
-                                ]
-                            });
-                    }
-                },
-                {
-                        field: "profile_image",
-                        label: { text: "Profile Image" },
-                        editor: function (container, options) {
-                            $("<input type='file' name='" + options.field + "' />")
-                                .appendTo(container)
-                                .kendoUpload({
-                                    async: {
-                                        @* saveUrl: "/ContactSingle/UploadImage",  // optional *@
-                                        autoUpload: false
-                                    },
-                                    multiple: false,
-                                    validation: {
-                                        allowedExtensions: [".jpg", ".jpeg", ".png"],
-                                        maxFileSize: 2097152 // 2MB
-                                    }
-                                });
-                        }
-                    }
-                ],
-                buttonsTemplate:`
-                    <button type="submit" class="k-button k-primary w-100">
-                        Register
-                    </button>
-                `,
-                submit:function(e){
-                    e.preventDefault();
-                    var formdata = new FormData(); 
-                    formdata.append("c_name", e.model.name);
-                    formdata.append("c_email", e.model.email);
-                    formdata.append("c_password", e.model.password);
-                    @* formdata.append("c_confirm_password", e.model.confirm_password); *@
-                    @* formdata.append("c_gender", e.model.gender); *@
+    // ✅ Notification
+    $("#notification").kendoNotification({
+        position: { pinned: true, top: 30, right: 30 },
+        autoHideAfter: 2000,
+        stacking: "down",
+        templates: [
+            {
+                type: "error",
+                template: "<div class='k-notification-error'>#: message #</div>"
+            },
+            {
+                type: "success",
+                template: "<div class='k-notification-success'>#: message #</div>"
+            }
+        ]
+    });
 
-                    var genderValue = $("select[name='gender']").data("kendoDropDownList").value();
-                    formdata.append("c_gender", genderValue);
-                    console.log(genderValue);
+    // ✅ Form
+    $("#registerForm").kendoForm({
+        layout: "grid",
+        grid: { cols: 2, gutter: 20 },
 
-                    @* var files = $("input[name='profile_image']").get(0).files;
-                    if(files.length > 0){
-                        formdata.append("c_profileimage", files[0]);
-                    } *@
-                    var files = $("input[name='profile_image']").get(0).files;
-                    if (files.length > 0) {
-                        formdata.append("c_profileimage", files[0]);
-                    }
+        formData: {
+            name: "",
+            email: "",
+            password: "",
+            confirm_password: "",
+            gender: "",
+            profile_image: ""
+        },
 
-                    $.ajax({
-                        url:"/Auth/Register",
-                        method:"POST",
-                        data:formdata,
-                        contentType: false,
-                        processData: false,
-                        success:function(response){
-                            if(response.success){
-                                $("#notification").data("kendoNotification").show("Registration successful! Redirecting to login..."    , "success");
-                                setTimeout(function(){
-                                    window.location.href = "/Auth/Login";
-                                }, 1500);
-                            } else {
-                                $("#notification").data("kendoNotification").show({ message : response.message || "Registration failed"}, "error");
-                            }
+        items: [
+            {
+                field: "name",
+                label: "Full Name",
+                validation: { required: true },
+                editor: "TextBox"
+            },
+            {
+                field: "email",
+                label: "Email",
+                validation: { required: true, email: true },
+                editor: "TextBox"
+            },
+            {
+                field: "password",
+                label: "Password",
+                validation: { required: true },
+                editor: function (container, options) {
+                    $('<input type="password" name="' + options.field + '" />')
+                        .appendTo(container)
+                        .kendoTextBox();
+                }
+            },
+            {
+                field: "confirm_password",
+                label: "Confirm Password",
+                validation: { required: true },
+                editor: function (container, options) {
+                    $('<input type="password" name="' + options.field + '" />')
+                        .appendTo(container)
+                        .kendoTextBox();
+                }
+            },
+            {
+                field: "gender",
+                label: "Gender",
+                editor: function (container, options) {
+                    $("<select name='" + options.field + "'></select>")
+                        .appendTo(container)
+                        .kendoDropDownList({
+                            optionLabel: "Select gender",
+                            dataTextField: "text",
+                            dataValueField: "value",
+                            dataSource: [
+                                { text: "Male", value: "Male" },
+                                { text: "Female", value: "Female" },
+                                { text: "Other", value: "Other" }
+                            ]
+                        });
+                }
+            },
+            {
+                field: "profile_image",
+                label: "Profile Image",
+                editor: function (container, options) {
+                    $('<div class="profile-upload-wrapper">')
+                        .appendTo(container)
+                        .append('<input type="file" name="profile_image" id="profileUpload" />');
+
+                    $("#profileUpload").kendoUpload({
+                        async: { autoUpload: false },
+                        multiple: false,
+                        showFileList: false,
+                        validation: {
+                            allowedExtensions: [".jpg", ".jpeg", ".png"],
+                            maxFileSize: 2097152
                         },
-                        error:function(){
-                            $("#notification").data("kendoNotification").show({message:"An error occurred. Please try again."}, "error");
+                        localization: {
+                            select: "Browse..."
+                        },
+                        select: function (e) {
+                            var fileName = e.files[0].name;
+                            $(".k-upload-button span").text("Selected: " + fileName);
                         }
                     });
                 }
-            });
-            
-            var validator = $("#registerForm").kendoValidator({
-                rules: {
-                    passwordMatch: function(input) {
-                        if (input.attr("name") === "confirm_password") {
+            }
+        ],
 
-                            var password = $("input[name='password']").val();
-                            var confirmPassword = input.val();
+        buttonsTemplate: `
+            <div class="form-button-container">
+                <button type="submit" class="k-button k-primary w-100" style="height:45px;font-weight:bold;">
+                    REGISTER
+                </button>
+            </div>
+        `,
 
-                            return password === confirmPassword;
-                        }
+        submit: function (e) {
+            e.preventDefault();
 
-                        return true;
+            var validator = $("#registerForm").data("kendoValidator");
+            if (!validator.validate()) return;
+
+            var formdata = new FormData();
+
+            // ✅ Append fields
+            formdata.append("c_name", e.model.name);
+            formdata.append("c_email", e.model.email);
+            formdata.append("c_password", e.model.password);
+
+            // ✅ Gender
+            var genderValue = $("select[name='gender']").data("kendoDropDownList").value();
+            formdata.append("c_gender", genderValue);
+
+            // ✅ Image (FIXED)
+            var upload = $("#profileUpload").data("kendoUpload");
+
+            if (upload) {
+                var input = upload.wrapper.find("input[type='file']")[0];
+                if (input.files.length > 0) {
+                    formdata.append("c_profileimage", input.files[0]);
+                }
+            }
+
+            // ✅ AJAX
+            $.ajax({
+                url: "/Auth/Register",
+                method: "POST",
+                data: formdata,
+                contentType: false,
+                processData: false,
+
+                success: function (response) {
+                    if (response.success) {
+
+                        $("#notification").data("kendoNotification")
+                            .show({ message: "Registration successful! Redirecting..." }, "success");
+
+                        setTimeout(function () {
+                            window.location.href = "/Auth/Login";
+                        }, 1500);
+
+                    } else {
+                        $("#notification").data("kendoNotification")
+                            .show({ message: response.message || "Registration failed" }, "error");
                     }
                 },
-                messages: {
-                    passwordMatch: "Passwords do not match"
-                }
-            }).data("kendoValidator");
 
-        })
-    </script>
+                error: function (xhr) {
+                    var msg = "Registration failed";
+
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    }
+
+                    $("#notification").data("kendoNotification")
+                        .show({ message: msg }, "error");
+                }
+            });
+        }
+    });
+
+    // ✅ Password match validation
+    $("#registerForm").kendoValidator({
+        rules: {
+            passwordMatch: function (input) {
+                if (input.attr("name") === "confirm_password") {
+                    return input.val() === $("input[name='password']").val();
+                }
+                return true;
+            }
+        },
+        messages: {
+            passwordMatch: "Passwords do not match"
+        }
+    });
+
+});
+</script>
 }

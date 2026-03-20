@@ -18,13 +18,15 @@ namespace MVCAttendEase.Controllers
         private readonly MailService _mailService;
         private readonly IAuthInterface _auth;
         private readonly ILogger<AuthController> _logger;
+        private readonly ElasticsearchService _elastic;
 
-        public AuthController(ILogger<AuthController> logger, IAuthInterface auth, CloudinaryService cloudinaryService, MailService mailService)
+        public AuthController(ILogger<AuthController> logger, IAuthInterface auth, CloudinaryService cloudinaryService, MailService mailService, ElasticsearchService elastic)
         {
             _logger = logger;
             _auth = auth;
             _cloudinaryService = cloudinaryService;
             _mailService = mailService;
+            _elastic = elastic;
         }
 
         public IActionResult Login()
@@ -76,9 +78,33 @@ namespace MVCAttendEase.Controllers
                 model.ProfileImageUrl = await _cloudinaryService.UploadImageAsync(model.c_profileimage);
             }
 
-            var employee = await _auth.Register(model);
-            if(employee > 0)
+            var employeeId = await _auth.Register(model);
+            if(employeeId > 0)
             {
+                try
+                {
+                    var employeeDoc = new EmployeeIndexDocument
+                    {
+                        EmpId = employeeId,
+                        Name = model.c_name,
+                        Email = model.c_email,
+                        Gender = model.c_gender,
+                        Status = "Active",
+                        Role = "Employee",
+                        TotalWorkingHours = 0,
+                        TotalDaysPresent = 0,
+                        LateInCount = 0,
+                        EarlyOutCount = 0,
+                        LastAttendDate = DateTime.Now
+                    };
+
+                    await _elastic.IndexWithIdAsync("employee_index", employeeId.ToString(), employeeDoc);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Employee {EmpId} created in DB but failed to index in Elasticsearch", employeeId);
+                }
+
                 string body = $@"Dear {model.c_name}, <br><br>
 
                                     Thank you for registering with our Attendance Management System. <br>
@@ -98,7 +124,14 @@ namespace MVCAttendEase.Controllers
                                     ";
                 string subject = "Registration Successfully";
 
-                _mailService.SendEmail(model.c_email, subject, body);
+                try
+                {
+                    _mailService.SendEmail(model.c_email, subject, body);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Employee {EmpId} registered but welcome email could not be sent", employeeId);
+                }
 
                 return Ok(new { message = "Registration successful", success = true });
             }

@@ -71,7 +71,9 @@ namespace Repositories.Implementation
 
         public async Task<int> Register(RegisterEmployeeModel model)
         {
-            var query = "INSERT INTO t_employees (c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role) VALUES (@Name, @Email, @Password, @Gender, @Status, @ProfileImage, @Role) ";
+            var query = @"INSERT INTO t_employees (c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role)
+                          VALUES (@Name, @Email, @Password, @Gender, @Status, @ProfileImage, @Role)
+                          RETURNING c_empid";
             try
             {
                 using var command = new NpgsqlCommand(query, _connection);
@@ -84,8 +86,8 @@ namespace Repositories.Implementation
                 command.Parameters.AddWithValue("@Role", NpgsqlTypes.NpgsqlDbType.Varchar, "Employee");
 
                 await _connection.OpenAsync();
-                var result = await command.ExecuteNonQueryAsync();
-                return result;
+                var result = await command.ExecuteScalarAsync();
+                return result == null ? -1 : Convert.ToInt32(result);
             }
             catch(Exception ex)
             {

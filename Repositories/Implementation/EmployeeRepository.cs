@@ -363,6 +363,9 @@ namespace Repositories.Implementation
 
             // using (var conn = new NpgsqlConnection(_conn))
             // {
+            if (_conn.State != System.Data.ConnectionState.Open)
+                    _conn.Open();
+
 
                 string query = @"SELECT * FROM t_attendance
                                  WHERE c_empid=@id
@@ -413,8 +416,7 @@ namespace Repositories.Implementation
                             });
                         }
                     }
-                }
-            
+                }            
 
             return list;
         }

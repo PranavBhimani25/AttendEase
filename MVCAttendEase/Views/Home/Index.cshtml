@@ -1,8 +1,1263 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- ══════════════════════════════════════════════════
+     AttendEase Landing Page
+     Design system: matches Login / Register / ForgotPassword
+     Font: Poppins | Colors: #6366F1 / #8B5CF6 / #EC4899
+     Left panel gradient: #312E81 → #4F46E5 → #7C3AED → #9D174D
+══════════════════════════════════════════════════ -->
+
+<!-- ─── NAVBAR ─── -->
+<nav class="lp-nav" id="lpNav">
+    <div class="lp-nav-inner">
+        <a href="#hero" class="lp-logo">
+            <div class="lp-logo-icon">
+                <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+                    <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.2"/>
+                    <path d="M14 6L20 10V18L14 22L8 18V10L14 6Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                    <circle cx="14" cy="14" r="3" fill="white" fill-opacity="0.6"/>
+                </svg>
+            </div>
+            <span class="lp-logo-text">AttendEase</span>
+        </a>
+        <ul class="lp-nav-links" id="navLinks">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#preview">Dashboard</a></li>
+            <li><a href="#testimonials">Reviews</a></li>
+            <li><a href="/Auth/Login" class="nav-login">Login</a></li>
+            <li><a href="/Auth/Register" class="nav-register">Register</a></li>
+        </ul>
+        <button class="lp-hamburger" id="hamburgerBtn" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</nav>
+
+<!-- Mobile Nav Overlay -->
+<div class="mobile-overlay" id="mobileOverlay">
+    <button class="mobile-close" id="mobileClose"><i class="fa fa-times"></i></button>
+    <a href="#hero" class="mob-link">Home</a>
+    <a href="#features" class="mob-link">Features</a>
+    <a href="#how" class="mob-link">How It Works</a>
+    <a href="#preview" class="mob-link">Dashboard</a>
+    <a href="/Auth/Login" class="mob-link">Login</a>
+    <a href="/Auth/Register" class="mob-btn">Register Free</a>
 </div>
+
+<!-- ─── HERO ─── -->
+<section class="lp-hero" id="hero">
+    <!-- Blobs matching auth-left -->
+    <div class="hero-blob b1"></div>
+    <div class="hero-blob b2"></div>
+    <div class="hero-blob b3"></div>
+
+    <div class="lp-container">
+        <div class="hero-inner">
+            <!-- Left Text -->
+            <div class="hero-left">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    Now with real-time analytics &amp; PDF reports
+                </div>
+                <h1 class="hero-h1">
+                    Smart Attendance<br>
+                    Management<br>
+                    <span class="hero-grad">Made Easy</span>
+                </h1>
+                <p class="hero-sub">
+                    Track employee check-ins, manage remote and field teams, generate instant reports, and boost productivity — all from one beautiful dashboard.
+                </p>
+                <div class="hero-ctas">
+                    <a href="/Auth/Register" class="btn-primary-lp">
+                        <i class="fa fa-rocket"></i> Get Started Free
+                    </a>
+                    <a href="/Auth/Login" class="btn-outline-lp">
+                        <i class="fa fa-right-to-bracket"></i> Login
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hstat">
+                        <span class="hstat-num">54+</span>
+                        <span class="hstat-label">Active Employees</span>
+                    </div>
+                    <div class="hstat-divider"></div>
+                    <div class="hstat">
+                        <span class="hstat-num">99.9%</span>
+                        <span class="hstat-label">Uptime</span>
+                    </div>
+                    <div class="hstat-divider"></div>
+                    <div class="hstat">
+                        <span class="hstat-num">3 min</span>
+                        <span class="hstat-label">Avg Setup</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Right: Dashboard Mockup -->
+            <div class="hero-right">
+                <!-- Floating notification chip -->
+                <div class="float-chip fc-top">
+                    <div class="fc-icon" style="background:rgba(110,231,183,.18);color:#10B981"><i class="fa fa-check"></i></div>
+                    <div>
+                        <div class="fc-name">Rahul checked in</div>
+                        <div class="fc-time">Today, 09:02 AM</div>
+                    </div>
+                </div>
+                <!-- Main mockup window -->
+                <div class="mockup-shell">
+                    <div class="mockup-titlebar">
+                        <div class="tb-dots">
+                            <span style="background:#FF5F56"></span>
+                            <span style="background:#FFBD2E"></span>
+                            <span style="background:#27C93F"></span>
+                        </div>
+                        <div class="tb-url">
+                            <i class="fa fa-lock" style="color:#10B981;font-size:9px"></i>
+                            attendease.app/admin
+                        </div>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mb-header">
+                            <span class="mb-title">Admin Dashboard</span>
+                            <span class="mb-month">March 2025</span>
+                        </div>
+                        <!-- KPI row -->
+                        <div class="mb-kpis">
+                            <div class="mb-kpi">
+                                <div class="kpi-val" style="color:#6366F1">48</div>
+                                <div class="kpi-lbl">Present</div>
+                            </div>
+                            <div class="mb-kpi">
+                                <div class="kpi-val" style="color:#10B981">96%</div>
+                                <div class="kpi-lbl">Rate</div>
+                            </div>
+                            <div class="mb-kpi">
+                                <div class="kpi-val" style="color:#F59E0B">3</div>
+                                <div class="kpi-lbl">Late</div>
+                            </div>
+                        </div>
+                        <!-- Mini bar chart -->
+                        <div class="mb-chart">
+                            <div class="mb-chart-label">Weekly Attendance</div>
+                            <div class="mini-bars">
+                                <div class="mini-bar" style="height:55%"></div>
+                                <div class="mini-bar" style="height:80%"></div>
+                                <div class="mini-bar hi" style="height:65%"></div>
+                                <div class="mini-bar" style="height:92%"></div>
+                                <div class="mini-bar hi" style="height:75%"></div>
+                                <div class="mini-bar" style="height:50%"></div>
+                                <div class="mini-bar" style="height:42%"></div>
+                            </div>
+                        </div>
+                        <!-- Employee list -->
+                        <div class="mb-list">
+                            <div class="mb-row">
+                                <div class="mb-av" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">RK</div>
+                                <span class="mb-name">Rahul K.</span>
+                                <span class="mb-status present">Present</span>
+                                <span class="mb-time">09:01</span>
+                            </div>
+                            <div class="mb-row">
+                                <div class="mb-av" style="background:linear-gradient(135deg,#EC4899,#F97316)">SP</div>
+                                <span class="mb-name">Sneha P.</span>
+                                <span class="mb-status late">Late</span>
+                                <span class="mb-time">10:14</span>
+                            </div>
+                            <div class="mb-row">
+                                <div class="mb-av" style="background:linear-gradient(135deg,#06B6D4,#10B981)">AM</div>
+                                <span class="mb-name">Arjun M.</span>
+                                <span class="mb-status absent">Absent</span>
+                                <span class="mb-time">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating report chip -->
+                <div class="float-chip fc-bot">
+                    <div class="fc-icon" style="background:rgba(99,102,241,.18);color:#6366F1"><i class="fa fa-chart-bar"></i></div>
+                    <div>
+                        <div class="fc-name">Monthly report ready</div>
+                        <div class="fc-time">96% attendance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── TRUSTED BY STRIP ─── -->
+<div class="trust-strip">
+    <div class="lp-container">
+        <span class="trust-label">Trusted by teams using</span>
+        <div class="trust-pills">
+            <div class="trust-pill"><i class="fa fa-database"></i> PostgreSQL</div>
+            <div class="trust-pill"><i class="fa fa-search"></i> Elasticsearch</div>
+            <div class="trust-pill"><i class="fa fa-cloud"></i> Cloudinary</div>
+            <div class="trust-pill"><i class="fa fa-envelope"></i> SMTP Mail</div>
+            <div class="trust-pill"><i class="fa fa-bolt"></i> Redis Cache</div>
+            <div class="trust-pill"><i class="fa fa-arrows-rotate"></i> RabbitMQ</div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── FEATURES ─── -->
+<section class="lp-section" id="features">
+    <div class="lp-container">
+        <div class="sec-head">
+            <div class="sec-label"><span></span> Features</div>
+            <h2 class="sec-title">Everything your team needs,<br>nothing it doesn't</h2>
+            <p class="sec-sub">Built for modern workplaces — office, remote, or field.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feat-card fade-up">
+                <div class="feat-icon" style="background:rgba(99,102,241,.12);color:#6366F1">
+                    <i class="fa fa-clock"></i>
+                </div>
+                <h3 class="feat-title">Attendance Tracking</h3>
+                <p class="feat-desc">Precision clock-in / clock-out with timestamps. Real-time status for every employee on one screen.</p>
+                <div class="feat-pill"><span class="pill-dot green"></span>Live updates</div>
+            </div>
+            <div class="feat-card fade-up" style="animation-delay:.08s">
+                <div class="feat-icon" style="background:rgba(139,92,246,.12);color:#8B5CF6">
+                    <i class="fa fa-chart-pie"></i>
+                </div>
+                <h3 class="feat-title">Admin Dashboard</h3>
+                <p class="feat-desc">At-a-glance KPIs, attendance trends, downloadable reports, and full employee oversight.</p>
+                <div class="feat-pill"><span class="pill-dot purple"></span>Full analytics</div>
+            </div>
+            <div class="feat-card fade-up" style="animation-delay:.16s">
+                <div class="feat-icon" style="background:rgba(236,72,153,.1);color:#EC4899">
+                    <i class="fa fa-user-circle"></i>
+                </div>
+                <h3 class="feat-title">Employee Profiles</h3>
+                <p class="feat-desc">Detailed profiles with photo, attendance history, work patterns, and performance stats.</p>
+                <div class="feat-pill"><span class="pill-dot pink"></span>Profile photos</div>
+            </div>
+            <div class="feat-card fade-up" style="animation-delay:.24s">
+                <div class="feat-icon" style="background:rgba(6,182,212,.1);color:#06B6D4">
+                    <i class="fa fa-list-check"></i>
+                </div>
+                <h3 class="feat-title">Task Tracking</h3>
+                <p class="feat-desc">Log task type per session — Developing, Designing, or Research — attached to each attendance record.</p>
+                <div class="feat-pill"><span class="pill-dot green"></span>3 task types</div>
+            </div>
+            <div class="feat-card fade-up" style="animation-delay:.32s">
+                <div class="feat-icon" style="background:rgba(16,185,129,.1);color:#10B981">
+                    <i class="fa fa-globe"></i>
+                </div>
+                <h3 class="feat-title">Work Type Support</h3>
+                <p class="feat-desc">Office, Remote, and Field — flexible modes for today's hybrid-first workforce with full reporting per type.</p>
+                <div class="feat-pill"><span class="pill-dot purple"></span>Hybrid ready</div>
+            </div>
+            <div class="feat-card fade-up" style="animation-delay:.4s">
+                <div class="feat-icon" style="background:rgba(245,158,11,.1);color:#F59E0B">
+                    <i class="fa fa-file-pdf"></i>
+                </div>
+                <h3 class="feat-title">PDF Reports</h3>
+                <p class="feat-desc">Generate and email monthly attendance PDFs with one click. Admins can send reports directly to employees.</p>
+                <div class="feat-pill"><span class="pill-dot pink"></span>Email delivery</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="lp-section lp-how" id="how">
+    <div class="lp-container">
+        <div class="sec-head text-center">
+            <div class="sec-label justify-center"><span></span> How It Works</div>
+            <h2 class="sec-title">Up and running in minutes</h2>
+            <p class="sec-sub mx-auto">Three simple steps from zero to a fully tracked, analytics-ready team.</p>
+        </div>
+        <div class="steps-row">
+            <div class="step-card fade-up">
+                <div class="step-num">
+                    <div class="step-circle">
+                        <i class="fa fa-user-plus"></i>
+                    </div>
+                    <div class="step-line"></div>
+                </div>
+                <h3 class="step-title">1. Register</h3>
+                <p class="step-desc">Create your account, upload your profile photo, and set preferences. An admin activates your account — you're in.</p>
+                <a href="/Auth/Register" class="step-link">Create account <i class="fa fa-arrow-right"></i></a>
+            </div>
+            <div class="step-card fade-up" style="animation-delay:.1s">
+                <div class="step-num">
+                    <div class="step-circle" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">
+                        <i class="fa fa-fingerprint"></i>
+                    </div>
+                    <div class="step-line"></div>
+                </div>
+                <h3 class="step-title">2. Login &amp; Mark Attendance</h3>
+                <p class="step-desc">Log in daily, choose your work type and task, then clock in. Clock out when your shift ends — that's it.</p>
+                <a href="/Auth/Login" class="step-link">Login now <i class="fa fa-arrow-right"></i></a>
+            </div>
+            <div class="step-card fade-up" style="animation-delay:.2s">
+                <div class="step-num">
+                    <div class="step-circle" style="background:linear-gradient(135deg,#EC4899,#F97316)">
+                        <i class="fa fa-chart-line"></i>
+                    </div>
+                </div>
+                <h3 class="step-title">3. View Reports</h3>
+                <p class="step-desc">Access monthly summaries, weekly trends, and export PDF reports. Admins get full visibility; employees see their own.</p>
+                <a href="/Auth/Login" class="step-link">See demo <i class="fa fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── DASHBOARD PREVIEW ─── -->
+<section class="lp-section lp-preview" id="preview">
+    <div class="lp-container">
+        <div class="sec-head text-center">
+            <div class="sec-label justify-center"><span></span> Dashboard Preview</div>
+            <h2 class="sec-title">Your command center for<br>workforce attendance</h2>
+            <p class="sec-sub mx-auto">Every metric you need, exactly where you expect it. Built for clarity.</p>
+        </div>
+        <!-- Full admin dashboard mockup -->
+        <div class="big-mockup fade-up">
+            <div class="bm-titlebar">
+                <div class="tb-dots">
+                    <span style="background:#FF5F56"></span>
+                    <span style="background:#FFBD2E"></span>
+                    <span style="background:#27C93F"></span>
+                </div>
+                <div class="tb-url">
+                    <i class="fa fa-lock" style="color:#10B981;font-size:10px"></i>
+                    attendease.app/admin/dashboard
+                </div>
+                <div style="flex:0 0 80px"></div>
+            </div>
+            <div class="bm-body">
+                <!-- Sidebar -->
+                <div class="bm-sidebar">
+                    <div class="bms-logo">
+                        <div class="bms-icon"></div>
+                        <span class="bms-name">AttendEase</span>
+                    </div>
+                    <div class="bms-nav">
+                        <div class="bms-item active"><i class="fa fa-th-large"></i> Dashboard</div>
+                        <div class="bms-item"><i class="fa fa-users"></i> Employees</div>
+                        <div class="bms-item"><i class="fa fa-calendar-check"></i> Attendance</div>
+                        <div class="bms-item"><i class="fa fa-chart-bar"></i> Reports</div>
+                        <div class="bms-item"><i class="fa fa-magnifying-glass"></i> Search</div>
+                        <div class="bms-item"><i class="fa fa-gear"></i> Settings</div>
+                    </div>
+                </div>
+                <!-- Main -->
+                <div class="bm-main">
+                    <!-- KPI Row -->
+                    <div class="bm-kpi-row">
+                        <div class="bm-kpi">
+                            <div class="bk-label">Total Employees</div>
+                            <div class="bk-val">54</div>
+                            <div class="bk-change up"><i class="fa fa-arrow-up"></i> +3 this month</div>
+                        </div>
+                        <div class="bm-kpi">
+                            <div class="bk-label">Present Today</div>
+                            <div class="bk-val" style="color:#10B981">48</div>
+                            <div class="bk-change up"><i class="fa fa-arrow-up"></i> 88.9% rate</div>
+                        </div>
+                        <div class="bm-kpi">
+                            <div class="bk-label">Absent Today</div>
+                            <div class="bk-val" style="color:#EF4444">6</div>
+                            <div class="bk-change dn"><i class="fa fa-arrow-down"></i> ↑2 from avg</div>
+                        </div>
+                        <div class="bm-kpi">
+                            <div class="bk-label">Late Arrivals</div>
+                            <div class="bk-val" style="color:#F59E0B">3</div>
+                            <div class="bk-change up">Avg 09:18 AM</div>
+                        </div>
+                    </div>
+                    <!-- Charts row -->
+                    <div class="bm-charts">
+                        <div class="bm-chart-card">
+                            <div class="bcc-title">Weekly Attendance <span>This Week</span></div>
+                            <div class="bar-chart">
+                                <div class="bc-bar" style="height:62%"></div>
+                                <div class="bc-bar" style="height:85%"></div>
+                                <div class="bc-bar hi" style="height:72%"></div>
+                                <div class="bc-bar" style="height:96%"></div>
+                                <div class="bc-bar hi" style="height:80%"></div>
+                                <div class="bc-bar" style="height:38%;opacity:.35"></div>
+                                <div class="bc-bar" style="height:28%;opacity:.35"></div>
+                            </div>
+                            <div class="bc-labels">
+                                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                            </div>
+                        </div>
+                        <div class="bm-chart-card">
+                            <div class="bcc-title">Work Type <span>March</span></div>
+                            <div class="donut-row">
+                                <div class="donut-ring"></div>
+                                <div class="donut-legend">
+                                    <div class="dl-row"><span class="dl-dot" style="background:#6366F1"></span>Office (68%)</div>
+                                    <div class="dl-row"><span class="dl-dot" style="background:#EC4899"></span>Remote (16%)</div>
+                                    <div class="dl-row"><span class="dl-dot" style="background:#94A3B8"></span>Field (16%)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table -->
+                    <div class="bm-table-wrap">
+                        <div class="bcc-title" style="padding:12px 16px;border-bottom:1px solid #E2E8F0">Recent Attendance <span>Today's log</span></div>
+                        <table class="bm-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Clock In</th>
+                                    <th>Clock Out</th>
+                                    <th>Status</th>
+                                    <th>Work Type</th>
+                                    <th>Task</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div class="t-emp"><div class="t-av" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">RK</div>Rahul Kumar</div></td>
+                                    <td>09:01 AM</td><td>06:02 PM</td>
+                                    <td><span class="t-badge present">Present</span></td>
+                                    <td><span class="t-badge office">Office</span></td>
+                                    <td>Developing</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="t-emp"><div class="t-av" style="background:linear-gradient(135deg,#EC4899,#F97316)">SP</div>Sneha Patel</div></td>
+                                    <td>10:14 AM</td><td>07:20 PM</td>
+                                    <td><span class="t-badge late">Late</span></td>
+                                    <td><span class="t-badge remote">Remote</span></td>
+                                    <td>Designing</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="t-emp"><div class="t-av" style="background:linear-gradient(135deg,#94A3B8,#64748B)">AM</div>Arjun Mehta</div></td>
+                                    <td>—</td><td>—</td>
+                                    <td><span class="t-badge absent">Absent</span></td>
+                                    <td>—</td><td>—</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="t-emp"><div class="t-av" style="background:linear-gradient(135deg,#06B6D4,#10B981)">PS</div>Priya Shah</div></td>
+                                    <td>08:55 AM</td><td>05:58 PM</td>
+                                    <td><span class="t-badge present">Present</span></td>
+                                    <td><span class="t-badge field">Field</span></td>
+                                    <td>Research</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section class="lp-section" id="testimonials">
+    <div class="lp-container">
+        <div class="sec-head text-center">
+            <div class="sec-label justify-center"><span></span> Testimonials</div>
+            <h2 class="sec-title">Loved by teams everywhere</h2>
+            <p class="sec-sub mx-auto">What managers and employees say about AttendEase.</p>
+        </div>
+        <div class="testi-grid">
+            <div class="testi-card fade-up">
+                <div class="testi-stars">
+                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                </div>
+                <p class="testi-text">"AttendEase completely replaced our spreadsheet chaos. The admin dashboard is incredibly intuitive and the PDF reports save us hours every month."</p>
+                <div class="testi-author">
+                    <div class="testi-av" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">NP</div>
+                    <div>
+                        <div class="testi-name">Neha Parikh</div>
+                        <div class="testi-role">HR Manager, TechNova Pvt. Ltd.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card fade-up" style="animation-delay:.1s">
+                <div class="testi-stars">
+                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                </div>
+                <p class="testi-text">"As a remote employee, I love how seamlessly I can clock in, log my task type, and view my monthly stats. It's polished and fast."</p>
+                <div class="testi-author">
+                    <div class="testi-av" style="background:linear-gradient(135deg,#06B6D4,#6366F1)">RD</div>
+                    <div>
+                        <div class="testi-name">Raj Desai</div>
+                        <div class="testi-role">Senior Developer, CloudBase</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card fade-up" style="animation-delay:.2s">
+                <div class="testi-stars">
+                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-stroke"></i>
+                </div>
+                <p class="testi-text">"The Elasticsearch-powered search is a game-changer. Finding any employee's attendance history across months takes just seconds."</p>
+                <div class="testi-author">
+                    <div class="testi-av" style="background:linear-gradient(135deg,#EC4899,#F97316)">AK</div>
+                    <div>
+                        <div class="testi-name">Ananya Kapoor</div>
+                        <div class="testi-role">Operations Lead, FinServe</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<section class="lp-cta">
+    <div class="lp-container">
+        <div class="cta-card fade-up">
+            <div class="cta-blob c1"></div>
+            <div class="cta-blob c2"></div>
+            <h2 class="cta-title">Ready to modernize your<br>attendance management?</h2>
+            <p class="cta-sub">Join teams already using AttendEase to save time, reduce errors, and gain real insight.</p>
+            <div class="cta-btns">
+                <a href="/Auth/Register" class="btn-primary-lp"><i class="fa fa-rocket"></i> Start for Free</a>
+                <a href="/Auth/Login" class="btn-outline-lp btn-light"><i class="fa fa-right-to-bracket"></i> Login to Dashboard</a>
+            </div>
+            <div class="cta-pills">
+                <div class="pill"><span class="pill-dot green"></span>No credit card</div>
+                <div class="pill"><span class="pill-dot purple"></span>Free forever plan</div>
+                <div class="pill"><span class="pill-dot pink"></span>Setup in 3 mins</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="lp-footer">
+    <div class="lp-container">
+        <div class="footer-top">
+            <div class="footer-brand-col">
+                <a href="#hero" class="lp-logo" style="margin-bottom:14px;display:inline-flex">
+                    <div class="lp-logo-icon" style="background:linear-gradient(135deg,#6366F1,#EC4899)">
+                        <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
+                            <path d="M14 6L20 10V18L14 22L8 18V10L14 6Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                            <circle cx="14" cy="14" r="3" fill="white" fill-opacity="0.6"/>
+                        </svg>
+                    </div>
+                    <span class="lp-logo-text" style="color:#0F172A">AttendEase</span>
+                </a>
+                <p class="footer-desc">Smart, beautiful attendance management for modern teams. Built with Elasticsearch, Redis, RabbitMQ, and PostgreSQL.</p>
+                <div class="footer-socials">
+                    <a href="#" class="soc-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="soc-btn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="soc-btn"><i class="fab fa-github"></i></a>
+                    <a href="#" class="soc-btn"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Product</div>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#preview">Dashboard</a></li>
+                    <li><a href="#how">How It Works</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Account</div>
+                <ul class="footer-links">
+                    <li><a href="/Auth/Login">Login</a></li>
+                    <li><a href="/Auth/Register">Register</a></li>
+                    <li><a href="/Auth/ForgetPassword">Forgot Password</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Company</div>
+                <ul class="footer-links">
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span class="footer-copy">© 2025 AttendEase. All rights reserved.</span>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+@section Scripts {
+<style>
+/* ═══════════════════════════════════════════════════════
+   LANDING PAGE STYLES
+   Matches: Login / Register / ForgetPassword design system
+   Font: Poppins | Primary: #6366F1 | Secondary: #8B5CF6
+   Left gradient: #312E81→#4F46E5→#7C3AED→#9D174D
+═══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --primary:   #6366F1;
+    --secondary: #8B5CF6;
+    --accent:    #EC4899;
+    --success:   #6EE7B7;
+    --text-dark: #0F172A;
+    --text-mid:  #475569;
+    --text-soft: #94A3B8;
+    --border:    #E2E8F0;
+    --surface:   #F8FAFC;
+    --white:     #ffffff;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Poppins', sans-serif; background: #fff; color: var(--text-dark); overflow-x: hidden; }
+
+/* ── CONTAINER ── */
+.lp-container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+/* ── NAVBAR ── */
+.lp-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.8);
+    padding: 14px 32px;
+    transition: all .3s ease;
+}
+.lp-nav.scrolled {
+    padding: 10px 32px;
+    box-shadow: 0 4px 30px rgba(99,102,241,.1);
+}
+.lp-nav-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1160px; margin: 0 auto; }
+.lp-logo {
+    display: flex; align-items: center; gap: 9px;
+    text-decoration: none;
+}
+.lp-logo-icon {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.lp-logo-text { font-size: 17px; font-weight: 700; color: var(--text-dark); letter-spacing: .3px; }
+.lp-nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+.lp-nav-links a {
+    text-decoration: none; color: var(--text-mid); font-size: 13.5px; font-weight: 500;
+    padding: 7px 12px; border-radius: 9px;
+    transition: all .25s;
+}
+.lp-nav-links a:hover { color: var(--primary); background: rgba(99,102,241,.07); }
+.nav-login {
+    color: var(--primary) !important; font-weight: 600 !important;
+}
+.nav-register {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+    color: #fff !important; font-weight: 600 !important;
+    border-radius: 10px !important; padding: 8px 16px !important;
+    box-shadow: 0 4px 16px rgba(99,102,241,.3);
+    transition: all .25s !important;
+}
+.nav-register:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(99,102,241,.45) !important; }
+
+/* Hamburger */
+.lp-hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 6px;
+}
+.lp-hamburger span { width: 22px; height: 2px; background: var(--text-dark); border-radius: 2px; transition: .3s; }
+
+/* ── MOBILE OVERLAY ── */
+.mobile-overlay {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(255,255,255,.97); backdrop-filter: blur(20px);
+    flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.mobile-overlay.open { display: flex; }
+.mobile-close {
+    position: absolute; top: 20px; right: 24px;
+    background: none; border: none; font-size: 1.3rem;
+    color: var(--text-mid); cursor: pointer;
+}
+.mob-link {
+    font-size: 1.2rem; font-weight: 600; color: var(--text-dark);
+    text-decoration: none; padding: 10px 30px; border-radius: 10px;
+    transition: .2s;
+}
+.mob-link:hover { color: var(--primary); }
+.mob-btn {
+    margin-top: 8px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff; font-size: 1rem; font-weight: 700;
+    text-decoration: none; padding: 13px 36px; border-radius: 14px;
+    box-shadow: 0 6px 22px rgba(99,102,241,.4);
+}
+
+/* ── HERO ── */
+.lp-hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #312E81 0%, #4F46E5 35%, #7C3AED 70%, #9D174D 100%);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center;
+    padding: 100px 0 80px;
+}
+/* Blobs — matches auth-left */
+.hero-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(70px); opacity: .22; pointer-events: none;
+    animation: blobFloat 8s ease-in-out infinite alternate;
+}
+.hero-blob.b1 { width: 500px; height: 500px; background: #A78BFA; top: -120px; right: -100px; }
+.hero-blob.b2 { width: 380px; height: 380px; background: #F472B6; bottom: -100px; left: -80px; animation-delay: 2s; animation-direction: alternate-reverse; }
+.hero-blob.b3 { width: 300px; height: 300px; background: #6EE7B7; top: 50%; left: 40%; opacity: .1; animation-delay: 4s; }
+@@keyframes blobFloat {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(20px,-20px) scale(1.05); }
+}
+
+.hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+
+/* Hero badge */
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.13); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.22);
+    color: rgba(255,255,255,.9); font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 100px;
+    margin-bottom: 22px; letter-spacing: .3px;
+}
+.badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #6EE7B7;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+@@keyframes badgePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+.hero-h1 {
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 800; line-height: 1.1; letter-spacing: -2px;
+    color: #fff; margin-bottom: 20px;
+}
+.hero-grad {
+    background: linear-gradient(135deg, #6EE7B7, #A78BFA);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub { color: rgba(255,255,255,.72); font-size: 15px; line-height: 1.7; margin-bottom: 32px; max-width: 460px; }
+
+/* CTA Buttons — same style as btn-submit from auth pages */
+.btn-primary-lp {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff; color: var(--primary);
+    font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700;
+    padding: 13px 26px; border-radius: 14px; text-decoration: none;
+    box-shadow: 0 6px 24px rgba(0,0,0,.2);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+}
+.btn-primary-lp:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(0,0,0,.28); color: var(--secondary); }
+.btn-outline-lp {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.12); backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255,255,255,.3);
+    color: #fff; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 13px 26px; border-radius: 14px; text-decoration: none;
+    transition: all .3s;
+}
+.btn-outline-lp:hover { background: rgba(255,255,255,.22); transform: translateY(-2px); color: #fff; }
+.btn-light {
+    background: rgba(255,255,255,.1) !important;
+    border: 1.5px solid rgba(255,255,255,.25) !important;
+    color: #fff !important;
+}
+
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* Hero stats — matches .stats-row from auth-left */
+.hero-stats {
+    display: flex; align-items: center; gap: 22px;
+    margin-top: 36px; padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,.15);
+}
+.hstat { display: flex; flex-direction: column; align-items: center; }
+.hstat-num { color: #fff; font-size: 18px; font-weight: 700; line-height: 1; }
+.hstat-label { color: rgba(255,255,255,.55); font-size: 11px; margin-top: 3px; }
+.hstat-divider { width: 1px; height: 32px; background: rgba(255,255,255,.18); }
+
+/* ── DASHBOARD MOCKUP (Hero Right) ── */
+.hero-right { position: relative; }
+.float-chip {
+    position: absolute;
+    background: #fff; border-radius: 14px;
+    padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    z-index: 5; border: 1px solid var(--border);
+}
+.fc-top { top: -22px; left: -22px; animation: chipFloat 4s ease-in-out infinite; }
+.fc-bot { bottom: 20px; right: -18px; animation: chipFloat 4s ease-in-out 2s infinite; }
+@@keyframes chipFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.fc-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0;
+}
+.fc-name { font-size: 12px; font-weight: 600; color: var(--text-dark); }
+.fc-time { font-size: 11px; color: var(--text-soft); }
+
+.mockup-shell {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.15);
+    overflow: hidden;
+    animation: shellFloat 6s ease-in-out infinite;
+}
+@@keyframes shellFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.mockup-titlebar {
+    background: #F1F5F9; padding: 9px 14px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+}
+.tb-dots { display: flex; gap: 6px; }
+.tb-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.tb-url {
+    flex: 1; background: #fff; border-radius: 6px;
+    padding: 4px 11px; font-size: 11px; color: var(--text-soft);
+    display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border);
+}
+.mockup-body { padding: 16px; }
+.mb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.mb-title { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+.mb-month { font-size: 11px; color: var(--text-soft); background: var(--surface); padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border); }
+.mb-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+.mb-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.kpi-val { font-size: 20px; font-weight: 800; color: var(--primary); font-family: 'Poppins', sans-serif; }
+.kpi-lbl { font-size: 10px; color: var(--text-soft); margin-top: 1px; }
+.mb-chart { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 10px; margin-bottom: 12px; }
+.mb-chart-label { font-size: 10px; color: var(--text-soft); margin-bottom: 8px; }
+.mini-bars { display: flex; gap: 5px; align-items: flex-end; height: 50px; }
+.mini-bar {
+    flex: 1; border-radius: 4px 4px 0 0;
+    background: linear-gradient(to top, var(--primary), var(--secondary));
+    opacity: .45; transition: opacity .2s;
+}
+.mini-bar.hi { opacity: .85; }
+.mini-bar:hover { opacity: 1; }
+.mb-list { display: flex; flex-direction: column; gap: 6px; }
+.mb-row {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 9px; padding: 8px 10px;
+}
+.mb-av {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.mb-name { font-size: 11.5px; font-weight: 500; flex: 1; color: var(--text-dark); }
+.mb-status { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+.mb-status.present { background: #ECFDF5; color: #065F46; }
+.mb-status.late    { background: #FFFBEB; color: #92400E; }
+.mb-status.absent  { background: #FEF2F2; color: #991B1B; }
+.mb-time { font-size: 10px; color: var(--text-soft); }
+
+/* ── TRUST STRIP ── */
+.trust-strip {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+}
+.trust-strip .lp-container { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.trust-label { font-size: 12px; font-weight: 600; color: var(--text-soft); white-space: nowrap; }
+.trust-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+.trust-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 13px;
+    font-size: 12px; font-weight: 500; color: var(--text-mid);
+}
+.trust-pill i { color: var(--primary); font-size: 11px; }
+
+/* ── SECTIONS ── */
+.lp-section { padding: 90px 0; }
+.lp-how { background: var(--surface); }
+
+/* Section headers */
+.sec-head { margin-bottom: 52px; }
+.sec-head.text-center { text-align: center; }
+.sec-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--primary); margin-bottom: 12px;
+}
+.sec-label span { width: 20px; height: 2px; background: var(--primary); border-radius: 2px; display: inline-block; }
+.sec-label.justify-center { justify-content: center; }
+.sec-title {
+    font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+    font-weight: 800; letter-spacing: -1.5px; line-height: 1.12;
+    color: var(--text-dark); margin-bottom: 14px;
+}
+.sec-sub { color: var(--text-soft); font-size: 15px; line-height: 1.7; }
+.mx-auto { margin: 0 auto; max-width: 500px; }
+
+/* ── FEATURES GRID ── matches card style from auth ── */
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.feat-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+    position: relative; overflow: hidden;
+}
+.feat-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 20px;
+    background: linear-gradient(135deg, rgba(99,102,241,.04), transparent);
+    opacity: 0; transition: .3s;
+}
+.feat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(99,102,241,.25);
+    box-shadow: 0 16px 50px rgba(99,102,241,.14);
+}
+.feat-card:hover::before { opacity: 1; }
+.feat-icon {
+    width: 46px; height: 46px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; margin-bottom: 18px;
+    transition: .3s;
+}
+.feat-card:hover .feat-icon { transform: scale(1.08); box-shadow: 0 6px 20px rgba(99,102,241,.25); }
+.feat-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 9px; }
+.feat-desc { color: var(--text-soft); font-size: 13px; line-height: 1.65; margin-bottom: 16px; }
+/* Feature pill — exact match from Register page */
+.feat-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 4px 12px;
+    font-size: 11.5px; font-weight: 600; color: var(--text-mid);
+}
+
+/* Pills — exact match from ForgotPassword / Register */
+.pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.14); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 100px; padding: 6px 14px;
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,.9);
+}
+.pill-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pill-dot.green  { background: #6EE7B7; }
+.pill-dot.purple { background: #A78BFA; }
+.pill-dot.pink   { background: #F472B6; }
+
+/* ── STEPS ── */
+.steps-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.step-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 20px; padding: 30px 26px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    transition: .3s;
+}
+.step-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(99,102,241,.12); border-color: rgba(99,102,241,.2); }
+.step-num { display: flex; align-items: center; gap: 0; margin-bottom: 20px; }
+.step-circle {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.2rem; flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(99,102,241,.35);
+}
+.step-line {
+    flex: 1; height: 2px; margin-left: 12px;
+    background: linear-gradient(to right, rgba(99,102,241,.3), transparent);
+}
+.step-title { font-size: 15.5px; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+.step-desc { color: var(--text-soft); font-size: 13px; line-height: 1.65; margin-bottom: 18px; }
+.step-link {
+    font-size: 13px; font-weight: 600; color: var(--primary);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    transition: .2s;
+}
+.step-link:hover { gap: 10px; color: var(--secondary); }
+
+/* ── BIG DASHBOARD MOCKUP ── */
+.lp-preview { background: #F8FAFF; }
+.big-mockup {
+    background: #fff; border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 80px rgba(99,102,241,.1), 0 4px 16px rgba(0,0,0,.06);
+    overflow: hidden;
+}
+.bm-titlebar {
+    background: var(--surface); padding: 11px 18px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+}
+.bm-body { display: grid; grid-template-columns: 200px 1fr; min-height: 420px; }
+.bm-sidebar {
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 20px 16px;
+}
+.bms-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+.bms-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+}
+.bms-name { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+.bms-nav { display: flex; flex-direction: column; gap: 2px; }
+.bms-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 9px;
+    font-size: 12px; color: var(--text-soft); cursor: default;
+    transition: .2s;
+}
+.bms-item:hover { background: rgba(99,102,241,.07); color: var(--text-dark); }
+.bms-item.active { background: rgba(99,102,241,.1); color: var(--primary); font-weight: 600; }
+.bms-item i { width: 14px; text-align: center; font-size: 12px; }
+
+.bm-main { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.bm-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.bm-kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+}
+.bk-label { font-size: 11px; color: var(--text-soft); margin-bottom: 5px; }
+.bk-val { font-size: 22px; font-weight: 800; color: var(--primary); font-family: 'Poppins'; }
+.bk-change { font-size: 11px; margin-top: 3px; color: #10B981; display: flex; align-items: center; gap: 4px; }
+.bk-change.dn { color: #EF4444; }
+
+.bm-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.bm-chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+}
+.bcc-title {
+    font-size: 12.5px; font-weight: 600; color: var(--text-dark);
+    margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+}
+.bcc-title span { font-size: 11px; color: var(--text-soft); font-weight: 400; }
+.bar-chart { display: flex; gap: 5px; align-items: flex-end; height: 70px; margin-bottom: 6px; }
+.bc-bar {
+    flex: 1; border-radius: 4px 4px 0 0;
+    background: linear-gradient(to top, var(--primary), var(--secondary));
+    opacity: .7; transition: .2s;
+}
+.bc-bar.hi { opacity: 1; }
+.bc-bar:hover { opacity: 1; transform: scaleY(1.03); }
+.bc-labels { display: flex; gap: 5px; }
+.bc-labels span { flex: 1; text-align: center; font-size: 9px; color: var(--text-soft); }
+
+.donut-row { display: flex; align-items: center; gap: 18px; }
+.donut-ring {
+    width: 74px; height: 74px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(#6366F1 0% 68%, #EC4899 68% 84%, #94A3B8 84%);
+    position: relative;
+}
+.donut-ring::after {
+    content: '68%'; position: absolute; inset: 14px;
+    background: var(--surface); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--primary);
+}
+.donut-legend { display: flex; flex-direction: column; gap: 8px; }
+.dl-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-mid); }
+.dl-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+
+.bm-table-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+}
+.bm-table { width: 100%; border-collapse: collapse; }
+.bm-table th {
+    font-size: 10.5px; color: var(--text-soft); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .5px;
+    padding: 9px 14px; text-align: left; background: rgba(255,255,255,.5);
+}
+.bm-table td { font-size: 12.5px; color: var(--text-dark); padding: 9px 14px; border-top: 1px solid var(--border); }
+.bm-table tr:hover td { background: rgba(99,102,241,.03); }
+.t-emp { display: flex; align-items: center; gap: 8px; }
+.t-av {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.t-badge { display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.t-badge.present { background: #ECFDF5; color: #065F46; }
+.t-badge.late    { background: #FFFBEB; color: #92400E; }
+.t-badge.absent  { background: #FEF2F2; color: #991B1B; }
+.t-badge.office  { background: #EFF6FF; color: #1D4ED8; }
+.t-badge.remote  { background: #F0FDF4; color: #166534; }
+.t-badge.field   { background: #FFF7ED; color: #9A3412; }
+
+/* ── TESTIMONIALS ── */
+.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+.testi-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 20px; padding: 26px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    transition: .3s; position: relative; overflow: hidden;
+}
+.testi-card::before {
+    content: '"'; font-size: 80px; font-weight: 800;
+    position: absolute; top: -10px; right: 18px;
+    color: var(--primary); opacity: .06; line-height: 1;
+}
+.testi-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(99,102,241,.1); border-color: rgba(99,102,241,.2); }
+.testi-stars { display: flex; gap: 3px; margin-bottom: 12px; color: #F59E0B; font-size: 13px; }
+.testi-text { color: var(--text-mid); font-size: 13.5px; line-height: 1.7; font-style: italic; margin-bottom: 18px; }
+.testi-author { display: flex; align-items: center; gap: 12px; }
+.testi-av {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
+}
+.testi-name { font-size: 13.5px; font-weight: 700; color: var(--text-dark); }
+.testi-role { font-size: 12px; color: var(--text-soft); margin-top: 1px; }
+
+/* ── CTA ── */
+.lp-cta { padding: 80px 0; }
+.cta-card {
+    background: linear-gradient(135deg, #312E81 0%, #4F46E5 40%, #7C3AED 75%, #BE185D 100%);
+    border-radius: 28px; padding: 70px 60px;
+    text-align: center; position: relative; overflow: hidden;
+}
+.cta-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(60px); opacity: .25; pointer-events: none;
+}
+.cta-blob.c1 { width: 350px; height: 350px; background: #A78BFA; top: -100px; right: -80px; }
+.cta-blob.c2 { width: 280px; height: 280px; background: #F472B6; bottom: -80px; left: -60px; }
+.cta-title {
+    font-size: clamp(1.7rem,3.5vw,2.5rem); font-weight: 800;
+    color: #fff; letter-spacing: -1.5px; margin-bottom: 14px;
+    position: relative; z-index: 1;
+}
+.cta-sub { color: rgba(255,255,255,.7); font-size: 15px; margin-bottom: 32px; position: relative; z-index: 1; }
+.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; position: relative; z-index: 1; }
+.cta-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+
+/* ── FOOTER ── */
+.lp-footer { background: var(--surface); border-top: 1px solid var(--border); padding: 60px 0 28px; }
+.footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 44px; }
+.footer-brand-col .lp-logo-text { color: var(--text-dark); }
+.footer-desc { color: var(--text-soft); font-size: 13px; line-height: 1.7; max-width: 260px; margin: 4px 0 20px; }
+.footer-socials { display: flex; gap: 9px; }
+.soc-btn {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: #fff; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-soft); font-size: 13px; text-decoration: none;
+    transition: .25s;
+}
+.soc-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-2px); }
+.footer-col-title { font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { text-decoration: none; color: var(--text-soft); font-size: 13px; transition: .2s; }
+.footer-links a:hover { color: var(--primary); }
+.footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 22px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.footer-copy { font-size: 12.5px; color: var(--text-soft); }
+.footer-bottom-links { display: flex; gap: 18px; }
+.footer-bottom-links a { font-size: 12.5px; color: var(--text-soft); text-decoration: none; transition: .2s; }
+.footer-bottom-links a:hover { color: var(--primary); }
+
+/* ── SCROLL ANIMATIONS ── */
+.fade-up {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity .65s ease, transform .65s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@@media (max-width: 1024px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .bm-sidebar { display: none; }
+    .bm-body { grid-template-columns: 1fr; }
+}
+@@media (max-width: 768px) {
+    .lp-nav-links { display: none; }
+    .lp-hamburger { display: flex; }
+    .steps-row { grid-template-columns: 1fr; }
+    .testi-grid { grid-template-columns: 1fr; }
+    .bm-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .bm-charts { grid-template-columns: 1fr; }
+    .cta-card { padding: 48px 24px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+}
+@@media (max-width: 480px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 14px; }
+    .trust-strip .lp-container { flex-direction: column; align-items: flex-start; }
+    .bm-kpi-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<script>
+$(function () {
+    // ── Navbar scroll ──
+    $(window).on('scroll', function () {
+        $('#lpNav').toggleClass('scrolled', $(this).scrollTop() > 50);
+    });
+
+    // ── Mobile nav ──
+    $('#hamburgerBtn').on('click', function () {
+        $('#mobileOverlay').addClass('open');
+    });
+    $('#mobileClose').on('click', function () {
+        $('#mobileOverlay').removeClass('open');
+    });
+    $('#mobileOverlay .mob-link, #mobileOverlay .mob-btn').on('click', function () {
+        $('#mobileOverlay').removeClass('open');
+    });
+
+    // ── Smooth scroll ──
+    $('a[href^="#"]').on('click', function (e) {
+        var target = $(this.getAttribute('href'));
+        if (target.length) {
+            e.preventDefault();
+            $('html, body').animate({ scrollTop: target.offset().top - 72 }, 600, 'swing');
+        }
+    });
+
+    // ── Scroll reveal ──
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -36px 0px' });
+
+    document.querySelectorAll('.fade-up').forEach(function (el) {
+        observer.observe(el);
+    });
+
+    // ── Kendo Notification ──
+    var $notif = $('<div id="lpNotif"></div>').appendTo('body');
+    var kNotif = $notif.kendoNotification({
+        position: { pinned: true, top: 80, right: 20 },
+        autoHideAfter: 3500,
+        stacking: 'down',
+        templates: [{
+            type: 'info',
+            template: '<div style="padding:4px 8px"><i class="fa fa-info-circle"></i> #= message #</div>'
+        }]
+    }).data('kendoNotification');
+
+    // ── Kendo Tooltip on CTA buttons ──
+    $('[href="/Auth/Register"]').first().kendoTooltip({
+        content: 'Create your free account in 60 seconds',
+        position: 'bottom',
+        showAfter: 400
+    });
+
+    // Welcome toast
+    setTimeout(function () {
+        kNotif.show({ message: 'Welcome to AttendEase — explore the features below!' }, 'info');
+    }, 1800);
+});
+</script>
+}

@@ -679,7 +679,7 @@ function sendNotification(selectedReportEmployeeId){
         type: "POST",
         data: {
             receiverName: selectedReportEmployeeId,
-            message: "Send ho gaya !!!"
+            message: "Your monthly attendance report is ready. Please check your email for the PDF report."
         },
         success: function(res){
             $("#notification").data("kendoNotification")

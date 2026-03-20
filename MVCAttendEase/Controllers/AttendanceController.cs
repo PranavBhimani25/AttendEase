@@ -7,6 +7,7 @@ using MVCAttendEase.Services;
 using Repositories.Interfaces;
 using Repositories.Models;
 using MVCAttendEase.Filters;
+using MVCAttendEase.Services;
 
 namespace MVCAttendEase.Controllers
 {
@@ -16,15 +17,19 @@ namespace MVCAttendEase.Controllers
         private readonly IAttendanceInterface _attendanceRepo;
         private readonly ElasticsearchService _elastic;
         private readonly ILogger<AttendanceController> _logger;
+        private readonly IAdminInterface _adminRepo;
 
         [ActivatorUtilitiesConstructor]
+
         public AttendanceController(
             IAttendanceInterface attendanceRepo,
             ElasticsearchService elastic,
+            IAdminInterface adminRepo,
             ILogger<AttendanceController> logger)
         {
             _attendanceRepo = attendanceRepo;
             _elastic = elastic;
+            _adminRepo = adminRepo;
             _logger = logger;
         }
 
@@ -39,12 +44,21 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> CheckIn([FromForm] AttendanceModel model)
         {
             var result = await _attendanceRepo.CheckIn(model);
-
             if (result.success)
             {
-                await IndexTodayAttendanceToElastic(model.EmpId);
-            }
+                var emp = await _adminRepo.GetEmployeeDetails(model.EmpId);
 
+                await _elastic.IndexAttendanceAsync(new AdminReportSearchModel
+                {
+                    AttendId = model.AttendId, // ⚠️ ensure this is returned from DB
+                    EmpId = model.EmpId,
+                    EmployeeName = emp.Name,
+                    AttendDate = model.AttendDate,
+                    AttendStatus = result.status,
+                    WorkType = model.WorkType,
+                    TaskType = model.TaskType
+                });
+            }
             return Json(new
             {
                 success = result.success,
@@ -60,9 +74,21 @@ namespace MVCAttendEase.Controllers
         {
             var result = await _attendanceRepo.CheckOut(model);
 
+            // 🔥 UPDATE INDEX AFTER CHECKOUT
             if (result.success)
             {
-                await IndexTodayAttendanceToElastic(model.EmpId);
+                var emp = await _adminRepo.GetEmployeeDetails(model.EmpId);
+
+                await _elastic.IndexAttendanceAsync(new AdminReportSearchModel
+                {
+                    AttendId = model.AttendId,
+                    EmpId = model.EmpId,
+                    EmployeeName = emp.Name,
+                    AttendDate = model.AttendDate,
+                    AttendStatus = result.status,
+                    WorkType = model.WorkType,
+                    TaskType = model.TaskType
+                });
             }
 
             return Json(new

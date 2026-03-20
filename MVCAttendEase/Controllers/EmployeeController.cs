@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVCAttendEase.Filters;
 using MVCAttendEase.Services;
+using Npgsql;
 using Repositories.Interfaces;
 using Repositories.Models;
 
@@ -21,14 +22,16 @@ namespace MVCAttendEase.Controllers
         private readonly ILogger<EmployeeController> _logger;
         private readonly IEmployeeInterface _emp;
         private readonly CloudinaryService _cloudinaryService;
+        private readonly ElasticsearchService _elastic;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService, ElasticsearchService elastic)
         {
             _logger = logger;
             _emp = emp;
             _cloudinaryService = cloudinaryService;
+            _elastic = elastic;
         }
-        
+
         private int GetCurrentEmpId()
         {
             return int.TryParse(HttpContext.Session.GetString("empId"), out var empId) ? empId : 0;
@@ -52,7 +55,7 @@ namespace MVCAttendEase.Controllers
         {
             EmployeeModel employee = new EmployeeModel();
             employee = await _emp.getEmployeeDetails(id);
-            return Ok(new{success = true, data = employee}) ;
+            return Ok(new { success = true, data = employee });
         }
 
         [Route("GetEmployee/{id}")]
@@ -60,26 +63,26 @@ namespace MVCAttendEase.Controllers
         {
             EmployeeModel employee = new EmployeeModel();
             employee = await _emp.GetOne(id);
-            return Ok(new {success = true, data = employee, message = "Data Fetched Successfully"});
+            return Ok(new { success = true, data = employee, message = "Data Fetched Successfully" });
         }
 
 
         [Route("ChangePassword/{id}")]
         [HttpPut]
-        public async Task<IActionResult> changePwd([FromBody]string password,int id)
+        public async Task<IActionResult> changePwd([FromBody] string password, int id)
         {
             if (password == null)
             {
                 return BadRequest("Password has No Value");
             }
-            var status=await  _emp.ChangePWD(id,password);
+            var status = await _emp.ChangePWD(id, password);
             if (status == 1)
             {
-                return Ok(new{success=true,message="Password Changed Successfully...!"});
+                return Ok(new { success = true, message = "Password Changed Successfully...!" });
             }
             else
             {
-                return BadRequest(new {message = "There Is Some Error.", success = true});
+                return BadRequest(new { message = "There Is Some Error.", success = true });
             }
         }
 
@@ -94,7 +97,7 @@ namespace MVCAttendEase.Controllers
             }
 
             var employee = await _emp.Update(emp);
-            if(employee > 0)
+            if (employee > 0)
             {
                 return Ok(new { message = "Update Employee`s Details Successfull", success = true });
             }
@@ -102,7 +105,7 @@ namespace MVCAttendEase.Controllers
             {
                 return BadRequest(new { message = "Update Employee Data Failed", success = false });
             }
-           
+
         }
 
 
@@ -110,34 +113,34 @@ namespace MVCAttendEase.Controllers
         [HttpGet("GetAttendence/{empId}")]
         public async Task<IActionResult> GetAttendance(int empId)
         {
-            int month=DateTime.Now.Month;
-            int year=DateTime.Now.Year;
+            int month = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
 
-            var data=await _emp.GetAttendanceByEmployee(empId,year);
+            var data = await _emp.GetAttendanceByEmployee(empId, year);
 
             return Ok(data);
         }
 
 
 
-       [HttpGet("GetMonthlyWorkingHours")]
-        public async Task<IActionResult> GetMonthlyWorkingHours(int empId,int month,int year)
+        [HttpGet("GetMonthlyWorkingHours")]
+        public async Task<IActionResult> GetMonthlyWorkingHours(int empId, int month, int year)
         {
-            var data = await _emp.GetMonthlyWorkingHours(empId,month,year);
+            var data = await _emp.GetMonthlyWorkingHours(empId, month, year);
 
             return Ok(data);
         }
 
         [HttpGet("GetYearlyWorkingHours")]
-        public async Task<IActionResult> GetYearlyWorkingHours(int empId,int year)
+        public async Task<IActionResult> GetYearlyWorkingHours(int empId, int year)
         {
-            var data = await _emp.GetYearlyWorkingHours(empId,year);
+            var data = await _emp.GetYearlyWorkingHours(empId, year);
             return Ok(data);
         }
 
-        
 
-      
+
+
 
         [HttpGet("Report")]
         public IActionResult Report()
@@ -154,12 +157,80 @@ namespace MVCAttendEase.Controllers
         }
 
         [HttpGet("[action]")]
-        public JsonResult GetAttendances(int empId) // s is added in the GetAttendances name 
+        public async Task<IActionResult> GetAttendances(
+            int empId,
+            string? searchText,
+            DateTime? fromDate,
+            DateTime? toDate,
+            string? status,
+            string? workType)
         {
             if (empId <= 0) empId = GetCurrentEmpId();
-            var data = _emp.GetAttendanceByEmployee(empId);
 
-            return Json(data);
+            // Always start from DB to keep report data complete and accurate.
+            var dbData = _emp.GetAttendanceByEmployee(empId).AsEnumerable();
+
+            if (fromDate.HasValue)
+            {
+                var from = fromDate.Value.Date;
+                dbData = dbData.Where(x => x.AttendDate.HasValue && x.AttendDate.Value.Date >= from);
+            }
+
+            if (toDate.HasValue)
+            {
+                var to = toDate.Value.Date;
+                dbData = dbData.Where(x => x.AttendDate.HasValue && x.AttendDate.Value.Date <= to);
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                dbData = dbData.Where(x => string.Equals(x.AttendStatus, status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(workType))
+            {
+                dbData = dbData.Where(x => string.Equals(x.WorkType, workType, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var attendanceIds = await _elastic.SearchAttendanceIdsAsync(searchText, empId);
+                if (attendanceIds.Count == 0)
+                {
+                    return Json(Array.Empty<object>());
+                }
+
+                dbData = dbData.Where(x => attendanceIds.Contains(x.AttendId));
+            }
+
+            var mapped = dbData.Select(x => new
+            {
+                attendDate = x.AttendDate,
+                clockInHour = x.ClockInHour,
+                clockInMin = x.ClockInMin,
+                clockOutHour = x.ClockOutHour,
+                clockOutMin = x.ClockOutMin,
+                workingHour = x.WorkingHour,
+                workType = x.WorkType,
+                taskType = x.TaskType,
+                attendStatus = x.AttendStatus
+            });
+
+            return Json(mapped);
+        }
+
+        // In your EmployeeController.cs
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> SearchAttendance(
+    int empId,
+    string? searchText,
+    DateTime? fromDate,
+    DateTime? toDate,
+    string? status,
+    string? workType)
+        {
+            return await GetAttendances(empId, searchText, fromDate, toDate, status, workType);
         }
 
         [HttpGet("[action]")]

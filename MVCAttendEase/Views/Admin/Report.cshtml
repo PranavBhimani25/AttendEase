@@ -3,8 +3,22 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="page-title">
-    Employee List
+
+<div class="header-bar">
+    <div class="page-title">Employee List</div>
+
+    <div class="search-box">
+        <input type="text" id="searchName" placeholder="Search Employee..." 
+               class="k-textbox" />
+
+        <button class="k-button k-button-md k-button-solid-primary" onclick="searchAttendance()">
+            🔍
+        </button>
+
+        <button class="k-button k-button-md k-button-outline" onclick="resetSearch()">
+            Reset
+        </button>
+    </div>
 </div>
 
 
@@ -34,13 +48,55 @@
     font-size:36px;
     font-weight:600;
     margin-bottom:20px;
+    position: relative; 
 }
 
+/* 🔥 NEW HEADER LAYOUT */
+.header-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    gap:10px;
+}
 
+/* TITLE */
+.page-title{
+    font-size:32px;
+    font-weight:600;
+}
 
+/* 🔍 SEARCH BOX */
+.search-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
 
+/* INPUT */
+.search-box input{
+    width:260px;
+    height:38px;
+    border-radius:8px;
+    padding:0 12px;
+    font-size:14px;
+}
 
+/* BUTTON ALIGNMENT */
+.search-box .k-button{
+    height:38px;
+    min-width:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 
+/* ICON BUTTON (🔍) */
+.search-box .k-button:first-of-type{
+    width:42px;
+    padding:0;
+}
 
 /* HEADER */
 
@@ -378,6 +434,10 @@ $(document).on("click", "#downloadPdfBtn", function(){
     downloadCurrentReportPdf();
 });
 
+$(document).on("click", "#sendPdfBtn", function () {
+    sendPdfToServer();
+});
+
 function generateMonthlyReportWindow(empId, empName, month, year){
     var reportWnd = $("#monthlyReportWindow").data("kendoWindow");
     currentReportMeta = { empId: empId, empName: empName || "", month: month, year: year };
@@ -398,6 +458,9 @@ function generateMonthlyReportWindow(empId, empName, month, year){
                 <div id="monthlyReportGrid"></div>
                 <div class="report-actions">
                     <button id="downloadPdfBtn" class="k-button k-button-md k-button-solid-primary">Download PDF</button>
+                </div>
+                <div class="report-actions">
+                    <button id="sendPdfBtn" class="k-button k-button-md k-button-solid-primary">Send PDF</button>
                 </div>
             </div>
         </div>`;
@@ -443,6 +506,8 @@ function normalizeAttendanceRows(rows){
         };
     });
 }
+
+
 
 function renderReportCards(summary){
     var cards = [
@@ -620,6 +685,61 @@ function renderMonthlyGrid(rows){
     });
 }
 
+function sendPdfToServer() {
+
+    var target = $("#monthlyReportContent .report-shell");
+
+    if (!target.length) {
+        $("#notification").data("kendoNotification").show({ message: "Report not ready" }, "error");
+        return;
+    }
+
+    kendo.drawing.drawDOM(target, {
+        paperSize: "A4",
+        margin: "1cm",
+        landscape: true,
+        scale: 0.75,
+        multiPage: true
+    })
+    .then(function (group) {
+        return kendo.drawing.exportPDF(group);
+    })
+    .then(function (dataURI) {
+
+        // Convert Base64
+        var base64 = dataURI.split(",")[1];
+
+        $.ajax({
+            url: "/Admin/SendReportEmail",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                empId: currentReportMeta.empId,
+                fileName: "Report.pdf",
+                fileData: base64
+            }),
+            success: function (res) {
+
+                debugger;
+                if(res.success)
+                {
+                    $("#notification").data("kendoNotification")
+                        .show( res.message , "success");
+                }
+                else{
+                    $("#notification").data("kendoNotification")
+                        .show({ message: res.message }, "error");
+                }
+            },
+            error: function () {
+                $("#notification").data("kendoNotification")
+                    .show({ message: "Failed to send email" }, "error");
+            }
+        });
+
+    });
+}
+
 function downloadCurrentReportPdf(){
     var target = $("#monthlyReportContent .report-shell");
     if (!target.length) {
@@ -667,6 +787,55 @@ function downloadCurrentReportPdf(){
         }
     });
 }
+
+// ================= 🔥 ELASTICSEARCH SEARCH START =================
+
+// 🔍 Search function
+function searchAttendance() {
+    let name = $("#searchName").val();
+
+    if (!name) {
+        alert("Please enter name");
+        return;
+    }
+
+    $.ajax({
+        url: "/Admin/SearchAttendance",
+        type: "GET",
+        data: { name: name },
+        success: function(res) {
+
+            let grid = $("#employeeGrid").data("kendoGrid");
+
+           if (res.success) {
+                console.log(res.data)
+               
+
+                grid.dataSource.data(res.data);
+
+            } else {
+                grid.dataSource.data([]);
+            }
+        },
+        error: function() {
+            alert("Search failed");
+        }
+    });
+}
+
+
+// 🔄 Reset Grid
+function resetSearch() {
+
+    let grid = $("#employeeGrid").data("kendoGrid");
+
+    grid.dataSource.transport.options.read.url = "/Admin/GetEmployees";
+    grid.dataSource.read();
+
+    $("#searchName").val("");
+}
+
+// ================= 🔥 ELASTICSEARCH SEARCH END =================
 
 </script>
 

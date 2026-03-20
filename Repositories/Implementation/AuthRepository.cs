@@ -71,7 +71,9 @@ namespace Repositories.Implementation
 
         public async Task<int> Register(RegisterEmployeeModel model)
         {
-            var query = "INSERT INTO t_employees (c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role) VALUES (@Name, @Email, @Password, @Gender, @Status, @ProfileImage, @Role) ";
+            var query = @"INSERT INTO t_employees (c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role)
+                          VALUES (@Name, @Email, @Password, @Gender, @Status, @ProfileImage, @Role)
+                          RETURNING c_empid";
             try
             {
                 using var command = new NpgsqlCommand(query, _connection);
@@ -84,8 +86,8 @@ namespace Repositories.Implementation
                 command.Parameters.AddWithValue("@Role", NpgsqlTypes.NpgsqlDbType.Varchar, "Employee");
 
                 await _connection.OpenAsync();
-                var result = await command.ExecuteNonQueryAsync();
-                return result;
+                var result = await command.ExecuteScalarAsync();
+                return result == null ? -1 : Convert.ToInt32(result);
             }
             catch(Exception ex)
             {
@@ -98,5 +100,91 @@ namespace Repositories.Implementation
             }
             
         }
+
+
+
+        public async Task<int> ForgetPassword(LoginModel model)
+        {
+            try
+            {
+                await _connection.OpenAsync();
+
+                // Step 1: Check if email exists
+                var checkQry = "SELECT c_email FROM t_employees WHERE c_email=@email";
+                using (var checkCmd = new NpgsqlCommand(checkQry, _connection))
+                {
+                    checkCmd.Parameters.AddWithValue("@email", model.c_email);
+
+                    var exists = await checkCmd.ExecuteReaderAsync();
+                    Console.WriteLine("Es" + exists);
+                    if (!exists.HasRows)
+                    {
+                        return -1; 
+                    }
+                }
+
+                await _connection.CloseAsync();
+                await _connection.OpenAsync();
+                
+                // Step 2: Update password
+                var updateQry = "UPDATE t_employees SET c_password=@pass WHERE c_email=@email";
+                using (var updateCmd = new NpgsqlCommand(updateQry, _connection))
+                {
+                    updateCmd.Parameters.AddWithValue("@email", model.c_email);
+                    updateCmd.Parameters.AddWithValue("@pass", model.c_password);
+
+                    var status = await updateCmd.ExecuteNonQueryAsync();
+
+                    if (status == 1)
+                    {
+                        return 1; 
+                    }
+                    else
+                    {
+                        return 0; 
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return 0;
+            }
+            finally
+            {
+                await _connection.CloseAsync();
+            }
+        }
+
+
+
+        public async Task<int> GetOne(string email)
+        {
+            var qry="SELECT * FROM t_employees WHERE c_email=@email";
+            EmployeeModel emp=new EmployeeModel();
+            try
+            {
+                NpgsqlCommand cmd=new NpgsqlCommand(qry,_connection);
+                cmd.Parameters.AddWithValue("@email", email);
+                await _connection.OpenAsync();
+                var reader=await cmd.ExecuteReaderAsync();
+                if (!reader.HasRows)
+                {
+                    return 0;
+                }
+                return 1;
+            }catch(Exception ex)
+            {
+                Console.WriteLine("Error is: "+ex.Message);
+            }
+            finally
+            {
+                await _connection.CloseAsync();
+            }
+            return 0;
+        }
+
+
+
     }
 }

@@ -50,21 +50,16 @@
             </div>
             <div class="topbar-actions">
                 <div class="notification-wrapper">
-
-                    <!-- ── BELL BUTTON (redesigned) ── -->
                     <button id="admin-notification-btn" type="button" class="notif-bell-btn" aria-haspopup="true" aria-expanded="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                             stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                        </svg>
-                        <span class="notif-badge" id="notification-count" aria-live="polite"></span>
-                    </button>
-
-                    <!-- ── DROPDOWN (redesigned) ── -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notif-badge" id="notification-count" aria-live="polite"></span>
+    </button>
                     <div class="notification-dropdown" id="notification-dropdown" role="region" aria-label="Recent notifications">
                         <div class="notification-header">
-                            <div class="d-flex justify-content-between align-items-center gap-4">
+                            <div class="d-flex justify-content-between align-items-center">
                                 <strong>Notifications</strong>
                                 <button id="mark-all-read" class="btn btn-sm btn-outline-secondary">Mark All Read</button>
                                 <button id="see-all-notifications" class="btn btn-sm btn-outline-primary ms-1" title="See all notifications">See ALL</button>
@@ -75,7 +70,6 @@
                             <div class="notification-empty" id="notification-empty">You're all caught up.</div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -176,7 +170,6 @@ function initAdminNotifications() {
         renderNotifications();
     }
 
-    // ── CHANGED: renderNotifications — avatar initials + unread dot ──
     function renderNotifications() {
         notificationItems.innerHTML = "";
         if (notifications.length === 0) {
@@ -186,46 +179,23 @@ function initAdminNotifications() {
 
         emptyState.style.display = "none";
 
-        var avatarColors = [
-            { bg: "#e6f1fb", color: "#185FA5" },
-            { bg: "#EEEDFE", color: "#534AB7" },
-            { bg: "#E1F5EE", color: "#0F6E56" },
-            { bg: "#FAECE7", color: "#993C1D" }
-        ];
-
         notifications.forEach(function (item, index) {
             var listItem = document.createElement("li");
             listItem.className = "notification-item";
             listItem.dataset.index = index;
+            listItem.style.cursor = "pointer";
+            listItem.style.transition = "opacity 0.3s ease";
 
             listItem.addEventListener("click", function() {
+                listItem.style.opacity = "0.5";
                 markItemRead(index);
             });
 
-            // Unread dot
-            var dot = document.createElement("div");
-            dot.className = index < unreadCount ? "notif-unread-dot" : "notif-read-spacer";
-
-            // Avatar with initials
-            var avatar = document.createElement("div");
-            avatar.className = "notif-avatar";
-            var scheme = avatarColors[index % avatarColors.length];
-            avatar.style.background = scheme.bg;
-            avatar.style.color = scheme.color;
-            var name = item?.fullName || "NU";
-            var parts = name.trim().split(" ");
-            avatar.textContent = parts.length >= 2
-                ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-                : name.substring(0, 2).toUpperCase();
-
-            // Content wrapper
-            var content = document.createElement("div");
-            content.style.flex = "1";
-            content.style.minWidth = "0";
-
             var header = document.createElement("div");
             header.className = "notification-header-item";
-            header.textContent = item?.fullName || "New user";
+            var title = document.createElement("strong");
+            title.textContent = item?.fullName || "New user";
+            header.appendChild(title);
 
             var body = document.createElement("div");
             body.className = "notification-body-item";
@@ -242,25 +212,21 @@ function initAdminNotifications() {
             }
             footer.appendChild(time);
 
-            content.appendChild(header);
-            content.appendChild(body);
-            content.appendChild(footer);
-
-            listItem.appendChild(dot);
-            listItem.appendChild(avatar);
-            listItem.appendChild(content);
+            listItem.appendChild(header);
+            listItem.appendChild(body);
+            listItem.appendChild(footer);
 
             notificationItems.appendChild(listItem);
         });
     }
 
-    // ── CHANGED: updateBadge — empty string instead of "0" when hidden ──
     function updateBadge() {
         if (unreadCount <= 0) {
             badge.classList.remove("visible");
-            badge.textContent = "";
+            badge.textContent = "0";
             return;
         }
+
         badge.classList.add("visible");
         badge.textContent = unreadCount > 99 ? "99+" : unreadCount;
     }
@@ -286,6 +252,7 @@ function initAdminNotifications() {
     });
 
     function showAllNotificationsModal() {
+        // Create modal backdrop
         let backdrop = document.getElementById("notification-modal-backdrop");
         if (!backdrop) {
             backdrop = document.createElement("div");
@@ -315,14 +282,12 @@ function initAdminNotifications() {
     }
 
     function closeAllNotificationsModal() {
-    const backdrop = document.getElementById("notification-modal-backdrop");
-    if (backdrop) {
-        backdrop.classList.remove("show");
+        const backdrop = document.getElementById("notification-modal-backdrop");
+        if (backdrop) {
+            backdrop.classList.remove("show");
+        }
     }
-}
-window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to global scope
 
-    // ── CHANGED: loadAllNotifications — avatar initials added to modal cards ──
     async function loadAllNotifications() {
         try {
             const res = await fetch('/Notifications/history?count=100');
@@ -334,32 +299,16 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
                     list.innerHTML = '<div class="text-center p-4 text-muted">No notifications</div>';
                     return;
                 }
-
-                const avatarColors = [
-                    { bg: "#e6f1fb", color: "#185FA5" },
-                    { bg: "#EEEDFE", color: "#534AB7" },
-                    { bg: "#E1F5EE", color: "#0F6E56" },
-                    { bg: "#FAECE7", color: "#993C1D" }
-                ];
-
-                allNotifications.forEach((item, index) => {
-                    const scheme = avatarColors[index % avatarColors.length];
-                    const name = item.fullName || "NU";
-                    const parts = name.trim().split(" ");
-                    const initials = parts.length >= 2
-                        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-                        : name.substring(0, 2).toUpperCase();
-
+                allNotifications.forEach(item => {
                     const card = document.createElement("div");
                     card.className = "notification-card";
                     card.innerHTML = `
-                        <div class="notif-avatar" style="background:${scheme.bg};color:${scheme.color};width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${initials}</div>
-                        <div style="flex:1;min-width:0;">
-                            <div class="card-header"><strong>${item.fullName || 'New User'}</strong></div>
-                            <div class="card-body">
-                                <p>${item.message}</p>
-                                <small class="text-muted">${new Date(item.registeredAt).toLocaleString()}</small>
-                            </div>
+                        <div class="card-header">
+                            <strong>${item.fullName || 'New User'}</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>${item.message}</p>
+                            <small class="text-muted">${new Date(item.registeredAt).toLocaleString()}</small>
                         </div>
                     `;
                     list.appendChild(card);
@@ -436,13 +385,13 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
 </script>
 
 <style>
-/* ── UNCHANGED: Layout ── */
+/* Layout */
 #example {
     display: flex;
     min-height: 100vh;
 }
 
-/* ── UNCHANGED: Sidebar ── */
+/* Sidebar */
 #sidebar {
     width: 250px;
     background: #2c3e50;
@@ -468,6 +417,7 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
     display: none;
 }
 
+/* Sidebar items */
 .k-list-group-item {
     padding: 15px 20px;
     border: none !important;
@@ -496,12 +446,13 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
     background: #34495e !important;
 }
 
+/* Icon color fix */
 .k-list-group-item .k-icon {
     color: white;
     flex-shrink: 0;
 }
 
-/* ── UNCHANGED: Top bar ── */
+/* Top bar */
 .topbar {
     display: flex;
     align-items: center;
@@ -522,72 +473,39 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
     align-items: center;
     gap: 0.5rem;
 }
-
-/* ════════════════════════════════════════════
-   NOTIFICATION UI — REDESIGNED
-   ════════════════════════════════════════════ */
-
-.notification-wrapper {
-    position: relative;
-}
-
-/* Bell button */
+/* Bell */
 .notif-bell-btn {
     position: relative;
-    width: 42px;
-    height: 42px;
+    width: 42px; height: 42px;
     border-radius: 12px;
     background: #f4f5f7;
     border: 1px solid #e2e5ea;
     color: #374151;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     transition: background .15s, border-color .15s;
 }
-.notif-bell-btn:hover {
-    background: #e9ebee;
-}
-.notif-bell-btn[aria-expanded="true"] {
-    background: #e6f1fb;
-    border-color: #b5d4f4;
-    color: #185FA5;
-}
+.notif-bell-btn:hover { background: #e9ebee; }
+.notif-bell-btn[aria-expanded="true"] { background: #e6f1fb; border-color: #b5d4f4; color: #185FA5; }
 
-/* Badge */
 .notif-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    min-width: 18px;
-    height: 18px;
+    position: absolute; top: -5px; right: -5px;
+    min-width: 18px; height: 18px;
     border-radius: 20px;
-    background: #E24B4A;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 600;
-    display: none;
-    align-items: center;
-    justify-content: center;
+    background: #E24B4A; color: #fff;
+    font-size: 10px; font-weight: 600;
+    display: none; align-items: center; justify-content: center;
     padding: 0 4px;
     border: 2px solid #fff;
     animation: badgePop .3s cubic-bezier(.34,1.56,.64,1);
 }
-.notif-badge.visible {
-    display: flex;
-}
-@@keyframes badgePop {
-    from { transform: scale(0); }
-    to   { transform: scale(1); }
-}
+.notif-badge.visible { display: flex; }
+@@keyframes badgePop { from { transform: scale(0) } to { transform: scale(1) } }
 
-/* Dropdown panel */
+/* Dropdown */
 .notification-dropdown {
     display: none;
-    position: absolute;
-    right: 0;
-    top: calc(100% + 10px);
+    position: absolute; right: 0; top: calc(100% + 10px);
     width: 340px;
     background: #fff;
     border-radius: 16px;
@@ -596,132 +514,61 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
     overflow: hidden;
     z-index: 40;
 }
-.notification-dropdown.open {
-    display: block;
-}
+.notification-dropdown.open { display: block; }
 
 .notification-header {
     padding: 13px 16px;
     border-bottom: 0.5px solid #f1f3f5;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    display: flex; align-items: center; justify-content: space-between;
 }
-.notification-header strong {
-    font-size: 13px;
-    font-weight: 500;
-}
+.notification-header strong { font-size: 13px; font-weight: 500; }
 
-.notification-body {
-    max-height: 300px;
-    overflow: hidden;
-}
-
-/* Notification list */
-.notification-items {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    max-height: 260px;
-    overflow-y: auto;
-}
+.notification-items { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; }
 
 .notification-item {
     padding: 11px 15px;
     border-bottom: 0.5px solid #f1f3f5;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
+    display: flex; gap: 10px; align-items: flex-start;
     cursor: pointer;
     transition: background .12s;
 }
-.notification-item:hover {
-    background: #f8f9ff;
-}
-.notification-item:last-child {
-    border-bottom: none;
-}
+.notification-item:hover { background: #f8f9ff; }
+.notification-item:last-child { border-bottom: none; }
 
-/* Unread dot / read spacer */
+/* Unread dot */
 .notif-unread-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #378ADD;
-    flex-shrink: 0;
-    margin-top: 6px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #378ADD; flex-shrink: 0; margin-top: 6px;
 }
-.notif-read-spacer {
-    width: 7px;
-    flex-shrink: 0;
-}
+.notif-read-spacer { width: 7px; flex-shrink: 0; }
 
-/* Avatar circle */
+/* Avatar */
 .notif-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    flex-shrink: 0;
-    background: #e6f1fb;
-    color: #185FA5;
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+    background: #e6f1fb; color: #185FA5;
 }
 
-/* Item text */
-.notification-header-item {
-    font-size: 12px;
-    font-weight: 500;
-    color: #111;
-    margin-bottom: 2px;
-}
-.notification-body-item {
-    font-size: 11.5px;
-    color: #5a6472;
-    line-height: 1.45;
-}
-.notification-footer-item small {
-    font-size: 10.5px;
-    color: #9ba3ad;
-}
+.notification-header-item { font-size: 12px; font-weight: 500; color: #111; margin-bottom: 2px; }
+.notification-body-item { font-size: 11.5px; color: #5a6472; line-height: 1.45; }
+.notification-footer-item small { font-size: 10.5px; color: #9ba3ad; }
 
-/* Empty state */
-.notification-empty {
-    padding: 16px;
-    text-align: center;
-    font-size: 0.85rem;
-    color: #868686;
-}
-
-/* Full modal backdrop */
+/* Modal */
 .notification-modal-backdrop {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(10,10,20,.45);
     z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
     transition: opacity .25s ease, visibility .25s ease;
 }
-.notification-modal-backdrop.show {
-    opacity: 1;
-    visibility: visible;
-}
+.notification-modal-backdrop.show { opacity: 1; visibility: visible; }
 
-/* Modal box */
 .notification-modal {
     background: #fff;
     border-radius: 20px;
-    width: 90vw;
-    max-width: 560px;
-    max-height: 82vh;
+    width: 90vw; max-width: 560px; max-height: 82vh;
     overflow: hidden;
     border: 0.5px solid #dde1e7;
     box-shadow: 0 24px 60px rgba(0,0,0,.18);
@@ -729,102 +576,41 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
 }
 @@keyframes modalSlideIn {
     from { transform: scale(.92) translateY(16px); opacity: 0; }
-    to   { transform: scale(1)   translateY(0);    opacity: 1; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .notification-modal-header {
     padding: 18px 22px;
     border-bottom: 0.5px solid #f1f3f5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
 }
-.notification-modal-header h5 {
-    font-size: 14px;
-    font-weight: 500;
-    margin: 0;
-}
-
+.notification-modal-header h5 { font-size: 14px; font-weight: 500; margin: 0; }
 .notif-count-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    background: #e6f1fb;
-    color: #185FA5;
-    border-radius: 20px;
-    font-weight: 600;
-    margin-left: 8px;
+    font-size: 10px; padding: 2px 8px;
+    background: #e6f1fb; color: #185FA5;
+    border-radius: 20px; font-weight: 600; margin-left: 8px;
 }
-
-/* Close button */
 .close-modal-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: #f4f5f7;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: #6b7280;
-    transition: background .12s;
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #f4f5f7; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #6b7280; transition: background .12s;
 }
-.close-modal-btn:hover {
-    background: #e9ebee;
-}
+.close-modal-btn:hover { background: #e9ebee; }
 
-/* Modal scrollable body */
-.notification-modal-body {
-    max-height: calc(82vh - 130px);
-    overflow-y: auto;
-}
-
-/* Modal notification cards */
+.notification-modal-body { max-height: calc(82vh - 130px); overflow-y: auto; }
 .notification-card {
-    padding: 14px 22px;
-    display: flex;
-    gap: 12px;
-    border-bottom: 0.5px solid #f1f3f5;
-    cursor: pointer;
-    transition: background .12s;
-    align-items: flex-start;
+    padding: 14px 22px; display: flex; gap: 12px;
+    border-bottom: 0.5px solid #f1f3f5; cursor: pointer;
+    transition: background .12s; align-items: flex-start;
 }
-.notification-card:hover {
-    background: #f8f9ff;
-}
-.notification-card:last-child {
-    border-bottom: none;
-}
-
-.card-header {
-    font-size: 13px;
-    font-weight: 500;
-    color: #111;
-    margin-bottom: 3px;
-    padding: 0;
-    background: none;
-    border: none;
-}
-.card-body {
-    padding: 0;
-}
-.card-body p {
-    font-size: 12px;
-    color: #5a6472;
-    margin: 0 0 5px;
-    line-height: 1.5;
-}
-.card-body small {
-    font-size: 11px;
-    color: #9ba3ad;
-}
-
-/* ════════════════════════════════════════════
-   END NOTIFICATION UI
-   ════════════════════════════════════════════ */
-
-/* ── UNCHANGED: Content ── */
+.notification-card:hover { background: #f8f9ff; }
+.notification-card:last-child { border-bottom: none; }
+.card-header { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 3px; padding: 0; }
+.card-body { padding: 0; }
+.card-body p { font-size: 12px; color: #5a6472; margin: 0 0 5px; line-height: 1.5; }
+.card-body small { font-size: 11px; color: #9ba3ad; }
+/* Content */
 #main {
     flex: 1;
     display: flex;
@@ -836,7 +622,7 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
     flex: 1;
 }
 
-/* ── UNCHANGED: Footer ── */
+/* Footer */
 .footer {
     text-align: center;
     padding: 10px;

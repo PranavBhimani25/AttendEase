@@ -50,7 +50,7 @@ namespace MVCAttendEase.Controllers
 
             //  var data = new
             // {
-            //     Message = "Hello Elasticsearch 🚀 ajsdbajs",
+            //     Message = "Hello Elasticsearch 🚀",
             //     Time = DateTime.UtcNow
             // };
             // await _elastic.CreateIndexAsync("attendance_logs");

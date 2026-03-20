@@ -458,6 +458,7 @@ function generateMonthlyReportWindow(empId, empName, month, year){
                 <div id="monthlyReportGrid"></div>
                 <div class="report-actions">
                     <button id="downloadPdfBtn" class="k-button k-button-md k-button-solid-primary">Download PDF</button>
+                    @* <button id="sendPdfBtn" class="k-button k-button-md k-button-solid-primary">Send Pdf</button> *@
                 </div>
                 <div class="report-actions">
                     <button id="sendPdfBtn" class="k-button k-button-md k-button-solid-primary">Send PDF</button>
@@ -723,6 +724,7 @@ function sendPdfToServer() {
                 debugger;
                 if(res.success)
                 {
+                    sendNotification(selectedReportEmployeeId);
                     $("#notification").data("kendoNotification")
                         .show( res.message , "success");
                 }
@@ -787,6 +789,31 @@ function downloadCurrentReportPdf(){
         }
     });
 }
+@* $(document).on("click", "#sendPdfBtn", function(){
+    sendNotification(selectedReportEmployeeId);
+}); *@
+
+function sendNotification(selectedReportEmployeeId){
+    console.log(selectedReportEmployeeId);
+    $.ajax({
+        url: "/Notification/SendNotificationAsync",
+        type: "POST",
+        data: {
+            receiverName: selectedReportEmployeeId,
+            message: "Your monthly attendance report is ready. Please check your email for the PDF report."
+        },
+        success: function(res){
+            $("#notification").data("kendoNotification")
+               .show("Notification sent successfully", "success");
+                
+        },
+        error: function(){
+            $("#notification").data("kendoNotification")
+                .show({ message: "Failed to send notification" }, "error");
+        }
+    });
+}
+
 
 // ================= 🔥 ELASTICSEARCH SEARCH START =================
 

@@ -18,6 +18,7 @@ namespace MVCAttendEase.Controllers
         private readonly ElasticsearchService _elastic;
         private readonly ILogger<AttendanceController> _logger;
         private readonly IAdminInterface _adminRepo;
+        private readonly RedisService _redis;
 
         [ActivatorUtilitiesConstructor]
 
@@ -25,12 +26,14 @@ namespace MVCAttendEase.Controllers
             IAttendanceInterface attendanceRepo,
             ElasticsearchService elastic,
             IAdminInterface adminRepo,
-            ILogger<AttendanceController> logger)
+            ILogger<AttendanceController> logger,
+            RedisService redis)
         {
             _attendanceRepo = attendanceRepo;
             _elastic = elastic;
             _adminRepo = adminRepo;
             _logger = logger;
+            _redis = redis;
         }
 
         public IActionResult Index()
@@ -47,6 +50,8 @@ namespace MVCAttendEase.Controllers
             if (result.success)
             {
                 var emp = await _adminRepo.GetEmployeeDetails(model.EmpId);
+                await _redis.InvalidateEmployeeAsync(model.EmpId);
+            
 
                 await _elastic.IndexAttendanceAsync(new AdminReportSearchModel
                 {
@@ -73,6 +78,13 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> CheckOut([FromForm] AttendanceModel model)
         {
             var result = await _attendanceRepo.CheckOut(model);
+            //Redis Cache Code
+            // If check-out is successful, invalidate all related cache keys for this employee
+            if (result.success)
+            {
+                // Real-time invalidation: wipe every emp:{empId}:* key
+                await _redis.InvalidateEmployeeAsync(model.EmpId);
+            }
 
             // 🔥 UPDATE INDEX AFTER CHECKOUT
             if (result.success)
@@ -103,8 +115,15 @@ namespace MVCAttendEase.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAttendanceByEmployee(int empId)
         {
-            var result = await _attendanceRepo.GetAttendanceByEmployee(empId);
+            //Redis Cache Code for Attendance Grid
+            var result = await _redis.GetOrSetAsync(
+                RedisKeys.AttendanceGrid(empId),
+                async () => await _attendanceRepo.GetAttendanceByEmployee(empId),
+                System.TimeSpan.FromMinutes(5));
+
             return Json(result);
+            // var result = await _attendanceRepo.GetAttendanceByEmployee(empId);
+            // return Json(result);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

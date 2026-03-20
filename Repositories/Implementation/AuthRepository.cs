@@ -89,7 +89,7 @@ namespace Repositories.Implementation
                 var result = await command.ExecuteScalarAsync();
                 return result == null ? -1 : Convert.ToInt32(result);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error during registration: {ex.Message}");
                 return -1;
@@ -98,7 +98,6 @@ namespace Repositories.Implementation
             {
                 await _connection.CloseAsync();
             }
-            
         }
 
 

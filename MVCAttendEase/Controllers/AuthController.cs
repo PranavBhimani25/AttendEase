@@ -9,6 +9,7 @@ namespace MVCAttendEase.Controllers
     public class AuthController : Controller
     {
         private readonly CloudinaryService _cloudinaryService;
+        private readonly MailService _mailService;
         private readonly IAuthInterface _auth;
         private readonly ILogger<AuthController> _logger;
         private readonly RedisService _redis;
@@ -17,12 +18,13 @@ namespace MVCAttendEase.Controllers
             ILogger<AuthController> logger,
             IAuthInterface auth,
             CloudinaryService cloudinaryService,
-            RedisService redis)
+            RedisService redis, MailService mailService)
         {
             _logger    = logger;
             _auth      = auth;
             _cloudinaryService = cloudinaryService;
             _redis     = redis;
+            _mailService = mailService;
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -128,42 +130,47 @@ namespace MVCAttendEase.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromForm] RegisterEmployeeModel model)
         {
-            if (model == null)
-                return BadRequest(new { message = "Invalid registration request", success = false });
+             if(model == null)
+            {
+                return BadRequest("Invalid registration request");
+            }
 
-            // ── STEP 1: Upload image if provided ─────────────────────────────
             if (model.c_profileimage != null && model.c_profileimage.Length > 0)
             {
                 model.ProfileImageUrl = await _cloudinaryService.UploadImageAsync(model.c_profileimage);
             }
 
-            // ── STEP 2: Save to PostgreSQL (permanent) ────────────────────────
-            var result = await _auth.Register(model);
+            var employee = await _auth.Register(model);
 
-            if (result <= 0)
-                return BadRequest(new { message = "Registration failed. Please try again.", success = false });
-
-            // ── STEP 3: Save to Redis for 30 minutes (fast login cache) ───────
-            var employeeCache = new EmployeeModel
+            if(employee > 0)
             {
-                EmpId        = result,            // ID returned from PostgreSQL
-                Name         = model.c_name,
-                Email        = model.c_email,
-                Password     = model.c_password,  // stored for password verification on Redis login
-                Gender       = model.c_gender,
-                Status       = "Inactive",
-                Role         = "Employee",
-                ProfileImage = model.ProfileImageUrl
-            };
+                string body = $@"Dear {model.c_name}, <br><br>
 
-            var redisKey  = $"employee:{model.c_email}";
-            var jsonData  = JsonSerializer.Serialize(employeeCache);
+                                    Thank you for registering with our Attendance Management System. <br>
+                                    Your registration has been completed successfully. 🎉 <br><br>
 
-            await _redis.SetAsync(redisKey, jsonData, TimeSpan.FromMinutes(30));
+                                    Please note that your account is currently under review. 
+                                    You will be able to login only after an administrator activates your account. <br><br>
 
-            _logger.LogInformation("Registered & cached in Redis (30 min) for: {Email}", model.c_email);
+                                    Once your account is activated, you will receive a confirmation, 
+                                    and then you can access the system using your credentials. <br><br>
 
-            return Ok(new { message = "Registration successful", success = true });
+                                    If you have any questions or need assistance, feel free to contact us. <br><br>
+
+                                    Best regards, <br>
+                                    Admin Team <br>
+                                    AttendEase System
+                                    ";
+                string subject = "Registration Successfully";
+
+                _mailService.SendEmail(model.c_email, subject, body);
+
+                return Ok(new { message = "Registration successful", success = true });
+            }
+            else
+            {
+                return BadRequest(new { message = "Registration failed", success = false });
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────

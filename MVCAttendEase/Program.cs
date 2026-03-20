@@ -5,6 +5,7 @@ using MVCAttendEase.Services;
 using Npgsql;
 using Repositories.Implementation;
 using Repositories.Interfaces;
+using Repositories.Models;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -65,6 +66,8 @@ builder.Services.AddScoped<IAuthInterface,       AuthRepository>();
 builder.Services.AddScoped<IAdminInterface,      AdminRepository>();
 builder.Services.AddScoped<IEmployeeInterface,   EmployeeRepository>();
 builder.Services.AddScoped<IAttendanceInterface, AttendanceRepository>();
+builder.Services.Configure<EmailModal>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<MailService>();
 
 builder.Services.AddScoped<NpgsqlConnection>(_ =>
     new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));

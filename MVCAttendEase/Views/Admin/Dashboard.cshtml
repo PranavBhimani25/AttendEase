@@ -410,31 +410,60 @@ function loadDashboard(){
 
 }
 
-function searchEmployee(){
-
-    let name = $("#searchName").val();
+function searchEmployee() {
+    let name = $("#searchName").val().trim();
     let status = $("#searchStatus").val();
 
     var grid = $("#employeeGrid").data("kendoGrid");
 
-    grid.dataSource.transport.options.read.url = 
-        `/Admin/SearchEmployee?name=${name}&status=${status}`;
-
-    grid.dataSource.read();
+    $.get(`/Admin/SearchEmployee?name=${encodeURIComponent(name)}&status=${encodeURIComponent(status)}`, function(res) {
+        if (res.success) {
+            // ✅ Load all results locally so Kendo handles pagination client-side
+            var ds = new kendo.data.DataSource({
+                data: res.data,
+                pageSize: 10,
+                schema: {
+                    model: {
+                        fields: {
+                            empId:  { type: "number" },
+                            name:   { type: "string" },
+                            email:  { type: "string" },
+                            gender: { type: "string" },
+                            role:   { type: "string" },
+                            status: { type: "string" }
+                        }
+                    }
+                }
+            });
+            console.log(ds);
+            grid.setDataSource(ds);
+        }
+    });
 }
 
-function resetSearch(){
-
+function resetSearch() {
     $("#searchName").val("");
     $("#searchStatus").val("");
 
     var grid = $("#employeeGrid").data("kendoGrid");
 
-    grid.dataSource.transport.options.read.url = "/Admin/ListEmployee";
+    // ✅ Restore original server-side DataSource
+    var originalDs = new kendo.data.DataSource({
+        transport: {
+            read: {
+                url: "/Admin/ListEmployee",
+                dataType: "json"
+            }
+        },
+        schema: {
+            data: "data",
+            total: "total"
+        },
+        pageSize: 10
+    });
 
-    grid.dataSource.read();
+    grid.setDataSource(originalDs);
 }
-
 </script>
 
 }

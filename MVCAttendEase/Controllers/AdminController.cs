@@ -239,13 +239,12 @@ namespace MVCAttendEase.Controllers
         }
 
 
-        // 🔍 Employee Search (Name + Status)
         [HttpGet("SearchEmployee")]
         public async Task<IActionResult> SearchEmployee(string name, string status)
         {
-            // Default handling
             name = name ?? "";
-            status = string.IsNullOrEmpty(status) ? "Active" : status;
+            // ✅ Don't override — pass empty string as-is so the service returns all statuses
+            status = status ?? "";
 
             var result = await _elastic.SearchEmployee(name, status);
 

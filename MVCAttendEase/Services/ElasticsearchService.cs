@@ -244,6 +244,7 @@ namespace MVCAttendEase.Services
 
             var response = await _client.SearchAsync<EmployeeSearchIndex>(s => s
                 .Index("employee_index")
+                .Size(1000)
                 .Query(query)
             );
 

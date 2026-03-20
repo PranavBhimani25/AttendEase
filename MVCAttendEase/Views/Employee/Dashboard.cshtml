@@ -52,12 +52,68 @@
     .profile p{
         font-size : 20px;
     }
+
+    .notification-item{
+        padding:14px 16px;
+        border-bottom:1px solid #f4f4f4;
+    }
+
+    .notification-item:last-child{
+        border-bottom:none;
+    }
+
+    .notification-item-header{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        margin-bottom:6px;
+    }
+
+    .notification-item-title{
+        font-weight:700;
+        color:#222;
+    }
+
+    .notification-item-time{
+        font-size:12px;
+        color:#777;
+        white-space:nowrap;
+    }
+
+    .notification-item-message{
+        margin:0;
+        color:#4f4f4f;
+        line-height:1.5;
+    }
+
+    .notification-item-actions{
+        margin-top:10px;
+        display:flex;
+        justify-content:flex-end;
+    }
+
+    .notification-read-btn{
+        border:none;
+        background:#d32f2f;
+        color:#fff;
+        border-radius:999px;
+        padding:6px 12px;
+        font-size:12px;
+        font-weight:600;
+        cursor:pointer;
+    }
+
+    .notification-empty{
+        padding:22px 16px;
+        text-align:center;
+        color:#777;
+    }
 </style>
 
 
 
 <div class="container">
-
     <div class="row">
         <!-- Profile Card -->
         <div class="col-md-4 profile">
@@ -133,9 +189,11 @@ console.log("ID:", id);
 
 
 var attendanceData = [];
+var employeeNotifications = [];
 
 $(document).ready(function () {
     loadEmployee();
+    loadNotifications();
     var id = sessionStorage.getItem("userId");
 
     $.get("/Employee/GetAttendence/" + id, function (data) {
@@ -356,7 +414,6 @@ $(document).ready(function () {
                 createYearlyChart(months, hours);
 
             });
-
     }
 
 
@@ -679,6 +736,83 @@ function loadEmployee(){
                 }
         });
     }
+
+function loadNotifications(){
+    $.ajax({
+        url: "/Employee/GetNotifications",
+        type: "GET",
+        success: function(response){
+            if(response.success){
+                employeeNotifications = response.data || [];
+                renderNotifications(employeeNotifications);
+            }
+        },
+        error: function(){
+            renderNotifications([]);
+        }
+    });
+}
+
+function renderNotifications(notifications){
+    var list = $("#notificationList");
+    var badge = $("#notificationCount");
+
+    list.empty();
+
+    if(!notifications || notifications.length === 0){
+        badge.hide();
+        list.append("<li class='notification-empty'>No notifications found</li>");
+        return;
+    }
+
+    badge.text(notifications.length).show();
+
+    notifications.forEach(function(item, index){
+        var createdAt = item.createdAt ? kendo.toString(new Date(item.createdAt), "dd MMM yyyy hh:mm tt") : "";
+        list.append(`
+            <li class="notification-item">
+                <div class="notification-item-header">
+                    <span class="notification-item-title">${escapeHtml(item.sender || "Admin")}</span>
+                    <span class="notification-item-time">${escapeHtml(createdAt)}</span>
+                </div>
+                <p class="notification-item-message">${escapeHtml(item.message || "")}</p>
+                <div class="notification-item-actions">
+                    <button type="button" class="notification-read-btn" data-index="${index}">
+                        Read
+                    </button>
+                </div>
+            </li>
+        `);
+    });
+}
+
+function escapeHtml(value){
+    return $("<div>").text(value || "").html();
+}
+
+$(document).on("click", ".notification-read-btn", function(){
+    var button = $(this);
+    var index = Number(button.attr("data-index"));
+    var payload = employeeNotifications[index];
+
+    if (!payload) {
+        return;
+    }
+
+    $.ajax({
+        url: "/Employee/MarkNotificationRead",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(payload),
+        success: function(response){
+            if(response.success){
+                employeeNotifications.splice(index, 1);
+
+                renderNotifications(employeeNotifications);
+            }
+        }
+    });
+});
 
 </script>
 }

@@ -378,6 +378,10 @@ $(document).on("click", "#downloadPdfBtn", function(){
     downloadCurrentReportPdf();
 });
 
+$(document).on("click", "#sendPdfBtn", function () {
+    sendPdfToServer();
+});
+
 function generateMonthlyReportWindow(empId, empName, month, year){
     var reportWnd = $("#monthlyReportWindow").data("kendoWindow");
     currentReportMeta = { empId: empId, empName: empName || "", month: month, year: year };
@@ -398,6 +402,9 @@ function generateMonthlyReportWindow(empId, empName, month, year){
                 <div id="monthlyReportGrid"></div>
                 <div class="report-actions">
                     <button id="downloadPdfBtn" class="k-button k-button-md k-button-solid-primary">Download PDF</button>
+                </div>
+                <div class="report-actions">
+                    <button id="sendPdfBtn" class="k-button k-button-md k-button-solid-primary">Send PDF</button>
                 </div>
             </div>
         </div>`;
@@ -443,6 +450,8 @@ function normalizeAttendanceRows(rows){
         };
     });
 }
+
+
 
 function renderReportCards(summary){
     var cards = [
@@ -617,6 +626,61 @@ function renderMonthlyGrid(rows){
             { field: "workingHours", title: "Working Hours" },
             { field: "attendStatus", title: "Attend Status" }
         ]
+    });
+}
+
+function sendPdfToServer() {
+
+    var target = $("#monthlyReportContent .report-shell");
+
+    if (!target.length) {
+        $("#notification").data("kendoNotification").show({ message: "Report not ready" }, "error");
+        return;
+    }
+
+    kendo.drawing.drawDOM(target, {
+        paperSize: "A4",
+        margin: "1cm",
+        landscape: true,
+        scale: 0.75,
+        multiPage: true
+    })
+    .then(function (group) {
+        return kendo.drawing.exportPDF(group);
+    })
+    .then(function (dataURI) {
+
+        // Convert Base64
+        var base64 = dataURI.split(",")[1];
+
+        $.ajax({
+            url: "/Admin/SendReportEmail",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                empId: currentReportMeta.empId,
+                fileName: "Report.pdf",
+                fileData: base64
+            }),
+            success: function (res) {
+
+                debugger;
+                if(res.success)
+                {
+                    $("#notification").data("kendoNotification")
+                        .show( res.message , "success");
+                }
+                else{
+                    $("#notification").data("kendoNotification")
+                        .show({ message: res.message }, "error");
+                }
+            },
+            error: function () {
+                $("#notification").data("kendoNotification")
+                    .show({ message: "Failed to send email" }, "error");
+            }
+        });
+
     });
 }
 

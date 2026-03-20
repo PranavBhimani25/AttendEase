@@ -8,6 +8,7 @@ using MVCAttendEase.Models;
 using MVCAttendEase.Services;
 using Repositories.Interfaces;
 using Repositories.Models;
+using System.Security.Cryptography;
 
 namespace MVCAttendEase.Controllers
 {
@@ -119,6 +120,123 @@ namespace MVCAttendEase.Controllers
             HttpContext.Session.SetString("Role", role);
             return Ok();
         }
+
+
+
+
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(string email, string otp)
+        {
+           if (email == null)
+            {
+                return BadRequest(new { message = "Invalid Email request", success = false });
+            }
+
+            if(!(HttpContext.Session.GetString("OTP") == otp && HttpContext.Session.GetString("Email") == email))
+            {
+                return Ok(new { message = "OTP Not Matched", success = false });
+            }
+
+            HttpContext.Session.Clear();
+
+            int length = 6;
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var result = new char[length];
+
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] buffer = new byte[length];
+                rng.GetBytes(buffer);
+
+                for (int i = 0; i < length; i++)
+                {
+                    result[i] = chars[buffer[i] % chars.Length];
+                }
+            }
+            string password = new string(result);
+
+            LoginModel ForgetPassword = new LoginModel()
+            {
+                c_email = email,
+                c_password = password
+            };
+
+            var status = await _auth.ForgetPassword(ForgetPassword);
+
+
+            if (status == -1)
+            {
+                return Ok(new { message = "Email Not Exist. Register First",success=false });
+            }
+            else if(status == 1)
+            {
+                
+                string body = $@"Dear {ForgetPassword.c_email}, <br><br>
+
+                                Your password has been successfully reset. 🔐   <br><br>
+
+                                You can now log in to your account using your new password <b> {ForgetPassword.c_password} <b>.   <br><br>
+
+                                For security reasons, we recommend that you change this password after logging in.   <br><br>
+
+                                If you did not request this change, please contact our support team immediately.    <br><br>
+
+                                Best regards,
+                                Admin Team
+                                AttendEase System";
+                string subject = "Password Reset Successfully";
+
+
+                _mailService.SendEmail(ForgetPassword.c_email, subject, body);
+                return Ok(new { message = "New Pasword Sent to Your Email....",success=true });
+            }
+            else
+            {
+                return BadRequest(new { message = "New Password Not Set", success = false });
+            }
+        }
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> SendOtp(string email)
+        {
+            if(email == null)
+            {
+                return BadRequest(new { message = "Email is Required", success = false });
+            }
+            int status = await _auth.GetOne(email);
+            if(status == 0)
+            {
+                return BadRequest(new { message = "User Not Exists", success = false });
+            }
+            var otp = new Random().Next(100000, 999999).ToString();
+
+            // Save OTP (DB / Redis recommended)
+            HttpContext.Session.SetString("OTP", otp);
+            HttpContext.Session.SetString("Email", email);
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "OtpVerify.html");
+            string body = System.IO.File.ReadAllText(path);
+
+            // Replace dynamic values
+            body = body.Replace("000000", otp);
+            body = body.Replace("username", email);
+
+
+            // Send Email
+            _mailService.SendEmail(email, "OTP Verification", body);
+
+            return Json(new { success = true });
+        }
+
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

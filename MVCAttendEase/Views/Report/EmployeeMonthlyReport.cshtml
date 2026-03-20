@@ -1,0 +1,1042 @@
+@{
+    ViewData["Title"] = "Employee Reports";
+}
+
+<link href="~/lib/kendo/kendo.blueopal.min.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/kendo/kendo.all.min.js"></script>
+
+<style>
+    /* Preserved your original styles with enhancements */
+    .page-wrap {
+        padding: 20px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9eef5 100%);
+        min-height: 100vh;
+    }
+
+    .section-title {
+        margin-bottom: 14px;
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 24px;
+        border-left: 5px solid #0072c6;
+        padding-left: 15px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .actions-cell .k-button {
+        margin-right: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .actions-cell .k-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .report-card {
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .report-card p {
+        margin: 4px 0;
+        color: #34495e;
+    }
+
+    .report-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 10px;
+        align-items: end;
+        margin-bottom: 14px;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .summary-row {
+        display: flex;
+        gap: 18px;
+        margin: 10px 0 14px;
+        font-weight: 600;
+    }
+    
+    .summary-item {
+        background: linear-gradient(135deg, #0072c6 0%, #0053a0 100%);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,114,198,0.2);
+        flex: 1;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .summary-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0,114,198,0.3);
+    }
+    
+    .summary-item span:first-child {
+        display: block;
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .summary-item span:last-child {
+        font-size: 24px;
+        font-weight: 700;
+        display: block;
+    }
+
+    .details-card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #0072c6;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .download-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    /* New styles for charts */
+    .dashboard-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e0e0e0;
+    }
+    
+    .chart-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #0072c6;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-left: 4px solid #0072c6;
+    }
+    
+    .stat-box h4 {
+        margin: 0 0 10px 0;
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+    
+    .stat-box .value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    
+    .stat-box .trend {
+        font-size: 12px;
+        color: #27ae60;
+        margin-top: 5px;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .quick-action-btn {
+        background: white;
+        border: 1px solid #0072c6;
+        color: #0072c6;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 13px;
+    }
+    
+    .quick-action-btn:hover {
+        background: #0072c6;
+        color: white;
+    }
+    
+    /* Kendo UI overrides for blue theme */
+    .k-button.k-button-solid-primary {
+        background: linear-gradient(135deg, #0072c6 0%, #0053a0 100%);
+        border-color: #0053a0;
+    }
+    
+    .k-button.k-button-solid-primary:hover {
+        background: linear-gradient(135deg, #0053a0 0%, #003d7a 100%);
+    }
+    
+    .k-grid .k-header {
+        background: linear-gradient(135deg, #0072c6 0%, #0053a0 100%);
+        color: white;
+    }
+    
+    .k-grid .k-header .k-link {
+        color: white;
+    }
+    
+    .k-pager-wrap {
+        background: #f8f9fa;
+    }
+    
+    .k-window-titlebar {
+        background: linear-gradient(135deg, #0072c6 0%, #0053a0 100%);
+        color: white;
+    }
+    
+    .k-window-titlebar .k-window-title {
+        color: white;
+    }
+    
+    .k-dropdown, .k-datepicker, .k-numerictextbox {
+        width: 100%;
+    }
+</style>
+
+<div class="page-wrap">
+    <h2 class="section-title">📊 Employees Report Center</h2>
+    
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+        <span class="quick-action-btn" onclick="exportDashboard('pdf')">📑 Export Dashboard PDF</span>
+        <span class="quick-action-btn" onclick="refreshAllData()">🔄 Refresh All Data</span>
+        <span class="quick-action-btn" onclick="showDateRangePicker()">📅 Custom Date Range</span>
+    </div>
+    
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-box">
+            <h4>Total Employees</h4>
+            <div class="value" id="totalEmployees">0</div>
+            <div class="trend">↑ 12% vs last month</div>
+        </div>
+        <div class="stat-box">
+            <h4>Present Today</h4>
+            <div class="value" id="presentToday">0</div>
+            <div class="trend">83% attendance rate</div>
+        </div>
+        <div class="stat-box">
+            <h4>On Leave</h4>
+            <div class="value" id="onLeave">0</div>
+            <div class="trend">↓ 3% from yesterday</div>
+        </div>
+        <div class="stat-box">
+            <h4>Late Arrivals</h4>
+            <div class="value" id="lateToday">0</div>
+            <div class="trend">↑ 2 more than avg</div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Charts -->
+    <div class="dashboard-header">
+        <div class="chart-card">
+            <div class="chart-title">📈 Attendance Overview (Present vs Absent)</div>
+            <div id="attendancePieChart"></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">📊 Daily Attendance Trend</div>
+            <div id="attendanceTrendChart"></div>
+        </div>
+    </div>
+    
+    <!-- Employee Grid -->
+    <div id="employeeGrid"></div>
+</div>
+
+<!-- Details Window -->
+<div id="detailsWindow" style="display:none;">
+    <div id="detailsContent" class="details-card"></div>
+</div>
+
+<!-- Report Window -->
+<div id="reportWindow" style="display:none;">
+    <div id="selectedEmployeeCard" class="report-card"></div>
+    
+    <!-- Employee Specific Charts -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div class="chart-card">
+            <div class="chart-title">Employee Attendance Pattern</div>
+            <div id="employeePieChart"></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">Monthly Working Hours</div>
+            <div id="employeeBarChart"></div>
+        </div>
+    </div>
+
+    <div class="report-controls">
+        <div>
+            <label for="reportType">Report Type</label>
+            <input id="reportType" />
+        </div>
+        <div id="monthWrap">
+            <label for="monthPicker">Month</label>
+            <input id="monthPicker" />
+        </div>
+        <div>
+            <label for="yearPicker">Year</label>
+            <input id="yearPicker" />
+        </div>
+        <div>
+            <button id="generateBtn" class="k-button k-button-solid-primary">📊 Generate Report</button>
+        </div>
+    </div>
+
+    <div class="summary-row">
+        <div class="summary-item">
+            <span>Total Days</span>
+            <span id="sumDays">0</span>
+        </div>
+        <div class="summary-item">
+            <span>Total Hours</span>
+            <span id="sumHours">0</span>
+        </div>
+        <div class="summary-item">
+            <span>Late Days</span>
+            <span id="sumLate">0</span>
+        </div>
+        <div class="summary-item">
+            <span>Early Out</span>
+            <span id="sumEarly">0</span>
+        </div>
+    </div>
+
+    <div id="reportGrid"></div>
+
+    <div class="download-actions">
+        <button id="downloadExcelBtn" class="k-button k-button-solid-primary">📊 Download Excel</button>
+        <button id="downloadPdfBtn" class="k-button k-button-solid-primary">📑 Download PDF</button>
+        <button id="downloadCsvBtn" class="k-button k-button-solid-base">📄 Download CSV</button>
+        <button id="printReportBtn" class="k-button k-button-solid-base">🖨️ Print</button>
+        <button id="emailReportBtn" class="k-button k-button-solid-base">✉️ Email</button>
+    </div>
+</div>
+
+<!-- Date Range Window -->
+<div id="dateRangeWindow" style="display:none;">
+    <div style="padding: 15px;">
+        <div style="margin-bottom: 15px;">
+            <label>Start Date:</label>
+            <input id="startDatePicker" style="width: 100%;" />
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>End Date:</label>
+            <input id="endDatePicker" style="width: 100%;" />
+        </div>
+        <div style="text-align: right;">
+            <button id="applyDateRangeBtn" class="k-button k-button-solid-primary">Apply Range</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedEmployee = null;
+    let attendanceChart = null;
+    let trendChart = null;
+
+    $(function () {
+        initEmployeeGrid();
+        initDetailsWindow();
+        initReportWindow();
+        initReportGrid();
+        initCharts();
+        initDateRangeWindow();
+        bindActions();
+        loadDashboardStats();
+    });
+
+    function initEmployeeGrid() {
+        $("#employeeGrid").kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Report/GetEmployees",
+                        dataType: "json"
+                    }
+                },
+                pageSize: 10,
+                schema: {
+                    model: {
+                        fields: {
+                            empId: { type: "number" },
+                            name: { type: "string" },
+                            email: { type: "string" },
+                            gender: { type: "string" },
+                            status: { type: "string" },
+                            role: { type: "string" }
+                        }
+                    }
+                }
+            },
+            height: 520,
+            pageable: {
+                refresh: true,
+                pageSizes: [5, 10, 20, 50]
+            },
+            sortable: true,
+            filterable: {
+                mode: "row"
+            },
+            resizable: true,
+            groupable: true,
+            columns: [
+                { field: "empId", title: "Emp ID", width: 95 },
+                { field: "name", title: "Name", width: 180 },
+                { field: "email", title: "Email", width: 220 },
+                { field: "gender", title: "Gender", width: 110 },
+                { 
+                    field: "status", 
+                    title: "Status", 
+                    width: 110,
+                    template: function(dataItem) {
+                        if (dataItem.status === "Active") {
+                            return "<span class='k-badge k-badge-success' style='padding: 4px 8px;'>✓ Active</span>";
+                        }
+                        return "<span class='k-badge k-badge-error' style='padding: 4px 8px;'>● Inactive</span>";
+                    }
+                },
+                { field: "role", title: "Role", width: 110 },
+                {
+                    title: "Actions",
+                    width: 260,
+                    template: "<div class='actions-cell'>" +
+                        "<button class='k-button k-button-solid-primary report-btn' data-id='#=empId#'>📊 Report</button>" +
+                        "<button class='k-button details-btn' data-id='#=empId#'>👤 Details</button>" +
+                        "<button class='k-button k-button-solid-base attendance-btn' data-id='#=empId#'>📅 Attendance</button>" +
+                        "</div>"
+                }
+            ],
+            dataBound: function() {
+                updateStatsFromGrid();
+            }
+        });
+    }
+
+    function initCharts() {
+        // Attendance Pie Chart
+        $("#attendancePieChart").kendoChart({
+            legend: {
+                position: "bottom"
+            },
+            seriesDefaults: {
+                type: "pie"
+            },
+            series: [{
+                data: [
+                    { category: "Present", value: 0, color: "#0072c6" },
+                    { category: "Absent", value: 0, color: "#ff6b6b" },
+                    { category: "Late", value: 0, color: "#f39c12" },
+                    { category: "Leave", value: 0, color: "#95a5a6" }
+                ]
+            }],
+            tooltip: {
+                visible: true,
+                template: "#= category #: #= value # (#= kendo.format('{0:P}', percentage)#)"
+            },
+            chartArea: {
+                background: "transparent"
+            }
+        });
+
+        // Attendance Trend Chart
+        $("#attendanceTrendChart").kendoChart({
+            legend: {
+                visible: true,
+                position: "top"
+            },
+            seriesDefaults: {
+                type: "line",
+                style: "smooth"
+            },
+            series: [{
+                name: "Present",
+                data: [0, 0, 0, 0, 0, 0, 0],
+                color: "#0072c6"
+            }, {
+                name: "Absent",
+                data: [0, 0, 0, 0, 0, 0, 0],
+                color: "#ff6b6b"
+            }],
+            valueAxis: {
+                title: { text: "Number of Employees" },
+                min: 0
+            },
+            categoryAxis: {
+                categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                majorGridLines: {
+                    visible: false
+                }
+            },
+            tooltip: {
+                visible: true,
+                shared: true
+            }
+        });
+    }
+
+    function initDetailsWindow() {
+        $("#detailsWindow").kendoWindow({
+            title: "Employee Details",
+            width: "450px",
+            modal: true,
+            visible: false,
+            actions: ["Close", "Maximize", "Minimize"]
+        });
+    }
+
+    function initReportWindow() {
+        $("#reportWindow").kendoWindow({
+            title: "Generate Employee Report",
+            width: "1100px",
+            height: "800px",
+            modal: true,
+            visible: false,
+            actions: ["Close", "Maximize", "Minimize"]
+        });
+
+        $("#reportType").kendoDropDownList({
+            dataSource: ["Monthly", "Yearly", "Quarterly"],
+            value: "Monthly",
+            change: function () {
+                const isMonthly = this.value() === "Monthly" || this.value() === "Quarterly";
+                $("#monthWrap").toggle(isMonthly);
+            }
+        });
+
+        $("#monthPicker").kendoDatePicker({
+            start: "year",
+            depth: "year",
+            format: "MMMM yyyy",
+            value: new Date()
+        });
+
+        $("#yearPicker").kendoNumericTextBox({
+            format: "n0",
+            min: 2000,
+            max: 2100,
+            value: new Date().getFullYear(),
+            step: 1
+        });
+    }
+
+    function initReportGrid() {
+        $("#reportGrid").kendoGrid({
+            dataSource: {
+                data: [],
+                pageSize: 12,
+                schema: {
+                    model: {
+                        fields: {
+                            empId: { type: "number" },
+                            attendDate: { type: "date" },
+                            clockInHour: { type: "number" },
+                            clockInMin: { type: "number" },
+                            clockOutHour: { type: "number" },
+                            clockOutMin: { type: "number" },
+                            workingHour: { type: "number" },
+                            status: { type: "string" },
+                            workType: { type: "string" },
+                            taskType: { type: "string" }
+                        }
+                    }
+                }
+            },
+            toolbar: ["excel", "pdf"],
+            excel: {
+                fileName: "EmployeeReport.xlsx",
+                allPages: true
+            },
+            pdf: {
+                fileName: "EmployeeReport.pdf",
+                allPages: true
+            },
+            height: 370,
+            pageable: true,
+            sortable: true,
+            filterable: true,
+            groupable: true,
+            columns: [
+                { field: "empId", title: "Emp ID", width: 95 },
+                { field: "attendDate", title: "Date", format: "{0:dd-MMM-yyyy}", width: 130 },
+                { 
+                    title: "Clock In", 
+                    template: "#= pad(clockInHour) #:#= pad(clockInMin) #",
+                    attributes: {
+                        style: "font-family: monospace; font-weight: bold;"
+                    },
+                    width: 120 
+                },
+                { 
+                    title: "Clock Out", 
+                    template: "#= pad(clockOutHour) #:#= pad(clockOutMin) #",
+                    attributes: {
+                        style: "font-family: monospace; font-weight: bold;"
+                    },
+                    width: 120 
+                },
+                { 
+                    field: "workingHour", 
+                    title: "Working Hours",
+                    template: "#= workingHour ? workingHour.toFixed(2) : '0.00' # hrs",
+                    width: 130 
+                },
+                { 
+                    field: "status", 
+                    title: "Status",
+                    template: function(dataItem) {
+                        var status = dataItem.status || "";
+                        if (status.toLowerCase().includes("late")) {
+                            return "<span style='color: #f39c12; font-weight: bold;'>⚠️ " + status + "</span>";
+                        } else if (status.toLowerCase().includes("early")) {
+                            return "<span style='color: #e74c3c; font-weight: bold;'>⚡ " + status + "</span>";
+                        }
+                        return "<span style='color: #27ae60;'>✓ " + status + "</span>";
+                    },
+                    width: 110 
+                },
+                { field: "workType", title: "Work Type", width: 140 },
+                { field: "taskType", title: "Task Type", width: 160 }
+            ]
+        });
+    }
+
+    function initDateRangeWindow() {
+        $("#dateRangeWindow").kendoWindow({
+            title: "Select Date Range",
+            width: "400px",
+            modal: true,
+            visible: false,
+            actions: ["Close"]
+        });
+
+        $("#startDatePicker").kendoDatePicker({
+            format: "dd-MMM-yyyy",
+            value: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        });
+
+        $("#endDatePicker").kendoDatePicker({
+            format: "dd-MMM-yyyy",
+            value: new Date()
+        });
+    }
+
+    function bindActions() {
+        // Employee Details
+        $("#employeeGrid").on("click", ".details-btn", function () {
+            const empid = $(this).data("id");
+            $.getJSON("/Report/GetEmployeeDetails", { empid: empid }, function (emp) {
+                const image = emp.profileImage ? 
+                    "<img src='" + emp.profileImage + "' alt='Profile' style='width: 120px; height: 120px; border-radius: 50%; border: 3px solid #0072c6;' />" : 
+                    "<div style='width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #0072c6, #0053a0); color: white; display: flex; align-items: center; justify-content: center; font-size: 48px; margin-bottom: 15px;'>" + (emp.name ? emp.name.charAt(0) : 'U') + "</div>";
+                
+                const html = image +
+                    "<div style='background: #f8f9fa; padding: 15px; border-radius: 8px;'>" +
+                    "<p><strong>🆔 Employee ID:</strong> " + emp.empId + "</p>" +
+                    "<p><strong>👤 Name:</strong> " + emp.name + "</p>" +
+                    "<p><strong>📧 Email:</strong> " + emp.email + "</p>" +
+                    "<p><strong>⚥ Gender:</strong> " + emp.gender + "</p>" +
+                    "<p><strong>📊 Status:</strong> <span class='k-badge k-badge-" + (emp.status === "Active" ? "success" : "error") + "'>" + emp.status + "</span></p>" +
+                    "<p><strong>💼 Role:</strong> " + emp.role + "</p>" +
+                    "<p><strong>📅 Join Date:</strong> " + (emp.joinDate || 'N/A') + "</p>" +
+                    "<p><strong>📞 Phone:</strong> " + (emp.phone || 'N/A') + "</p>" +
+                    "</div>";
+                
+                $("#detailsContent").html(html);
+                $("#detailsWindow").data("kendoWindow").center().open();
+            });
+        });
+
+        // Attendance Quick View
+        $("#employeeGrid").on("click", ".attendance-btn", function () {
+            const empid = $(this).data("id");
+            showEmployeeAttendance(empid);
+        });
+
+        // Report Generation
+        $("#employeeGrid").on("click", ".report-btn", function () {
+            const empid = $(this).data("id");
+            $.getJSON("/Report/GetEmployeeDetails", { empid: empid }, function (emp) {
+                selectedEmployee = emp;
+                $("#selectedEmployeeCard").html(
+                    "<div style='display: flex; align-items: center; gap: 15px;'>" +
+                    "<div style='width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #0072c6, #0053a0); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px;'>" + emp.name.charAt(0) + "</div>" +
+                    "<div>" +
+                    "<p><strong>🆔 Employee ID:</strong> " + emp.empId + "</p>" +
+                    "<p><strong>👤 Name:</strong> " + emp.name + "</p>" +
+                    "<p><strong>📧 Email:</strong> " + emp.email + "</p>" +
+                    "<p><strong>📊 Status:</strong> <span class='k-badge k-badge-success'>" + emp.status + "</span></p>" +
+                    "</div>" +
+                    "</div>"
+                );
+                $("#reportGrid").data("kendoGrid").dataSource.data([]);
+                resetSummary();
+                $("#reportWindow").data("kendoWindow").center().open();
+                generateReport();
+                loadEmployeeCharts(empid);
+            });
+        });
+
+        $("#generateBtn").on("click", function () {
+            generateReport();
+        });
+
+        $("#downloadExcelBtn").on("click", function () {
+            $("#reportGrid").data("kendoGrid").saveAsExcel();
+        });
+
+        $("#downloadPdfBtn").on("click", function () {
+            $("#reportGrid").data("kendoGrid").saveAsPDF();
+        });
+
+        $("#downloadCsvBtn").on("click", function () {
+            if (!selectedEmployee) {
+                alert("Please select an employee first.");
+                return;
+            }
+
+            const filters = getReportFilters();
+            if (!filters.isValid) {
+                alert(filters.message);
+                return;
+            }
+
+            const url = "/Report/DownloadReportCsv?empid=" + selectedEmployee.empId +
+                "&reportType=" + encodeURIComponent(filters.reportType) +
+                "&month=" + (filters.month ?? "") +
+                "&year=" + filters.year;
+
+            window.location = url;
+        });
+
+        $("#printReportBtn").on("click", function () {
+            window.print();
+        });
+
+        $("#emailReportBtn").on("click", function () {
+            alert("Email functionality would be implemented here!");
+        });
+
+        $("#applyDateRangeBtn").on("click", function () {
+            const startDate = $("#startDatePicker").data("kendoDatePicker").value();
+            const endDate = $("#endDatePicker").data("kendoDatePicker").value();
+            
+            if (startDate && endDate) {
+                loadCustomRangeData(startDate, endDate);
+                $("#dateRangeWindow").data("kendoWindow").close();
+            }
+        });
+    }
+
+    function getReportFilters() {
+        const reportType = $("#reportType").data("kendoDropDownList").value();
+        const monthDate = $("#monthPicker").data("kendoDatePicker").value();
+        const year = $("#yearPicker").data("kendoNumericTextBox").value();
+
+        if (!year) {
+            return { isValid: false, message: "Please select a valid year." };
+        }
+
+        if (reportType === "Monthly" || reportType === "Quarterly") {
+            if (!monthDate) {
+                return { isValid: false, message: "Please select a month for " + reportType.toLowerCase() + " report." };
+            }
+            return { isValid: true, reportType: reportType, month: monthDate.getMonth() + 1, year: year };
+        }
+
+        return { isValid: true, reportType: reportType, month: null, year: year };
+    }
+
+    function generateReport() {
+        if (!selectedEmployee) {
+            alert("Please select an employee first.");
+            return;
+        }
+
+        const filters = getReportFilters();
+        if (!filters.isValid) {
+            alert(filters.message);
+            return;
+        }
+
+        $("#generateBtn").text("⏳ Generating...").prop("disabled", true);
+
+        $.getJSON("/Report/GenerateReport", {
+            empid: selectedEmployee.empId,
+            reportType: filters.reportType,
+            month: filters.month,
+            year: filters.year
+        }, function (data) {
+            const grid = $("#reportGrid").data("kendoGrid");
+            grid.dataSource.data(data);
+            updateSummary(data);
+            
+            $("#generateBtn").text("📊 Generate Report").prop("disabled", false);
+        }).fail(function() {
+            $("#generateBtn").text("📊 Generate Report").prop("disabled", false);
+            alert("Error generating report. Please try again.");
+        });
+    }
+
+    function updateSummary(data) {
+        let totalHours = 0;
+        let late = 0;
+        let early = 0;
+        let present = 0;
+
+        for (let i = 0; i < data.length; i++) {
+            totalHours += data[i].workingHour || 0;
+            const status = (data[i].status || "").toLowerCase();
+            
+            if (status.includes("late")) {
+                late++;
+            }
+            if (status.includes("early")) {
+                early++;
+            }
+            if (status.includes("present") || !status.includes("absent")) {
+                present++;
+            }
+        }
+
+        $("#sumDays").text(data.length);
+        $("#sumHours").text(totalHours.toFixed(2));
+        $("#sumLate").text(late);
+        $("#sumEarly").text(early);
+    }
+
+    function resetSummary() {
+        $("#sumDays").text(0);
+        $("#sumHours").text(0);
+        $("#sumLate").text(0);
+        $("#sumEarly").text(0);
+    }
+
+    function pad(value) {
+        const num = value || 0;
+        return num < 10 ? "0" + num : num.toString();
+    }
+
+    function loadDashboardStats() {
+        $.getJSON("/Report/GetDashboardStats", function(stats) {
+            if (stats) {
+                $("#totalEmployees").text(stats.totalEmployees || 0);
+                $("#presentToday").text(stats.presentToday || 0);
+                $("#onLeave").text(stats.onLeave || 0);
+                $("#lateToday").text(stats.lateToday || 0);
+
+                // Update pie chart
+                const pieChart = $("#attendancePieChart").data("kendoChart");
+                if (pieChart) {
+                    pieChart.options.series[0].data = [
+                        { category: "Present", value: stats.presentToday || 0, color: "#0072c6" },
+                        { category: "Absent", value: stats.absentToday || 0, color: "#ff6b6b" },
+                        { category: "Late", value: stats.lateToday || 0, color: "#f39c12" },
+                        { category: "Leave", value: stats.onLeave || 0, color: "#95a5a6" }
+                    ];
+                    pieChart.redraw();
+                }
+
+                // Update trend chart
+                const trendChart = $("#attendanceTrendChart").data("kendoChart");
+                if (trendChart && stats.weeklyTrend) {
+                    trendChart.options.series[0].data = stats.weeklyTrend.present;
+                    trendChart.options.series[1].data = stats.weeklyTrend.absent;
+                    trendChart.redraw();
+                }
+            }
+        });
+    }
+
+    function loadEmployeeCharts(empid) {
+        $.getJSON("/Report/GetEmployeeChartData", { empid: empid }, function(data) {
+            if (data) {
+                // Employee Pie Chart
+                $("#employeePieChart").kendoChart({
+                    legend: {
+                        position: "bottom"
+                    },
+                    seriesDefaults: {
+                        type: "pie"
+                    },
+                    series: [{
+                        data: [
+                            { category: "Present", value: data.present || 0, color: "#0072c6" },
+                            { category: "Absent", value: data.absent || 0, color: "#ff6b6b" },
+                            { category: "Late", value: data.late || 0, color: "#f39c12" },
+                            { category: "Leave", value: data.leave || 0, color: "#95a5a6" }
+                        ],
+                        labels: {
+                            visible: true,
+                            template: "#= category #: #= value#"
+                        }
+                    }],
+                    tooltip: {
+                        visible: true,
+                        template: "#= category #: #= value # days"
+                    }
+                });
+
+                // Employee Bar Chart
+                $("#employeeBarChart").kendoChart({
+                    legend: {
+                        visible: false
+                    },
+                    seriesDefaults: {
+                        type: "column"
+                    },
+                    series: [{
+                        name: "Working Hours",
+                        data: data.monthlyHours || [],
+                        color: "#0072c6"
+                    }],
+                    valueAxis: {
+                        title: { text: "Hours" },
+                        min: 0
+                    },
+                    categoryAxis: {
+                        categories: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                        majorGridLines: {
+                            visible: false
+                        }
+                    },
+                    tooltip: {
+                        visible: true,
+                        template: "#= value # hours"
+                    }
+                });
+            }
+        });
+    }
+
+    function showEmployeeAttendance(empid) {
+        $.getJSON("/Report/GetEmployeeDetails", { empid: empid }, function(emp) {
+            const window = $("#detailsWindow").data("kendoWindow");
+            window.title("Attendance Overview - " + emp.name);
+            
+            const content = "<div style='padding: 15px;'>" +
+                "<div style='text-align: center; margin-bottom: 20px;'>" +
+                "<div style='width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #0072c6, #0053a0); color: white; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 10px;'>" + emp.name.charAt(0) + "</div>" +
+                "<h3 style='margin: 0; color: #2c3e50;'>" + emp.name + "</h3>" +
+                "<p style='color: #7f8c8d;'>" + emp.role + "</p>" +
+                "</div>" +
+                
+                "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;'>" +
+                "<div style='background: #f0f7ff; padding: 10px; border-radius: 5px; text-align: center;'>" +
+                "<div style='font-size: 12px; color: #0072c6;'>Attendance Rate</div>" +
+                "<div style='font-size: 24px; font-weight: bold; color: #2c3e50;'>95%</div>" +
+                "</div>" +
+                "<div style='background: #f0f7ff; padding: 10px; border-radius: 5px; text-align: center;'>" +
+                "<div style='font-size: 12px; color: #0072c6;'>Avg Hours/Day</div>" +
+                "<div style='font-size: 24px; font-weight: bold; color: #2c3e50;'>8.5</div>" +
+                "</div>" +
+                "</div>" +
+                
+                "<div id='quickAttendanceChart' style='height: 200px;'></div>" +
+                "</div>";
+            
+            $("#detailsContent").html(content);
+            window.center().open();
+            
+            // Initialize quick chart
+            $("#quickAttendanceChart").kendoChart({
+                legend: { visible: false },
+                seriesDefaults: { type: "column" },
+                series: [{
+                    data: [8, 7, 9, 8, 7, 6, 8],
+                    color: "#0072c6"
+                }],
+                categoryAxis: {
+                    categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                    labels: { rotation: 0 }
+                },
+                valueAxis: {
+                    max: 10,
+                    title: { text: "Hours" }
+                }
+            });
+        });
+    }
+
+    function showDateRangePicker() {
+        $("#dateRangeWindow").data("kendoWindow").center().open();
+    }
+
+    function loadCustomRangeData(startDate, endDate) {
+        if (selectedEmployee) {
+            $.getJSON("/Report/GetCustomRangeReport", {
+                empid: selectedEmployee.empId,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString()
+            }, function(data) {
+                const grid = $("#reportGrid").data("kendoGrid");
+                grid.dataSource.data(data);
+                updateSummary(data);
+            });
+        }
+    }
+
+    function exportDashboard(format) {
+        if (format === 'pdf') {
+            kendo.drawing.drawDOM("#employeeGrid")
+                .then(function(group) {
+                    return kendo.drawing.exportPDF(group, {
+                        paperSize: "auto",
+                        margin: { left: "1cm", top: "1cm", right: "1cm", bottom: "1cm" }
+                    });
+                })
+                .done(function(data) {
+                    kendo.saveAs({
+                        dataURI: data,
+                        fileName: "dashboard_report.pdf"
+                    });
+                });
+        }
+    }
+
+    function refreshAllData() {
+        $("#employeeGrid").data("kendoGrid").dataSource.read();
+        loadDashboardStats();
+        kendo.ui.progress($("#employeeGrid"), false);
+    }
+
+    function updateStatsFromGrid() {
+        // This would update stats based on grid data
+        // Implementation depends on your data structure
+    }
+</script>

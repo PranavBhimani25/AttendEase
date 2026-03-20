@@ -57,6 +57,9 @@ builder.Services.Configure<RabbitMQConfig>(
 );
 
 builder.Services.AddScoped<RabbitMQService>();
+builder.Services.AddSingleton<NotificationService>();
+builder.Services.AddSingleton<NotificationPublisher>();
+builder.Services.AddHostedService<RabbitMqNotificationConsumer>();
 
 // ===================Elasticsearch Configuration===================
 builder.Services.Configure<ElasticsearchConfig>(

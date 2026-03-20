@@ -18,13 +18,20 @@ namespace MVCAttendEase.Controllers
         private readonly MailService _mailService;
         private readonly IAuthInterface _auth;
         private readonly ILogger<AuthController> _logger;
+        private readonly NotificationPublisher _notificationPublisher;
 
-        public AuthController(ILogger<AuthController> logger, IAuthInterface auth, CloudinaryService cloudinaryService, MailService mailService)
+        public AuthController(
+            ILogger<AuthController> logger,
+            IAuthInterface auth,
+            CloudinaryService cloudinaryService,
+            MailService mailService,
+            NotificationPublisher notificationPublisher)
         {
             _logger = logger;
             _auth = auth;
             _cloudinaryService = cloudinaryService;
             _mailService = mailService;
+            _notificationPublisher = notificationPublisher;
         }
 
         public IActionResult Login()
@@ -99,6 +106,27 @@ namespace MVCAttendEase.Controllers
                 string subject = "Registration Successfully";
 
                 _mailService.SendEmail(model.c_email, subject, body);
+
+                var candidateName = string.IsNullOrWhiteSpace(model.c_name) ? "Employee" : model.c_name;
+                var userDisplayName = candidateName ?? "Employee";
+                var notification = new NotificationMessage
+                {
+                    EmployeeId = employee,
+                    FullName = userDisplayName,
+                    Email = model.c_email ?? string.Empty,
+                    Role = "Employee",
+                    Message = $"New user registration from {userDisplayName}.",
+                    RegisteredAt = DateTime.UtcNow
+                };
+
+                try
+                {
+                    await _notificationPublisher.PublishAsync(notification);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish registration notification for {Email}", model.c_email);
+                }
 
                 return Ok(new { message = "Registration successful", success = true });
             }

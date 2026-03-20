@@ -340,6 +340,7 @@ namespace Repositories.Implementation
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
                 var result=await cmd.ExecuteNonQueryAsync();
+                await _conn.CloseAsync();
                 return Convert.ToInt32(result);                
             }catch(Exception ex)
             {
@@ -626,6 +627,7 @@ namespace Repositories.Implementation
                 {
 
                     cmd.Parameters.AddWithValue("@id", empId);
+                    await _conn.CloseAsync();
                     await _conn.OpenAsync();
                     var reader = await cmd.ExecuteReaderAsync();
                     if (await reader.ReadAsync())

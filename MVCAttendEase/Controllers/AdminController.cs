@@ -166,6 +166,16 @@ namespace MVCAttendEase.Controllers
             var result=await _adminRepo.UpdateEmpStatus(id,status);
             if(result > 0 )
             {
+                if(status == "Active")
+                {
+                    string path = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "ActivateEmployee.html");
+                    string body = System.IO.File.ReadAllText(path);
+                    EmployeeModel employee = await _adminRepo.GetEmployeeById(id);
+                    body = body.Replace("EmployeeName", employee.Name);
+                    _mailService.SendEmail(employee.Email, "Your Account is Now Active – Login to Get Started", body);   
+                }
+
+
                 return Ok(new{success=true,message="Status updated"});
             }
             return Ok(new{success=false,message="Status not updated"});

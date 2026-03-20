@@ -137,7 +137,20 @@ namespace MVCAttendEase.Controllers
                 return BadRequest(new { message = "Invalid Email request", success = false });
             }
 
-            if(!(HttpContext.Session.GetString("OTP") == otp && HttpContext.Session.GetString("Email") == email))
+
+            var storedOtp = HttpContext.Session.GetString("OTP");
+            var storedTime = HttpContext.Session.GetString("OTP_Time");
+            var storedEmail = HttpContext.Session.GetString("Email");
+            
+            DateTime otpTime = DateTime.Parse(storedTime);
+            // ⏱️ Check 1 minute expiry
+            if ((DateTime.Now - otpTime).TotalMinutes > 1)
+            {
+                return Json(new { success = false, message = "OTP expired" });
+            }
+
+
+            if(!(storedOtp == otp && storedEmail == email))
             {
                 return Ok(new { message = "OTP Not Matched", success = false });
             }
@@ -220,6 +233,7 @@ namespace MVCAttendEase.Controllers
 
             // Save OTP (DB / Redis recommended)
             HttpContext.Session.SetString("OTP", otp);
+            HttpContext.Session.SetString("OTP_Time", DateTime.Now.ToString());
             HttpContext.Session.SetString("Email", email);
 
             string path = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "OtpVerify.html");

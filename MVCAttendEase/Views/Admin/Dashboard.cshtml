@@ -84,6 +84,25 @@
 </div>
 
 <div class="task-container">
+    <div style="margin-bottom:15px; display:flex; gap:10px;">
+
+    <input type="text" id="searchName" class="k-textbox" placeholder="Search by name" style="width:200px;" />
+
+    <select id="searchStatus" class="k-dropdown">
+        <option value="">All Status</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+    </select>
+
+    <button class="k-button k-button-solid k-button-solid-primary" onclick="searchEmployee()">
+        Search
+    </button>
+
+    <button class="k-button" onclick="resetSearch()">
+        Reset
+    </button>
+
+</div>
     <div id="employeeGrid"></div>
 </div>
 
@@ -389,6 +408,31 @@ function loadDashboard(){
 
     });
 
+}
+
+function searchEmployee(){
+
+    let name = $("#searchName").val();
+    let status = $("#searchStatus").val();
+
+    var grid = $("#employeeGrid").data("kendoGrid");
+
+    grid.dataSource.transport.options.read.url = 
+        `/Admin/SearchEmployee?name=${name}&status=${status}`;
+
+    grid.dataSource.read();
+}
+
+function resetSearch(){
+
+    $("#searchName").val("");
+    $("#searchStatus").val("");
+
+    var grid = $("#employeeGrid").data("kendoGrid");
+
+    grid.dataSource.transport.options.read.url = "/Admin/ListEmployee";
+
+    grid.dataSource.read();
 }
 
 </script>

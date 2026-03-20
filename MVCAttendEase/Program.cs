@@ -116,43 +116,54 @@ async Task IndexElasticData()
     var adminRepo = scope.ServiceProvider.GetRequiredService<IAdminInterface>();
     var employeeRepo = scope.ServiceProvider.GetRequiredService<IEmployeeInterface>();
 
-    // ✅ Create Index
+    // ================= CREATE INDEX =================
     await es.CreateAttendanceIndexAsync();
     await es.CreateEmployeeIndexAsync();
 
     // ================= EMPLOYEE DATA =================
     var employeeList = await adminRepo.ListEmployee();
+    Console.WriteLine($"Employee Count: {employeeList.Count}");
 
     // ================= ATTENDANCE DATA =================
     var attendanceList = new List<AttendanceModel>();
 
     foreach (var emp in employeeList)
     {
-        var empAttendance = employeeRepo.GetAttendanceByEmployee(emp.EmpId);
+        var empAttendance = await Task.Run(() =>
+            employeeRepo.GetAttendanceByEmployee(emp.EmpId)
+        );
+
         attendanceList.AddRange(empAttendance);
     }
 
-    // ================= ATTENDANCE INDEX =================
-    var attendanceData = from a in attendanceList
-                         join e in employeeList
-                         on a.EmpId equals e.EmpId
-                         select new AdminReportSearchModel
-                         {
-                             AttendId = a.AttendId,
-                             EmpId = a.EmpId,
-                             EmployeeName = e.Name,
-                             AttendDate = a.AttendDate,
-                             AttendStatus = a.AttendStatus,
-                             WorkType = a.WorkType,
-                             TaskType = a.TaskType
-                         };
+    var attendanceData = (from a in attendanceList
+                          join e in employeeList
+                          on a.EmpId equals e.EmpId
+                          select new AdminReportSearchModel
+                          {
+                              AttendId = a.AttendId,
+                              EmpId = a.EmpId,
+                              EmployeeName = e.Name,
+                              AttendDate = a.AttendDate,
+                              AttendStatus = a.AttendStatus,
+                              WorkType = a.WorkType,
+                              TaskType = a.TaskType
+                          }).ToList();
 
-    foreach (var item in attendanceData)
+    // ================= CHECK ATTENDANCE =================
+    var existingAttendance = await es.GetAllAsync<AdminReportSearchModel>();
+
+    if (existingAttendance.Count == 0)
     {
-        await es.IndexAttendanceAsync(item);
+        Console.WriteLine("🚀 Indexing Attendance...");
+        await es.BulkIndexAttendanceAsync(attendanceData);
+    }
+    else
+    {
+        Console.WriteLine("⚠️ Attendance already indexed");
     }
 
-    // ================= EMPLOYEE INDEX =================
+    // ================= EMPLOYEE INDEX (ALWAYS RUN) =================
     var employeeIndexData = employeeList.Select(e => new EmployeeSearchIndex
     {
         EmpId = e.EmpId,
@@ -161,23 +172,32 @@ async Task IndexElasticData()
         Gender = e.Gender,
         Status = e.Status,
         Role = e.Role,
-
-        // You can improve this later
         TotalWorkingHours = 0,
         TotalDaysPresent = 0,
         LateInCount = 0,
         EarlyOutCount = 0,
         LastAttendDate = DateTime.Now
-    });
+    }).ToList();
 
-    foreach (var emp in employeeIndexData)
-    {
-        await es.IndexEmployeeAsync(emp);
-    }
+    Console.WriteLine("🚀 Indexing Employees...");
+    await es.BulkIndexEmployeeAsync(employeeIndexData);
 
     Console.WriteLine("✅ Elasticsearch indexing completed");
 }
 
- 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Task.Run(async () =>
+    {
+        try
+        {
+            await IndexElasticData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Indexing Error: {ex.Message}");
+        }
+    });
+});
 
 app.Run();

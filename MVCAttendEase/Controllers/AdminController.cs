@@ -21,13 +21,13 @@ namespace MVCAttendEase.Controllers
     {
 
         private readonly IAdminInterface _adminRepo;
-        private readonly RedisService   _redisService;
+        private readonly RedisService _redisService;
         private readonly RabbitMQService _rabbit;
         private readonly ElasticsearchService _elastic;
 
         public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit, ElasticsearchService elastic)
         {
-            _adminRepo=adminRepository;
+            _adminRepo = adminRepository;
             _redisService = redisService;
             _rabbit = rabbit;
             _elastic = elastic;
@@ -64,118 +64,118 @@ namespace MVCAttendEase.Controllers
         [Route("GetEmployeeCount")]
         public async Task<IActionResult> GetEmployeeCount()
         {
-            var count=await _adminRepo.GetEmployeeCount();
+            var count = await _adminRepo.GetEmployeeCount();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Employee not found"});
+                return Ok(new { success = false, message = "Employee not found" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
         [Route("PresentEmpCount")]
         public async Task<IActionResult> PresentEmpCount()
         {
-            var count=await _adminRepo.PresentEmpCount();
+            var count = await _adminRepo.PresentEmpCount();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Employee not present"});
+                return Ok(new { success = false, message = "Employee not present" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
-        [Route("AbsentEmpCount")]   
+        [Route("AbsentEmpCount")]
         public async Task<IActionResult> AbsentEmpCount()
         {
-            var count=await _adminRepo.AbsentEmpCount();
+            var count = await _adminRepo.AbsentEmpCount();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Absent Employee not found"});
+                return Ok(new { success = false, message = "Absent Employee not found" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
         [Route("OnLeaveEmpCount")]
         public async Task<IActionResult> OnLeaveEmpCount()
         {
-            var count=await _adminRepo.OnLeaveEmpCount();
+            var count = await _adminRepo.OnLeaveEmpCount();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Not one on Leave"});
+                return Ok(new { success = false, message = "Not one on Leave" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
         [Route("DevelopingHour")]
         public async Task<IActionResult> DevelopingHour()
         {
-            var count=await _adminRepo.CountDevelopingHour();
+            var count = await _adminRepo.CountDevelopingHour();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Developing hour is not count"});
+                return Ok(new { success = false, message = "Developing hour is not count" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
         [Route("DesigningHour")]
         public async Task<IActionResult> DesigningHour()
         {
-            var count=await _adminRepo.CountDesigningHour();
+            var count = await _adminRepo.CountDesigningHour();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Designing hour is not count"});
+                return Ok(new { success = false, message = "Designing hour is not count" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
 
         [Route("ResearchHour")]
         public async Task<IActionResult> ResearchHour()
         {
-            var count=await _adminRepo.CountResearchHour();
+            var count = await _adminRepo.CountResearchHour();
             // Console.WriteLine(count);
-            if(count == -1)
+            if (count == -1)
             {
-                return Ok(new{success=false,message="Research hour not found"});
+                return Ok(new { success = false, message = "Research hour not found" });
             }
-            return Ok(new{success=true,data=count});
+            return Ok(new { success = true, data = count });
         }
 
         [Route("ListEmployee")]
         public async Task<IActionResult> ListEmployee()
         {
-            var employees=await _adminRepo.ListEmployee();
-            if(employees == null)
+            var employees = await _adminRepo.ListEmployee();
+            if (employees == null)
             {
-                return Ok(new{success=false,message="Employee not found"});
+                return Ok(new { success = false, message = "Employee not found" });
             }
-            return Ok(new{success=true,data=employees,total=employees.Count()});
+            return Ok(new { success = true, data = employees, total = employees.Count() });
         }
 
         [HttpPost]
         [Route("UpdateEmpStatus")]
-        public async Task<IActionResult> UpdateEmpStatus(int id,string status)
+        public async Task<IActionResult> UpdateEmpStatus(int id, string status)
         {
-            var result=await _adminRepo.UpdateEmpStatus(id,status);
-            if(result > 0 )
+            var result = await _adminRepo.UpdateEmpStatus(id, status);
+            if (result > 0)
             {
-                return Ok(new{success=true,message="Status updated"});
+                return Ok(new { success = true, message = "Status updated" });
             }
-            return Ok(new{success=false,message="Status not updated"});
+            return Ok(new { success = false, message = "Status not updated" });
         }
 
         [Route("Report")]
-         public IActionResult Report()
+        public IActionResult Report()
         {
             return View();
         }
 
-         [HttpGet("GetEmployees")]
+        [HttpGet("GetEmployees")]
         public async Task<IActionResult> GetEmployees()
         {
             var employees = await _adminRepo.GetEmployeesForReport();
@@ -216,15 +216,25 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> SearchAttendance(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return Ok(new List<AdminReportSearchModel>());
+                return Ok(new List<object>());
 
             var result = await _elastic.SearchAttendanceByName(name);
 
+            var uniqueEmployees = result
+                .GroupBy(x => x.EmpId)
+                .Select(g => g.First())
+                .Select(x => new
+                {
+                    EmpId = x.EmpId,
+                    Name = x.EmployeeName // ✅ FIX HERE
+                })
+                .ToList();
+            Console.WriteLine($"ES Count: {result.Count}");
             return Ok(new
             {
                 success = true,
-                data = result,
-                total = result.Count
+                data = uniqueEmployees,
+                total = uniqueEmployees.Count
             });
         }
 

@@ -712,13 +712,9 @@ function searchAttendance() {
 
            if (res.success) {
                 console.log(res.data)
-                // 🔥 ADD THIS MAPPING
-                let mappedData = res.data.map(x => ({
-                    empId: x.empId,
-                    name: x.employeeName // 🔥 FIX HERE
-                }));
+               
 
-                grid.dataSource.data(mappedData);
+                grid.dataSource.data(res.data);
 
             } else {
                 grid.dataSource.data([]);

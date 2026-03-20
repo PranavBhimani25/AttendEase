@@ -26,7 +26,7 @@ namespace Repositories.Implementation
                 command.Parameters.AddWithValue("@empid", id);
 
                 using var reader = await command.ExecuteReaderAsync();
-                if(await reader.ReadAsync())
+                if (await reader.ReadAsync())
                 {
                     return new EmployeeModel
                     {
@@ -42,14 +42,14 @@ namespace Repositories.Implementation
                     return null;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Error during Profile {e.Message}");
                 return null;
             }
             finally
             {
-                _conn.CloseAsync();
+                await _conn.CloseAsync();
             }
 
         }
@@ -58,28 +58,29 @@ namespace Repositories.Implementation
 
         public async Task<EmployeeModel> GetOne(int id)
         {
-            var qry="SELECT * FROM t_employees WHERE c_empid=@id";
-            EmployeeModel emp=new EmployeeModel();
+            var qry = "SELECT * FROM t_employees WHERE c_empid=@id";
+            EmployeeModel emp = new EmployeeModel();
             try
             {
-                NpgsqlCommand cmd=new NpgsqlCommand(qry,_conn);
-                cmd.Parameters.AddWithValue("@id",id);
+                NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn);
+                cmd.Parameters.AddWithValue("@id", id);
                 await _conn.OpenAsync();
-                var reader=await cmd.ExecuteReaderAsync();
+                var reader = await cmd.ExecuteReaderAsync();
                 if (reader.Read())
                 {
-                    emp.EmpId=(int)reader["c_empid"];
-                    emp.Name=(string)reader["c_name"];
-                    emp.Email=(string)reader["c_email"];
-                    emp.Gender=(string)reader["c_gender"];
-                    emp.Role=(string)reader["c_role"];
-                    emp.Status=(string)reader["c_status"];
-                    emp.ProfileImage=(string)reader["c_profileimage"];
+                    emp.EmpId = (int)reader["c_empid"];
+                    emp.Name = (string)reader["c_name"];
+                    emp.Email = (string)reader["c_email"];
+                    emp.Gender = (string)reader["c_gender"];
+                    emp.Role = (string)reader["c_role"];
+                    emp.Status = (string)reader["c_status"];
+                    emp.ProfileImage = (string)reader["c_profileimage"];
                 }
                 await _conn.CloseAsync();
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine("Error is: "+ex.Message);
+                Console.WriteLine("Error is: " + ex.Message);
             }
             finally
             {
@@ -90,25 +91,26 @@ namespace Repositories.Implementation
 
 
 
-        public async Task<int> ChangePWD(int id,string pass)
+        public async Task<int> ChangePWD(int id, string pass)
         {
-            var qry="UPDATE t_employees SET c_password=@pass WHERE c_empid=@id";
+            var qry = "UPDATE t_employees SET c_password=@pass WHERE c_empid=@id";
             try
             {
-                NpgsqlCommand cmd=new NpgsqlCommand(qry,_conn);
-                cmd.Parameters.AddWithValue("@id",id);
-                cmd.Parameters.AddWithValue("@pass",pass);
+                NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@pass", pass);
                 await _conn.OpenAsync();
-                var status=await cmd.ExecuteNonQueryAsync();
+                var status = await cmd.ExecuteNonQueryAsync();
                 if (status == 1)
                 {
                     Console.WriteLine("Password Chnage SuccessFully...");
                 }
                 await _conn.CloseAsync();
                 return 1;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine("Error is: "+ex.Message);
+                Console.WriteLine("Error is: " + ex.Message);
                 return 0;
             }
             finally
@@ -121,24 +123,24 @@ namespace Repositories.Implementation
 
         public async Task<int> Update(UpdateEmployee emp)
         {
-            var qry="UPDATE t_employees SET c_name=@name,c_email=@email,c_gender=@gender,c_profileimage=@image WHERE c_empid=@id";
+            var qry = "UPDATE t_employees SET c_name=@name,c_email=@email,c_gender=@gender,c_profileimage=@image WHERE c_empid=@id";
             try
             {
-                NpgsqlCommand cmd= new NpgsqlCommand(qry,_conn);
-                cmd.Parameters.AddWithValue("@name",emp.Name);
-                cmd.Parameters.AddWithValue("@email",emp.Email);
-                cmd.Parameters.AddWithValue("@gender",emp.Gender);
-                cmd.Parameters.AddWithValue("@image",emp.ProfileImageUrl);
-                cmd.Parameters.AddWithValue("@id",emp.EmpId);
+                NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn);
+                cmd.Parameters.AddWithValue("@name", emp.Name);
+                cmd.Parameters.AddWithValue("@email", emp.Email);
+                cmd.Parameters.AddWithValue("@gender", emp.Gender);
+                cmd.Parameters.AddWithValue("@image", emp.ProfileImageUrl);
+                cmd.Parameters.AddWithValue("@id", emp.EmpId);
 
                 await _conn.OpenAsync();
                 await cmd.ExecuteNonQueryAsync();
                 await _conn.CloseAsync();
                 return 1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error is: "+ex.Message);
+                Console.WriteLine("Error is: " + ex.Message);
                 return 0;
             }
             finally
@@ -150,39 +152,39 @@ namespace Repositories.Implementation
 
 
 
-        public async Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId,int year)
+        public async Task<List<vm_AttendenceUser>> GetAttendanceByEmployee(int empId, int year)
         {
-            List<vm_AttendenceUser> list=new List<vm_AttendenceUser>();
+            List<vm_AttendenceUser> list = new List<vm_AttendenceUser>();
 
-            var qry=@"SELECT c_attendid,c_empid,c_attenddate FROM t_attendance WHERE c_empid=@empid AND EXTRACT(YEAR FROM c_attenddate)=@year";
+            var qry = @"SELECT c_attendid,c_empid,c_attenddate FROM t_attendance WHERE c_empid=@empid AND EXTRACT(YEAR FROM c_attenddate)=@year";
             try
             {
-                NpgsqlCommand cmd=new NpgsqlCommand(qry,_conn);
-                cmd.Parameters.AddWithValue("@empid",empId);
+                NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn);
+                cmd.Parameters.AddWithValue("@empid", empId);
                 // cmd.Parameters.AddWithValue("@month",month);
-                cmd.Parameters.AddWithValue("@year",year);
+                cmd.Parameters.AddWithValue("@year", year);
 
                 await _conn.OpenAsync();
 
-                var reader=await cmd.ExecuteReaderAsync();
+                var reader = await cmd.ExecuteReaderAsync();
 
                 while (reader.Read())
                 {
                     vm_AttendenceUser att = new vm_AttendenceUser();
 
-                    att.AttendID=(int)reader["c_attendid"];
-                    att.EmpID=(int)reader["c_empid"];
-                    att.AttendDate=(DateOnly)reader["c_attenddate"];
+                    att.AttendID = (int)reader["c_attendid"];
+                    att.EmpID = (int)reader["c_empid"];
+                    att.AttendDate = (DateOnly)reader["c_attenddate"];
 
-                    att.Status="Present";
+                    att.Status = "Present";
 
                     list.Add(att);
                 }
                 await _conn.CloseAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error : "+ex.Message);
+                Console.WriteLine("Error : " + ex.Message);
             }
             finally
             {
@@ -193,7 +195,7 @@ namespace Repositories.Implementation
 
 
 
-        public async Task<List<vm_YearlyWorkingHours>> GetYearlyWorkingHours(int empId,int year)
+        public async Task<List<vm_YearlyWorkingHours>> GetYearlyWorkingHours(int empId, int year)
         {
             List<vm_YearlyWorkingHours> list = new List<vm_YearlyWorkingHours>();
 
@@ -209,16 +211,16 @@ namespace Repositories.Implementation
 
             try
             {
-                NpgsqlCommand cmd = new NpgsqlCommand(qry,_conn);
+                NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn);
 
-                cmd.Parameters.AddWithValue("@empid",empId);
-                cmd.Parameters.AddWithValue("@year",year);
+                cmd.Parameters.AddWithValue("@empid", empId);
+                cmd.Parameters.AddWithValue("@year", year);
 
                 await _conn.OpenAsync();
 
                 var reader = await cmd.ExecuteReaderAsync();
 
-                while(await reader.ReadAsync())
+                while (await reader.ReadAsync())
                 {
                     vm_YearlyWorkingHours obj = new vm_YearlyWorkingHours();
 
@@ -231,7 +233,7 @@ namespace Repositories.Implementation
 
                 await reader.CloseAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -245,7 +247,7 @@ namespace Repositories.Implementation
 
 
 
-        public async Task<List<vm_MonthlyWorkingHours>> GetMonthlyWorkingHours(int empId,int month,int year)
+        public async Task<List<vm_MonthlyWorkingHours>> GetMonthlyWorkingHours(int empId, int month, int year)
         {
             List<vm_MonthlyWorkingHours> list = new List<vm_MonthlyWorkingHours>();
 
@@ -274,7 +276,7 @@ namespace Repositories.Implementation
                 {
                     vm_MonthlyWorkingHours obj = new vm_MonthlyWorkingHours();
 
-                    obj.Date =(DateOnly)reader["c_attenddate"];
+                    obj.Date = (DateOnly)reader["c_attenddate"];
                     obj.WorkingHour = Convert.ToInt32(reader["c_workinghour"]);
 
                     list.Add(obj);
@@ -282,7 +284,7 @@ namespace Repositories.Implementation
 
                 await _conn.CloseAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Error : " + ex.Message);
             }
@@ -327,30 +329,30 @@ namespace Repositories.Implementation
         {
             EmployeeModel emp = new EmployeeModel();
 
-            
-                _conn.Open();
 
-                string query = "SELECT * FROM t_employees WHERE c_empid=@id";
+            _conn.Open();
 
-                using (var cmd = new NpgsqlCommand(query, _conn))
+            string query = "SELECT * FROM t_employees WHERE c_empid=@id";
+
+            using (var cmd = new NpgsqlCommand(query, _conn))
+            {
+                cmd.Parameters.AddWithValue("@id", empId);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@id", empId);
-
-                    using (var reader = cmd.ExecuteReader())
+                    if (reader.Read())
                     {
-                        if (reader.Read())
-                        {
-                            emp.EmpId = Convert.ToInt32(reader["c_empid"]);
-                            emp.Name = reader["c_name"].ToString();
-                            emp.Email = reader["c_email"].ToString();
-                            emp.Gender = reader["c_gender"].ToString();
-                            emp.Role = reader["c_role"].ToString();
-                            emp.ProfileImage = reader["c_profileimage"].ToString();
-                            emp.Status = reader["c_status"].ToString();
-                        }
+                        emp.EmpId = Convert.ToInt32(reader["c_empid"]);
+                        emp.Name = reader["c_name"].ToString();
+                        emp.Email = reader["c_email"].ToString();
+                        emp.Gender = reader["c_gender"].ToString();
+                        emp.Role = reader["c_role"].ToString();
+                        emp.ProfileImage = reader["c_profileimage"].ToString();
+                        emp.Status = reader["c_status"].ToString();
                     }
                 }
-            
+            }
+
 
             return emp;
         }
@@ -364,57 +366,58 @@ namespace Repositories.Implementation
             // using (var conn = new NpgsqlConnection(_conn))
             // {
 
-                string query = @"SELECT * FROM t_attendance
+            string query = @"SELECT * FROM t_attendance
                                  WHERE c_empid=@id
                                  ORDER BY c_attenddate DESC";
 
-                using (var cmd = new NpgsqlCommand(query, _conn))
+            using (var cmd = new NpgsqlCommand(query, _conn))
+            {
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    _conn.Open(); // i do change here
+                cmd.Parameters.AddWithValue("@id", empId);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    // _conn.Open();
-                    cmd.Parameters.AddWithValue("@id", empId);
+                    int attendIdOrdinal = reader.GetOrdinal("c_attendid");
+                    int empIdOrdinal = reader.GetOrdinal("c_empid");
+                    int attendDateOrdinal = reader.GetOrdinal("c_attenddate");
+                    int clockInHourOrdinal = reader.GetOrdinal("c_clockinhour");
+                    int clockInMinOrdinal = reader.GetOrdinal("c_clockinmin");
+                    int clockOutHourOrdinal = reader.GetOrdinal("c_clockouthour");
+                    int clockOutMinOrdinal = reader.GetOrdinal("c_clockoutmin");
+                    int workingHourOrdinal = reader.GetOrdinal("c_workinghour");
+                    int attendStatusOrdinal = reader.GetOrdinal("c_attendstatus");
+                    int workTypeOrdinal = reader.GetOrdinal("c_worktype");
+                    int taskTypeOrdinal = reader.GetOrdinal("c_tasktype");
 
-                    using (var reader = cmd.ExecuteReader())
+                    while (reader.Read())
                     {
-                        int attendIdOrdinal = reader.GetOrdinal("c_attendid");
-                        int empIdOrdinal = reader.GetOrdinal("c_empid");
-                        int attendDateOrdinal = reader.GetOrdinal("c_attenddate");
-                        int clockInHourOrdinal = reader.GetOrdinal("c_clockinhour");
-                        int clockInMinOrdinal = reader.GetOrdinal("c_clockinmin");
-                        int clockOutHourOrdinal = reader.GetOrdinal("c_clockouthour");
-                        int clockOutMinOrdinal = reader.GetOrdinal("c_clockoutmin");
-                        int workingHourOrdinal = reader.GetOrdinal("c_workinghour");
-                        int attendStatusOrdinal = reader.GetOrdinal("c_attendstatus");
-                        int workTypeOrdinal = reader.GetOrdinal("c_worktype");
-                        int taskTypeOrdinal = reader.GetOrdinal("c_tasktype");
-
-                        while (reader.Read())
+                        var attendDateValue = reader.GetValue(attendDateOrdinal);
+                        DateTime attendDate = attendDateValue switch
                         {
-                            var attendDateValue = reader.GetValue(attendDateOrdinal);
-                            DateTime attendDate = attendDateValue switch
-                            {
-                                DateOnly d => d.ToDateTime(TimeOnly.MinValue),
-                                DateTime dt => dt,
-                                _ => Convert.ToDateTime(attendDateValue)
-                            };
+                            DateOnly d => d.ToDateTime(TimeOnly.MinValue),
+                            DateTime dt => dt,
+                            _ => Convert.ToDateTime(attendDateValue)
+                        };
 
-                            list.Add(new AttendanceModel
-                            {
-                                AttendId = reader.GetInt32(attendIdOrdinal),
-                                EmpId = reader.GetInt32(empIdOrdinal),
-                                AttendDate = attendDate,
-                                ClockInHour = reader.GetInt32(clockInHourOrdinal),
-                                ClockInMin = reader.GetInt32(clockInMinOrdinal),
-                                ClockOutHour = reader.IsDBNull(clockOutHourOrdinal) ? null : reader.GetInt32(clockOutHourOrdinal),
-                                ClockOutMin = reader.IsDBNull(clockOutMinOrdinal) ? null : reader.GetInt32(clockOutMinOrdinal),
-                                WorkingHour = reader.IsDBNull(workingHourOrdinal) ? null : reader.GetInt32(workingHourOrdinal),
-                                AttendStatus = reader.IsDBNull(attendStatusOrdinal) ? string.Empty : reader.GetString(attendStatusOrdinal),
-                                WorkType = reader.IsDBNull(workTypeOrdinal) ? string.Empty : reader.GetString(workTypeOrdinal),
-                                TaskType = reader.IsDBNull(taskTypeOrdinal) ? null : reader.GetString(taskTypeOrdinal)
-                            });
-                        }
+                        list.Add(new AttendanceModel
+                        {
+                            AttendId = reader.GetInt32(attendIdOrdinal),
+                            EmpId = reader.GetInt32(empIdOrdinal),
+                            AttendDate = attendDate,
+                            ClockInHour = reader.GetInt32(clockInHourOrdinal),
+                            ClockInMin = reader.GetInt32(clockInMinOrdinal),
+                            ClockOutHour = reader.IsDBNull(clockOutHourOrdinal) ? null : reader.GetInt32(clockOutHourOrdinal),
+                            ClockOutMin = reader.IsDBNull(clockOutMinOrdinal) ? null : reader.GetInt32(clockOutMinOrdinal),
+                            WorkingHour = reader.IsDBNull(workingHourOrdinal) ? null : reader.GetInt32(workingHourOrdinal),
+                            AttendStatus = reader.IsDBNull(attendStatusOrdinal) ? string.Empty : reader.GetString(attendStatusOrdinal),
+                            WorkType = reader.IsDBNull(workTypeOrdinal) ? string.Empty : reader.GetString(workTypeOrdinal),
+                            TaskType = reader.IsDBNull(taskTypeOrdinal) ? null : reader.GetString(taskTypeOrdinal)
+                        });
                     }
                 }
-            
+            }
+
 
             return list;
         }
@@ -473,11 +476,11 @@ namespace Repositories.Implementation
 
             // using (var conn = new NpgsqlConnection(_conn))
             // {
-                _conn.Open();
+            _conn.Open();
 
-                /* ================= SUMMARY ================= */
+            /* ================= SUMMARY ================= */
 
-                string summaryQuery = @"SELECT
+            string summaryQuery = @"SELECT
                                         COUNT(DISTINCT CASE 
                                             WHEN EXTRACT(ISODOW FROM c_attenddate) < 6 
                                             THEN c_attenddate 
@@ -485,31 +488,31 @@ namespace Repositories.Implementation
                                         COALESCE(SUM(c_workinghour),0) AS hours
                                         FROM t_attendance
                                         WHERE c_empid=@empId 
-                                        AND c_attenddate BETWEEN @startDate AND @endDate"; 
+                                        AND c_attenddate BETWEEN @startDate AND @endDate";
 
-                using (var cmd = new NpgsqlCommand(summaryQuery, _conn))
+            using (var cmd = new NpgsqlCommand(summaryQuery, _conn))
+            {
+                cmd.Parameters.AddWithValue("@empId", empId);
+                cmd.Parameters.AddWithValue("@startDate", startDate);
+                cmd.Parameters.AddWithValue("@endDate", endDate);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@empId", empId);
-                    cmd.Parameters.AddWithValue("@startDate", startDate);
-                    cmd.Parameters.AddWithValue("@endDate", endDate);
-
-                    using (var reader = cmd.ExecuteReader())
+                    if (reader.Read())
                     {
-                        if (reader.Read())
-                        {
-                            model.Present = Convert.ToInt32(reader["present"]);
-                            model.TotalHours = Convert.ToInt32(reader["hours"]);
-                        }
+                        model.Present = Convert.ToInt32(reader["present"]);
+                        model.TotalHours = Convert.ToInt32(reader["hours"]);
                     }
                 }
+            }
 
-                int totalDaysToConsider = CountWeekdays(startDate, endDate);
+            int totalDaysToConsider = CountWeekdays(startDate, endDate);
 
-                model.Absent = Math.Max(0, totalDaysToConsider - model.Present);
+            model.Absent = Math.Max(0, totalDaysToConsider - model.Present);
 
-                /* ================= WORK TYPE PIE ================= */
+            /* ================= WORK TYPE PIE ================= */
 
-                string workQuery = @"SELECT
+            string workQuery = @"SELECT
                                      SUM(CASE WHEN LOWER(TRIM(c_worktype))='remote' THEN 1 ELSE 0 END) AS remote,
                                      SUM(CASE WHEN LOWER(TRIM(c_worktype))='office' THEN 1 ELSE 0 END) AS office,
                                      SUM(CASE WHEN LOWER(TRIM(c_worktype))='field' THEN 1 ELSE 0 END) AS field
@@ -517,26 +520,26 @@ namespace Repositories.Implementation
                                      WHERE c_empid=@empId
                                      AND c_attenddate BETWEEN @startDate AND @endDate";
 
-                using (var cmd = new NpgsqlCommand(workQuery, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@empId", empId);
-                    cmd.Parameters.AddWithValue("@startDate", startDate);
-                    cmd.Parameters.AddWithValue("@endDate", endDate);
+            using (var cmd = new NpgsqlCommand(workQuery, _conn))
+            {
+                cmd.Parameters.AddWithValue("@empId", empId);
+                cmd.Parameters.AddWithValue("@startDate", startDate);
+                cmd.Parameters.AddWithValue("@endDate", endDate);
 
-                    using (var reader = cmd.ExecuteReader())
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
                     {
-                        if (reader.Read())
-                        {
-                            model.Remote = Convert.ToInt32(reader["remote"]);
-                            model.Office = Convert.ToInt32(reader["office"]);
-                            model.Field = Convert.ToInt32(reader["field"]);
-                        }
+                        model.Remote = Convert.ToInt32(reader["remote"]);
+                        model.Office = Convert.ToInt32(reader["office"]);
+                        model.Field = Convert.ToInt32(reader["field"]);
                     }
                 }
+            }
 
-                /* ================= ATTENDANCE TREND ================= */
+            /* ================= ATTENDANCE TREND ================= */
 
-                string trendQuery = @"SELECT
+            string trendQuery = @"SELECT
                                         EXTRACT(MONTH FROM c_attenddate) AS month,
                                         COUNT(DISTINCT CASE 
                                             WHEN EXTRACT(ISODOW FROM c_attenddate) < 6 
@@ -548,29 +551,29 @@ namespace Repositories.Implementation
                                     GROUP BY month
                                     ORDER BY month";
 
-                using (var cmd = new NpgsqlCommand(trendQuery, _conn))
+            using (var cmd = new NpgsqlCommand(trendQuery, _conn))
+            {
+                cmd.Parameters.AddWithValue("@empId", empId);
+                cmd.Parameters.AddWithValue("@startDate", startDate);
+                cmd.Parameters.AddWithValue("@endDate", endDate);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@empId", empId);
-                    cmd.Parameters.AddWithValue("@startDate", startDate);
-                    cmd.Parameters.AddWithValue("@endDate", endDate);
-
-                    using (var reader = cmd.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            int month = Convert.ToInt32(reader["month"]) - 1;
-                            int present = Convert.ToInt32(reader["present"]);
+                        int month = Convert.ToInt32(reader["month"]) - 1;
+                        int present = Convert.ToInt32(reader["present"]);
 
-                            model.PresentMonthly[month] = present;
-                            int daysToConsiderInMonth = model.AbsentMonthly[month];
-                            model.AbsentMonthly[month] = Math.Max(0, daysToConsiderInMonth - present);
-                        }
+                        model.PresentMonthly[month] = present;
+                        int daysToConsiderInMonth = model.AbsentMonthly[month];
+                        model.AbsentMonthly[month] = Math.Max(0, daysToConsiderInMonth - present);
                     }
                 }
+            }
 
-                /* ================= TASK DISTRIBUTION ================= */
+            /* ================= TASK DISTRIBUTION ================= */
 
-                string taskQuery = @"SELECT
+            string taskQuery = @"SELECT
                                     month,
                                 
                                     ROUND(SUM(CASE WHEN task='developing' THEN 1 ELSE 0 END)*100.0/COUNT(*),2) AS developing_percentage,
@@ -588,28 +591,28 @@ namespace Repositories.Implementation
                                 GROUP BY month
                                 ORDER BY month;";
 
-                using (var cmd = new NpgsqlCommand(taskQuery, _conn))
+            using (var cmd = new NpgsqlCommand(taskQuery, _conn))
+            {
+                cmd.Parameters.AddWithValue("@empId", empId);
+                cmd.Parameters.AddWithValue("@startDate", startDate);
+                cmd.Parameters.AddWithValue("@endDate", endDate);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@empId", empId);
-                    cmd.Parameters.AddWithValue("@startDate", startDate);
-                    cmd.Parameters.AddWithValue("@endDate", endDate);
-
-                    using (var reader = cmd.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            int month = Convert.ToInt32(reader["month"]) - 1;
+                        int month = Convert.ToInt32(reader["month"]) - 1;
 
-                            model.Developing[month] = Convert.ToDouble(reader["developing_percentage"]);
-                            model.Designing[month] = Convert.ToDouble(reader["designing_percentage"]);
-                            model.Research[month] = Convert.ToDouble(reader["research_percentage"]);
-                        }
+                        model.Developing[month] = Convert.ToDouble(reader["developing_percentage"]);
+                        model.Designing[month] = Convert.ToDouble(reader["designing_percentage"]);
+                        model.Research[month] = Convert.ToDouble(reader["research_percentage"]);
                     }
                 }
+            }
 
-                /* ================= ATTENDANCE STATUS ================= */
+            /* ================= ATTENDANCE STATUS ================= */
 
-                string statusQuery = @"SELECT
+            string statusQuery = @"SELECT
                     EXTRACT(MONTH FROM c_attenddate) AS month,
                     SUM(CASE WHEN LOWER(TRIM(c_attendstatus))='regular' THEN 1 ELSE 0 END) AS regular,
                     SUM(CASE WHEN LOWER(TRIM(c_attendstatus))='latein' THEN 1 ELSE 0 END) AS latein,
@@ -620,25 +623,25 @@ namespace Repositories.Implementation
                     GROUP BY month
                     ORDER BY month";
 
-                using (var cmd = new NpgsqlCommand(statusQuery, _conn))
+            using (var cmd = new NpgsqlCommand(statusQuery, _conn))
+            {
+                cmd.Parameters.AddWithValue("@empId", empId);
+                cmd.Parameters.AddWithValue("@startDate", startDate);
+                cmd.Parameters.AddWithValue("@endDate", endDate);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@empId", empId);
-                    cmd.Parameters.AddWithValue("@startDate", startDate);
-                    cmd.Parameters.AddWithValue("@endDate", endDate);
-
-                    using (var reader = cmd.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            int month = Convert.ToInt32(reader["month"]) - 1;
+                        int month = Convert.ToInt32(reader["month"]) - 1;
 
-                            model.Regular[month] = Convert.ToInt32(reader["regular"]);
-                            model.LateIn[month] = Convert.ToInt32(reader["latein"]);
-                            model.EarlyOut[month] = Convert.ToInt32(reader["earlyout"]);
-                        }
+                        model.Regular[month] = Convert.ToInt32(reader["regular"]);
+                        model.LateIn[month] = Convert.ToInt32(reader["latein"]);
+                        model.EarlyOut[month] = Convert.ToInt32(reader["earlyout"]);
                     }
                 }
-            
+            }
+
 
             model.GridData = GetAttendanceByEmployee(empId);
 
@@ -685,26 +688,26 @@ namespace Repositories.Implementation
 
             // using (var conn = new NpgsqlConnection(_conn))
             // {
-                _conn.Open();
+            _conn.Open();
 
-                string query = @"SELECT DISTINCT EXTRACT(YEAR FROM c_attenddate) AS year
+            string query = @"SELECT DISTINCT EXTRACT(YEAR FROM c_attenddate) AS year
                                  FROM t_attendance
                                  WHERE c_empid=@empId
                                  ORDER BY year DESC";
 
-                using (var cmd = new NpgsqlCommand(query, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@empId", empId);
+            using (var cmd = new NpgsqlCommand(query, _conn))
+            {
+                cmd.Parameters.AddWithValue("@empId", empId);
 
-                    using (var reader = cmd.ExecuteReader())
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            years.Add(Convert.ToInt32(reader["year"]));
-                        }
+                        years.Add(Convert.ToInt32(reader["year"]));
                     }
                 }
-            
+            }
+
 
             return years;
         }

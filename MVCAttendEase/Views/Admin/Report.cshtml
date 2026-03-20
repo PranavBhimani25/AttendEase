@@ -3,21 +3,22 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="page-title">
-    Employee List
-</div>
 
-<div class="search-top-right">
-    <input type="text" id="searchName" placeholder="Search Employee..." 
-           class="k-textbox" />
+<div class="header-bar">
+    <div class="page-title">Employee List</div>
 
-    <button class="k-button k-button-md k-button-solid-primary" onclick="searchAttendance()">
-        🔍
-    </button>
+    <div class="search-box">
+        <input type="text" id="searchName" placeholder="Search Employee..." 
+               class="k-textbox" />
 
-    <button class="k-button k-button-md k-button-outline" onclick="resetSearch()">
-        Reset
-    </button>
+        <button class="k-button k-button-md k-button-solid-primary" onclick="searchAttendance()">
+            🔍
+        </button>
+
+        <button class="k-button k-button-md k-button-outline" onclick="resetSearch()">
+            Reset
+        </button>
+    </div>
 </div>
 
 
@@ -50,20 +51,52 @@
     position: relative; 
 }
 
-.search-top-right{
-    position: absolute;
-    top: 30px;
-    right: 30px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
+/* 🔥 NEW HEADER LAYOUT */
+.header-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    gap:10px;
 }
 
-.search-top-right input{
-    width: 220px;
-    border-radius: 8px;
+/* TITLE */
+.page-title{
+    font-size:32px;
+    font-weight:600;
 }
 
+/* 🔍 SEARCH BOX */
+.search-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+/* INPUT */
+.search-box input{
+    width:260px;
+    height:38px;
+    border-radius:8px;
+    padding:0 12px;
+    font-size:14px;
+}
+
+/* BUTTON ALIGNMENT */
+.search-box .k-button{
+    height:38px;
+    min-width:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* ICON BUTTON (🔍) */
+.search-box .k-button:first-of-type{
+    width:42px;
+    padding:0;
+}
 
 /* HEADER */
 

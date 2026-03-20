@@ -21,14 +21,16 @@ namespace MVCAttendEase.Controllers
         private readonly ILogger<EmployeeController> _logger;
         private readonly IEmployeeInterface _emp;
         private readonly CloudinaryService _cloudinaryService;
+        private readonly RedisService _redis;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService, RedisService redis)
         {
             _logger = logger;
             _emp = emp;
+            _redis = redis;
             _cloudinaryService = cloudinaryService;
         }
-        
+
         private int GetCurrentEmpId()
         {
             return int.TryParse(HttpContext.Session.GetString("empId"), out var empId) ? empId : 0;
@@ -52,7 +54,7 @@ namespace MVCAttendEase.Controllers
         {
             EmployeeModel employee = new EmployeeModel();
             employee = await _emp.getEmployeeDetails(id);
-            return Ok(new{success = true, data = employee}) ;
+            return Ok(new { success = true, data = employee });
         }
 
         [Route("GetEmployee/{id}")]
@@ -60,26 +62,26 @@ namespace MVCAttendEase.Controllers
         {
             EmployeeModel employee = new EmployeeModel();
             employee = await _emp.GetOne(id);
-            return Ok(new {success = true, data = employee, message = "Data Fetched Successfully"});
+            return Ok(new { success = true, data = employee, message = "Data Fetched Successfully" });
         }
 
 
         [Route("ChangePassword/{id}")]
         [HttpPut]
-        public async Task<IActionResult> changePwd([FromBody]string password,int id)
+        public async Task<IActionResult> changePwd([FromBody] string password, int id)
         {
             if (password == null)
             {
                 return BadRequest("Password has No Value");
             }
-            var status=await  _emp.ChangePWD(id,password);
+            var status = await _emp.ChangePWD(id, password);
             if (status == 1)
             {
-                return Ok(new{success=true,message="Password Changed Successfully...!"});
+                return Ok(new { success = true, message = "Password Changed Successfully...!" });
             }
             else
             {
-                return BadRequest(new {message = "There Is Some Error.", success = true});
+                return BadRequest(new { message = "There Is Some Error.", success = true });
             }
         }
 
@@ -94,7 +96,7 @@ namespace MVCAttendEase.Controllers
             }
 
             var employee = await _emp.Update(emp);
-            if(employee > 0)
+            if (employee > 0)
             {
                 return Ok(new { message = "Update Employee`s Details Successfull", success = true });
             }
@@ -102,42 +104,50 @@ namespace MVCAttendEase.Controllers
             {
                 return BadRequest(new { message = "Update Employee Data Failed", success = false });
             }
-           
+
         }
-
-
 
         [HttpGet("GetAttendence/{empId}")]
         public async Task<IActionResult> GetAttendance(int empId)
         {
-            int month=DateTime.Now.Month;
-            int year=DateTime.Now.Year;
+            int month = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
 
-            var data=await _emp.GetAttendanceByEmployee(empId,year);
+            var data = await _redis.GetOrSetAsync(
+                RedisKeys.AttendanceByYear(empId, year),
+                async () => await _emp.GetAttendanceByEmployee(empId, year),
+                TimeSpan.FromMinutes(5));
 
             return Ok(data);
         }
 
-
-
-       [HttpGet("GetMonthlyWorkingHours")]
-        public async Task<IActionResult> GetMonthlyWorkingHours(int empId,int month,int year)
+        /// Monthly working-hours line chart (one point per day).
+        /// Redis key: emp:{empId}:working:monthly:{year}:{month}   TTL: 1 hour
+        /// </summary>
+        [HttpGet("GetMonthlyWorkingHours")]
+        public async Task<IActionResult> GetMonthlyWorkingHours(int empId, int month, int year)
         {
-            var data = await _emp.GetMonthlyWorkingHours(empId,month,year);
+            var data = await _redis.GetOrSetAsync(
+                RedisKeys.MonthlyWorkingHours(empId, month, year),
+                async () => await _emp.GetMonthlyWorkingHours(empId, month, year),
+                TimeSpan.FromMinutes(5));
 
             return Ok(data);
         }
 
+        /// <summary>
+        /// Yearly working-hours bar chart (one bar per month).
+        /// Redis key: emp:{empId}:working:yearly:{year}   TTL: 1 hour
         [HttpGet("GetYearlyWorkingHours")]
-        public async Task<IActionResult> GetYearlyWorkingHours(int empId,int year)
+        public async Task<IActionResult> GetYearlyWorkingHours(int empId, int year)
         {
-            var data = await _emp.GetYearlyWorkingHours(empId,year);
+            var data = await _redis.GetOrSetAsync(
+                RedisKeys.YearlyWorkingHours(empId, year),
+                async () => await _emp.GetYearlyWorkingHours(empId, year),
+                TimeSpan.FromMinutes(5));
+
             return Ok(data);
         }
-
-        
-
-      
 
         [HttpGet("Report")]
         public IActionResult Report()
@@ -153,20 +163,33 @@ namespace MVCAttendEase.Controllers
             return View(dashboard);
         }
 
+        /// Report page: grid of all attendance records (no year filter).
+        /// Redis key: emp:{empId}:attendance:grid   TTL: 1 hour
         [HttpGet("[action]")]
-        public JsonResult GetAttendances(int empId) // s is added in the GetAttendances name 
+        public async Task<IActionResult> GetAttendances(int empId)
         {
             if (empId <= 0) empId = GetCurrentEmpId();
-            var data = _emp.GetAttendanceByEmployee(empId);
+
+            var data = await _redis.GetOrSetAsync(
+                RedisKeys.AttendanceGrid(empId),
+                () => _emp.GetAttendanceByEmployee(empId),  // sync factory
+                TimeSpan.FromMinutes(5));
 
             return Json(data);
         }
+        // ─────────────────────────────────────────────
+        //  Report – chart + grid data  (Redis-cached)
+        // ─────────────────────────────────────────────
 
         [HttpGet("[action]")]
-        public JsonResult GetReportYearData(int empId, int year)
+        public async Task<IActionResult> GetReportYearData(int empId, int year)
         {
             if (empId <= 0) empId = GetCurrentEmpId();
-            var data = _emp.GetReportYearData(empId, year);
+
+            var data = await _redis.GetOrSetAsync(
+                RedisKeys.ReportYearData(empId, year),
+                () => _emp.GetReportYearData(empId, year),  // sync factory
+                TimeSpan.FromMinutes(5));
 
             return Json(data);
         }
@@ -178,6 +201,27 @@ namespace MVCAttendEase.Controllers
             var years = _emp.GetAttendanceYears(empId);
 
             return Json(years);
+        }
+
+        // ─────────────────────────────────────────────
+        //  Dashboard – chart data  (Redis-cached)
+        // ─────────────────────────────────────────────
+
+        /// <summary>
+        /// Employee Dashboard: summary cards + attendance list for the current month.
+        /// Redis key: emp:{empId}:dashboard   TTL: 5 minutes
+        /// Invalidated automatically when attendance is written (CheckIn/CheckOut).
+        /// </summary>
+        [HttpGet("GetDashboardData")]
+        public async Task<IActionResult> GetDashboardData(int empId)
+        {
+            if (empId <= 0) empId = GetCurrentEmpId();
+
+            var data = await _redis.GetOrSetAsync(
+                RedisKeys.DashboardData(empId),
+                async () => await Task.FromResult(_emp.GetReportData(empId)), // FIX: async overload — key always saved
+                TimeSpan.FromMinutes(5));
+            return Ok(new { success = true, data });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

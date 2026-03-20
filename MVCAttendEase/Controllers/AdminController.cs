@@ -22,14 +22,15 @@ namespace MVCAttendEase.Controllers
         private readonly IAdminInterface _adminRepo;
         private readonly RedisService   _redisService;
         private readonly RabbitMQService _rabbit;
-        private readonly ElasticsearchService _elastic;
+        // private readonly ElasticsearchService _elastic;
 
-        public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit, ElasticsearchService elastic)
+        // public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit, ElasticsearchService elastic)//Temp ElasticSearch not include
+        public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit)
         {
             _adminRepo=adminRepository;
             _redisService = redisService;
             _rabbit = rabbit;
-            _elastic = elastic;
+            // _elastic = elastic;
         }
 
         [Route("Dashboard")]
@@ -45,14 +46,14 @@ namespace MVCAttendEase.Controllers
             //     Timestamp = DateTime.UtcNow
             // };
 
-             var data = new
-            {
-                Message = "Hello Elasticsearch 🚀",
-                Time = DateTime.UtcNow
-            };
-            await _elastic.CreateIndexAsync("attendance_logs");
+            //  var data = new
+            // {
+            //     Message = "Hello Elasticsearch 🚀",
+            //     Time = DateTime.UtcNow
+            // };
+            // await _elastic.CreateIndexAsync("attendance_logs");
 
-            await _elastic.IndexAsync(data);
+            // await _elastic.IndexAsync(data);
 
             // await _rabbit.SendMessageAsync("Dev", msg);
 

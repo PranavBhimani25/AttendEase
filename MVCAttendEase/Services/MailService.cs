@@ -20,7 +20,7 @@ namespace MVCAttendEase.Services
         
 
         // It is Created By Het Patel . So For any Query Contact Him. 
-        public void SendEmail(string toEmail, string subject, string body)
+        public void SendEmail(string toEmail, string subject, string body,  byte[] pdfBytes = null)
         {
             var smtp = new SmtpClient(_emailSettings.SmtpServer, _emailSettings.Port)
             {
@@ -34,6 +34,14 @@ namespace MVCAttendEase.Services
                 Body = body,
                 IsBodyHtml = true
             };
+
+            // ✅ Attach only if PDF exists
+            if (pdfBytes != null && pdfBytes.Length > 0)
+            {
+                var stream = new MemoryStream(pdfBytes);
+                var attachment = new Attachment(stream, "AttendanceReport.pdf", "application/pdf");
+                message.Attachments.Add(attachment);
+            }
 
             smtp.Send(message);
         }

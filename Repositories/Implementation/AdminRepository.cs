@@ -340,6 +340,7 @@ namespace Repositories.Implementation
                 await _conn.CloseAsync();
                 await _conn.OpenAsync();
                 var result=await cmd.ExecuteNonQueryAsync();
+                await _conn.CloseAsync();
                 return Convert.ToInt32(result);                
             }catch(Exception ex)
             {
@@ -614,6 +615,43 @@ namespace Repositories.Implementation
             }
 
             return workingDays;
+        }
+
+
+        public async Task<EmployeeModel> GetEmployeeById(int empId)
+        {
+            var qry = "SELECT c_email FROM t_employees WHERE c_empid=@id";
+            try
+            {
+                using (NpgsqlCommand cmd = new NpgsqlCommand(qry, _conn))
+                {
+
+                    cmd.Parameters.AddWithValue("@id", empId);
+                    await _conn.CloseAsync();
+                    await _conn.OpenAsync();
+                    var reader = await cmd.ExecuteReaderAsync();
+                    if (await reader.ReadAsync())
+                    {
+                        return new EmployeeModel
+                        {
+                            Email = reader["c_email"].ToString()
+                        };
+                    }
+                }
+
+                return null;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error is: " + ex.Message);
+                return null;
+            }
+            finally
+            {
+                await _conn.CloseAsync();
+            }
+
         }
     }
 }

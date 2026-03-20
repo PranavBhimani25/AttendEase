@@ -24,13 +24,15 @@ namespace MVCAttendEase.Controllers
         private readonly RedisService _redisService;
         private readonly RabbitMQService _rabbit;
         private readonly ElasticsearchService _elastic;
+        private readonly MailService _mailService;
 
-        public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit, ElasticsearchService elastic)
+        public AdminController(IAdminInterface adminRepository, RedisService redisService, RabbitMQService rabbit, ElasticsearchService elastic, MailService mailService)
         {
             _adminRepo = adminRepository;
             _redisService = redisService;
             _rabbit = rabbit;
             _elastic = elastic;
+            _mailService = mailService;
         }
 
         [Route("Dashboard")]
@@ -164,7 +166,17 @@ namespace MVCAttendEase.Controllers
             var result = await _adminRepo.UpdateEmpStatus(id, status);
             if (result > 0)
             {
-                return Ok(new { success = true, message = "Status updated" });
+                if(status == "Active")
+                {
+                    string path = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "ActivateEmployee.html");
+                    string body = System.IO.File.ReadAllText(path);
+                    EmployeeModel employee = await _adminRepo.GetEmployeeById(id);
+                    body = body.Replace("EmployeeName", employee.Name);
+                    _mailService.SendEmail(employee.Email, "Your Account is Now Active – Login to Get Started", body);   
+                }
+
+
+                return Ok(new{success=true,message="Status updated"});
             }
             return Ok(new { success = false, message = "Status not updated" });
         }
@@ -255,6 +267,44 @@ namespace MVCAttendEase.Controllers
                 total = result.Count
             });
         }
+
+
+        [HttpPost("SendReportEmail")]
+        public async Task<IActionResult> SendReportEmail([FromBody] SendPdfModel model)
+        {
+            try
+            {
+                // Step 1: Get employee email
+                var emp = await _adminRepo.GetEmployeeById(model.EmpId);
+
+                if (emp == null)
+                {
+                    return BadRequest(new { message = "Employee not found" });
+                }
+
+                // Step 2: Convert Base64 to byte[]
+                byte[] pdfBytes = Convert.FromBase64String(model.FileData);
+
+                string subject = $"Attendance Report - {DateTime.Now:dd MMM yyyy}";
+                // ✅ Email body (HTML)
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "ReportEmployee.html");
+                string body = System.IO.File.ReadAllText(path);
+                body = body.Replace("{{FileName}}", model.FileName).Replace("{{Date}}", DateTime.Now.ToString("dd-MM-yyyy"));
+
+                Console.WriteLine(emp.Email);
+                // Step 3: Send Email
+                _mailService.SendEmail(emp.Email, subject, body, pdfBytes);
+
+                return Ok(new { message = "PDF sent successfully to employee email", success = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in Sending Email :- " + ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

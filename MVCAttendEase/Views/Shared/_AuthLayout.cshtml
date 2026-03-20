@@ -70,12 +70,122 @@
         .k-button:hover{
             background:#1E40AF;
         }
+                /* ===================== PRELOADER STYLES ===================== */
+        #preloader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.72);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #preloader.show {
+            display: flex;
+        }
+
+        .preloader-box {
+            background: #0F1117;
+            padding: 36px 48px;
+            border-radius: 16px;
+            text-align: center;
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            min-width: 230px;
+        }
+
+        .spinner {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 20px auto;
+        }
+
+        .spinner-ring-outer,
+        .spinner-ring-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .spinner-ring-outer {
+            animation: spin 1.4s linear infinite;
+        }
+
+        .spinner-ring-inner {
+            animation: spin-reverse 2s linear infinite;
+        }
+
+        .spinner-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #C4B5FD;
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @@keyframes spin-reverse {
+            to { transform: rotate(-360deg); }
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50%       { opacity: 0.4; transform: translate(-50%, -50%) scale(0.6); }
+        }
+
+        .preloader-box p {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: #E2E8F0;
+            letter-spacing: 0.01em;
+        }
+
+        .preloader-box small {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #4B5563;
+        }
+        /* ============================================================ */
 
     </style>
 
 </head>
 
 <body>
+    <!-- ===================== PRELOADER HTML ===================== -->
+<div id="preloader">
+    <div class="preloader-box">
+        <div class="spinner">
+            <svg class="spinner-ring-outer" width="52" height="52" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(139,92,246,0.15)" stroke-width="3.5"/>
+                <circle cx="26" cy="26" r="22" fill="none" stroke="#8B5CF6" stroke-width="3.5"
+                    stroke-dasharray="138" stroke-dashoffset="100" stroke-linecap="round"/>
+            </svg>
+            <svg class="spinner-ring-inner" width="52" height="52" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="14" fill="none" stroke="rgba(167,139,250,0.12)" stroke-width="2"/>
+                <circle cx="26" cy="26" r="14" fill="none" stroke="#A78BFA" stroke-width="2"
+                    stroke-dasharray="88" stroke-dashoffset="66" stroke-linecap="round"/>
+            </svg>
+            <div class="spinner-dot"></div>
+        </div>
+        <p id="preloader-msg">Please wait...</p>
+        <small id="preloader-sub"></small>
+    </div>
+</div>
+<!-- ========================================================== -->
     <div class="auth-container">
         <div class="auth-card">
             @RenderBody()
@@ -86,6 +196,21 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/kendo/kendo.all.min.js"></script>
+     <!-- ===================== PRELOADER HELPER FUNCTIONS ===================== -->
+    <script>
+        // Call this to show the preloader with a custom message
+        function showPreloader(msg, subMsg) {
+            $("#preloader-msg").text(msg || "Please wait...");
+            $("#preloader-sub").text(subMsg || "");
+            $("#preloader").addClass("show");
+        }
+
+        // Call this to hide the preloader
+        function hidePreloader() {
+            $("#preloader").removeClass("show");
+        }
+    </script>
+    <!-- ====================================================================== -->
 
 
     @RenderSection("Scripts",required:false)

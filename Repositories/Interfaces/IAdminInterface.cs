@@ -30,5 +30,6 @@ namespace Repositories.Interfaces
         Task<AdminMonthlyReportDataModel> GetEmployeeMonthlyReportData(int empId, int month, int year);
 
         Task<EmployeeModel> GetEmployeeDetails(int empId);
+        
         }
 }

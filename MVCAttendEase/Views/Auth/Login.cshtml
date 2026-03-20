@@ -24,14 +24,16 @@
 
     <script>
 
-        $(document).ready(function(){
+        $(document).ready(function () {
+
+            // ── Kendo Notification setup ──────────────────────────────────────
             $("#notification").kendoNotification({
                 position: {
                     pinned: true,
                     top: 30,
                     right: 30
                 },
-                autoHideAfter: 1500,
+                autoHideAfter: 2000,
                 stacking: "down",
                 templates: [
                     {
@@ -41,96 +43,109 @@
                 ]
             });
 
+            // ── Kendo Form setup ──────────────────────────────────────────────
             $("#loginForm").kendoForm({
 
-                formData:{
-                    c_email:"",
-                    c_password:""
+                formData: {
+                    c_email: "",
+                    c_password: ""
                 },
 
-                items:[
-
+                items: [
                     {
-                        field:"email",
-                        label:"Email",
-                        validation:{ required: { message: "Email is required" }, email: { message: "Invalid email format" } },
-                        editor:function(container,options){
-                            $('<input required="required" name="'+options.field+'" type="email"/>')
-                            .appendTo(container)
-                            .kendoTextBox({
-                                placeholder:"Enter your email"
-                            });
+                        field: "email",
+                        label: "Email",
+                        validation: {
+                            required: { message: "Email is required" },
+                            email: { message: "Invalid email format" }
+                        },
+                        editor: function (container, options) {
+                            $('<input required="required" name="' + options.field + '" type="email"/>')
+                                .appendTo(container)
+                                .kendoTextBox({ placeholder: "Enter your email" });
                         }
                     },
-
                     {
-                        field:"password",
-                        label:"Password",
-                        validator:{required: { message: "Password is required" }},
-                        editor:function(container,options){
-                            $('<input required="required" name="'+options.field+'" type="password"/>')
-                            .appendTo(container)
-                            .kendoTextBox({
-                                placeholder:"Enter password"
-                            });
+                        field: "password",
+                        label: "Password",
+                        validator: { required: { message: "Password is required" } },
+                        editor: function (container, options) {
+                            $('<input required="required" name="' + options.field + '" type="password"/>')
+                                .appendTo(container)
+                                .kendoTextBox({ placeholder: "Enter password" });
                         }
                     }
-
                 ],
 
-                buttonsTemplate:`
+                buttonsTemplate: `
                     <button type="submit" class="k-button k-primary w-100">
                         Login
                     </button>
                 `,
 
-                submit:function(e){
+                submit: function (e) {
                     e.preventDefault();
-                        var formdata = {
-                            c_email: e.model.email,
-                            c_password: e.model.password
-                        }
 
-                        $.ajax({
-                            url: "/Auth/Login",
-                            method: "POST",
-                            data: JSON.stringify(formdata),
-                            contentType: "application/json",
+                    var formdata = {
+                        c_email: e.model.email,
+                        c_password: e.model.password
+                    };
 
-                            success:function(response){
-                                debugger;
+                    // ── Show preloader when Login button is clicked ────────────
+                    showPreloader("Logging in...", "Please wait while we verify your credentials");
+                    // ─────────────────────────────────────────────────────────────
 
-                                if (response.success) {
-                                    $("#notification").data("kendoNotification")
-                                    .show("Login successful!", "success");                                   
-                                    sessionStorage.setItem("userRole", response.role); // Store role in sessionStorage
-                                    sessionStorage.setItem("userId", response.id); // Store name in sessionStorage
-                                    if(response.role === "Admin"){
-                                        setTimeout(function(){
-                                            window.location.href = "/Admin/Dashboard";
-                                        }, 1500);
-                                    }else{
-                                        setTimeout(()=>window.location.href="/Employee/Dashboard",1500);
+                    $.ajax({
+                        url: "/Auth/Login",
+                        method: "POST",
+                        data: JSON.stringify(formdata),
+                        contentType: "application/json",
+
+                        success: function (response) {
+
+                            if (response.success) {
+
+                                // ── Update preloader message on success ───────────
+                                showPreloader("Login Successful!", "Redirecting to your dashboard...");
+                                // ─────────────────────────────────────────────────
+
+                                $("#notification").data("kendoNotification").show("Login successful!", "success");
+
+                                sessionStorage.setItem("userRole", response.role);
+                                sessionStorage.setItem("userId", response.id);
+
+                                // Redirect after short delay so user sees the success message
+                                setTimeout(function () {
+                                    if (response.role === "Admin") {
+                                        window.location.href = "/Admin/Dashboard";
+                                    } else {
+                                        window.location.href = "/Employee/Dashboard";
                                     }
+                                }, 1500);
 
-                                } else {
-                                    $("#notification")
-                                        .data("kendoNotification")
-                                        .show({message:"Invalid credentials"},"error");
-                                }
-                            },
+                            } else {
+                                // ── Hide preloader on failure ─────────────────────
+                                hidePreloader();
+                                // ─────────────────────────────────────────────────
 
-                            error:function(xhr){
-                                var message = "Login failed";
-                                if (xhr.responseJSON && xhr.responseJSON.message)
-                                    message = xhr.responseJSON.message;
-
-                                $("#notification")
-                                    .data("kendoNotification")
-                                    .show({message:message},"error");
+                                $("#notification").data("kendoNotification")
+                                    .show({ message: "Invalid credentials" }, "error");
                             }
+                        },
 
-                    });    
+                        error: function (xhr) {
+                            // ── Hide preloader on error ───────────────────────────
+                            hidePreloader();
+                            // ─────────────────────────────────────────────────────
+
+                            var message = "Login failed. Please try again.";
+                            if (xhr.responseJSON && xhr.responseJSON.message)
+                                message = xhr.responseJSON.message;
+
+                            $("#notification").data("kendoNotification")
+                                .show({ message: message }, "error");
+                        }
+                    });
                 }
             });
         });

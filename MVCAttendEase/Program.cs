@@ -8,71 +8,66 @@ using Repositories.Interfaces;
 using Repositories.Models;
 using StackExchange.Redis;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// =================== MVC ===================
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<AdminFilter>();
 builder.Services.AddScoped<EmployeeFilter>();
 builder.Services.AddScoped<CloudinaryService>();
 
-// ===================Radis Configuration===================
-builder.Services.AddScoped<RedisService>();
-
+// =================== Redis ===================
 builder.Services.Configure<RedisConfig>(
     builder.Configuration.GetSection("Redis")
 );
 
-// var redisTest = builder.Configuration.GetSection("Redis").Get<RedisConfig>();
-// Console.WriteLine("==== REDIS CONFIG ====");
-// Console.WriteLine(redisTest.Host);
-// Console.WriteLine(redisTest.Port);
-
+// Register IConnectionMultiplexer — reads Host from appsettings.json
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var config = sp.GetRequiredService<IOptions<RedisConfig>>().Value;
 
-    if (string.IsNullOrEmpty(config.Host))
-        throw new Exception("Redis Host is NULL ❌");
-
     var options = new ConfigurationOptions
     {
         EndPoints = { { config.Host, config.Port } },
-        Password = config.Password,
-        Ssl = config.Ssl,
+        Password  = config.Password,
+        Ssl       = config.Ssl,
         AbortOnConnectFail = false,
-        ConnectTimeout = 10000,
-        SyncTimeout = 10000
+        ConnectTimeout     = 10000,
+        SyncTimeout        = 10000,
+          // Allow the SCAN command used by InvalidateByPrefixAsync
+        AllowAdmin         = true
     };
 
     return ConnectionMultiplexer.Connect(options);
 });
 
-// ===================RabbitMQ Configuration===================
+// Register RedisService AFTER IConnectionMultiplexer so DI can inject it correctly
+builder.Services.AddScoped<RedisService>();
 
+// =================== RabbitMQ ===================
 builder.Services.Configure<RabbitMQConfig>(
     builder.Configuration.GetSection("RabbitMQ")
 );
-
 builder.Services.AddScoped<RabbitMQService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddSingleton<NotificationPublisher>();
 builder.Services.AddHostedService<RabbitMqNotificationConsumer>();
 
-// ===================Elasticsearch Configuration===================
-builder.Services.Configure<ElasticsearchConfig>(
-    builder.Configuration.GetSection("Elasticsearch")
-);
-builder.Services.AddScoped<ElasticsearchService>();
+// =================== Elasticsearch ===================
+// builder.Services.Configure<ElasticsearchConfig>(
+//     builder.Configuration.GetSection("Elasticsearch")
+// );
+// builder.Services.AddScoped<ElasticsearchService>();
 
-var test = builder.Configuration.GetSection("Elasticsearch").Get<ElasticsearchConfig>();
-Console.WriteLine(test.Url);
+// // Safe log — no crash if section is missing
+// var esConfig = builder.Configuration.GetSection("Elasticsearch").Get<ElasticsearchConfig>();
+// Console.WriteLine($"Elasticsearch URL: {esConfig?.Url ?? "Not configured"}");
 
-builder.Services.AddScoped<IAuthInterface, AuthRepository>();
-builder.Services.AddScoped<IAdminInterface, AdminRepository>();
-builder.Services.AddScoped<IEmployeeInterface, EmployeeRepository>();
+// =================== Repositories ===================
+builder.Services.AddScoped<IAuthInterface,       AuthRepository>();
+builder.Services.AddScoped<IAdminInterface,      AdminRepository>();
+builder.Services.AddScoped<IEmployeeInterface,   EmployeeRepository>();
 builder.Services.AddScoped<IAttendanceInterface, AttendanceRepository>();
 builder.Services.Configure<EmailModal>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<MailService>();
@@ -80,35 +75,31 @@ builder.Services.AddScoped<MailService>();
 builder.Services.AddScoped<NpgsqlConnection>(_ =>
     new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+// =================== Session ===================
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
+    options.IdleTimeout      = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly  = true;
     options.Cookie.IsEssential = true;
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// =================== Middleware ===================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.UseSession();
 
 app.MapControllerRoute(
-    name: "default",
+    name:    "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
 
 app.Run();

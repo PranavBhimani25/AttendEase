@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVCAttendEase.Filters;
+using MVCAttendEase.Models;
 using MVCAttendEase.Services;
 using Npgsql;
 using Repositories.Interfaces;
@@ -18,15 +20,15 @@ namespace MVCAttendEase.Controllers
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class EmployeeController : Controller
     {
-        private readonly IEmployeeInterface _repo;
         private readonly ILogger<EmployeeController> _logger;
         private readonly IEmployeeInterface _emp;
         private readonly CloudinaryService _cloudinaryService;
         private readonly ElasticsearchService _elastic;
         private readonly INotificationInterface _notification;
         private readonly RedisService _redis;
+        private readonly NotificationPublisher _notificationPublisher;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService, ElasticsearchService elastic, INotificationInterface notification, RedisService redis)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService, ElasticsearchService elastic, INotificationInterface notification, RedisService redis, NotificationPublisher notificationPublisher)
         {
             _logger = logger;
             _emp = emp;
@@ -34,6 +36,7 @@ namespace MVCAttendEase.Controllers
             _elastic = elastic;
             _notification = notification;
             _redis = redis;
+            _notificationPublisher = notificationPublisher;
         }
 
 
@@ -47,6 +50,10 @@ namespace MVCAttendEase.Controllers
         {
             await using var connection = await _notification.GetConnectionAsync();
             var userId = HttpContext.Session.GetString("empId");
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
             System.Console.WriteLine("UserName " + userId);
 
             await _notification.GetEmpNotification(connection, userId);
@@ -57,6 +64,10 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> GetNotifications()
         {
             var userId = HttpContext.Session.GetString("empId");
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new { success = false, message = "Employee session expired." });
+            }
             var notifications = await _notification.GetStoredNotifications(userId);
 
             return Ok(new
@@ -70,12 +81,82 @@ namespace MVCAttendEase.Controllers
         public async Task<IActionResult> MarkNotificationRead([FromBody] MsgToEmp model)
         {
             var userId = HttpContext.Session.GetString("empId");
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new { success = false });
+            }
             var isRemoved = await _notification.MarkNotificationAsRead(userId, model);
 
             return Ok(new
             {
                 success = isRemoved
             });
+        }
+
+        [HttpPost("SendMonthlyReportRequest")]
+        public async Task<IActionResult> SendMonthlyReportRequest([FromBody] JsonElement payload)
+        {
+            if (!payload.TryGetProperty("month", out var monthElement) ||
+                !payload.TryGetProperty("year", out var yearElement) ||
+                !monthElement.TryGetInt32(out var month) ||
+                !yearElement.TryGetInt32(out var year))
+            {
+                return BadRequest(new { success = false, message = "Invalid month/year selection." });
+            }
+
+            if (month < 1 || month > 12 || year < 2000 || year > 2100)
+            {
+                return BadRequest(new { success = false, message = "Invalid month/year selection." });
+            }
+
+            var empId = GetCurrentEmpId();
+            if (empId <= 0)
+            {
+                return Unauthorized(new { success = false, message = "Employee session expired. Please login again." });
+            }
+
+            var selectedMonth = new DateTime(year, month, 1);
+            var empName = HttpContext.Session.GetString("empName") ?? "Employee";
+            var empEmail = HttpContext.Session.GetString("empEmail") ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(empEmail) || empName == "Employee")
+            {
+                var employee = await _emp.GetOne(empId);
+                if (employee != null)
+                {
+                    if (string.IsNullOrWhiteSpace(empName) || empName == "Employee")
+                    {
+                        empName = employee.Name;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(empEmail))
+                    {
+                        empEmail = employee.Email;
+                    }
+                }
+            }
+
+            var notification = new NotificationMessage
+            {
+                EmployeeId = empId,
+                FullName = empName,
+                Email = empEmail,
+                Role = "Employee",
+                NotificationType = "MonthRequest",
+                Message = $"{empName} requested monthly report for {selectedMonth:MMM yyyy}.",
+                RegisteredAt = DateTime.UtcNow
+            };
+
+            try
+            {
+                await _notificationPublisher.PublishAttendanceAsync(notification);
+                return Ok(new { success = true, message = "Request sent to admin successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send monthly report request for EmpId {EmpId}", empId);
+                return StatusCode(500, new { success = false, message = "Failed to send request." });
+            }
         }
 
         [Route("Profile")]

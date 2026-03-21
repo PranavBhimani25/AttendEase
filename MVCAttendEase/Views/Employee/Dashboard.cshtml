@@ -141,7 +141,13 @@
                         style="border-color:#d32f2f;color:#d32f2f">
                     <span class="k-icon k-i-lock"></span>
                     Change Password
-                </button>   
+                </button>
+
+                <button id="btnRequestMonthReport" class="k-button k-outline k-button-sm w-75 d-flex align-items-center justify-content-center gap-2"
+                        style="border-color:#d32f2f;color:#d32f2f">
+                    <span class="k-icon k-i-calendar"></span>
+                    Request Monthly Report
+                </button>
             </div>
         </div>
         <div id="calender" class="col-md-8">
@@ -171,6 +177,18 @@
 
 <div id="changePasswordWindow" style="display:none;">
     <div id="changePasswordForm"></div>
+</div>
+
+<div id="monthRequestWindow" style="display:none;">
+    <div style="margin-bottom:12px;">
+        <label for="monthPicker" style="display:block;font-weight:600;margin-bottom:6px;">Select Month</label>
+        <input id="monthPicker" style="width:100%;" />
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" id="btnCloseMonthRequest" class="k-button">Cancel</button>
+        <button type="button" id="btnSendMonthRequest" class="k-button k-primary">Send Request</button>
+    </div>
 </div>
 
 <div id="notification"></div>
@@ -652,6 +670,63 @@ $("#updateEmployeeForm").kendoForm({
 
     $(document).on("click","#btnCloseChangePwd",function(){
         changePasswordWindow.close();
+    });
+
+    var monthRequestWindow = $("#monthRequestWindow").kendoWindow({
+        title: "Request Monthly Report",
+        modal: true,
+        visible: false,
+        resizable: false,
+        width: "380px",
+        actions: ["Close"]
+    }).data("kendoWindow");
+
+    $("#monthPicker").kendoDatePicker({
+        value: new Date(),
+        format: "MMM yyyy",
+        start: "year",
+        depth: "year"
+    });
+
+    $("#btnRequestMonthReport").click(function(){
+        monthRequestWindow.center().open();
+    });
+
+    $(document).on("click", "#btnCloseMonthRequest", function(){
+        monthRequestWindow.close();
+    });
+
+    $(document).on("click", "#btnSendMonthRequest", function(){
+        var picker = $("#monthPicker").data("kendoDatePicker");
+        var selectedDate = picker ? picker.value() : null;
+
+        if (!selectedDate) {
+            $("#notification").data("kendoNotification").show({ message: "Please select a month." }, "error");
+            return;
+        }
+
+        var payload = {
+            month: selectedDate.getMonth() + 1,
+            year: selectedDate.getFullYear()
+        };
+
+        $.ajax({
+            url: "/Employee/SendMonthlyReportRequest",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            success: function(response){
+                if (response.success) {
+                    $("#notification").data("kendoNotification").show(response.message, "success");
+                    monthRequestWindow.close();
+                } else {
+                    $("#notification").data("kendoNotification").show({ message: response.message || "Unable to send request." }, "error");
+                }
+            },
+            error: function(){
+                $("#notification").data("kendoNotification").show({ message: "Failed to send request to admin." }, "error");
+            }
+        });
     });
 
     $(document).on("click","#Passchg",function(){

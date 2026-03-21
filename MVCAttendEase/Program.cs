@@ -70,6 +70,7 @@ builder.Services.AddScoped<IAuthInterface,       AuthRepository>();
 builder.Services.AddScoped<IAdminInterface,      AdminRepository>();
 builder.Services.AddScoped<IEmployeeInterface,   EmployeeRepository>();
 builder.Services.AddScoped<IAttendanceInterface, AttendanceRepository>();
+builder.Services.AddScoped<INotificationInterface, NotificationRepository>();
 builder.Services.Configure<EmailModal>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<MailService>();
 

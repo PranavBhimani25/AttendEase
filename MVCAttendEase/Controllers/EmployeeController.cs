@@ -21,14 +21,17 @@ namespace MVCAttendEase.Controllers
         private readonly ILogger<EmployeeController> _logger;
         private readonly IEmployeeInterface _emp;
         private readonly CloudinaryService _cloudinaryService;
+         
+        private readonly INotificationInterface _notification;
         private readonly RedisService _redis;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService, RedisService redis)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeInterface emp, CloudinaryService cloudinaryService, INotificationInterface notification, RedisService redis)
         {
             _logger = logger;
             _emp = emp;
             _redis = redis;
             _cloudinaryService = cloudinaryService;
+            _notification = notification;
         }
 
         private int GetCurrentEmpId()
@@ -37,14 +40,45 @@ namespace MVCAttendEase.Controllers
         }
 
         [HttpGet("Dashboard")]
-        public IActionResult Dashboard()
+        public async Task<IActionResult> DashboardAsync()
         {
+            await using var connection = await _notification.GetConnectionAsync();
+            var userId = HttpContext.Session.GetString("empId");
+            System.Console.WriteLine("UserName " + userId);
+
+            await _notification.GetEmpNotification(connection, userId);
             return View();
+        }
+
+        [HttpGet("GetNotifications")]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var userId = HttpContext.Session.GetString("empId");
+            var notifications = await _notification.GetStoredNotifications(userId);
+
+            return Ok(new
+            {
+                success = true,
+                data = notifications
+            });
+        }
+
+        [HttpPost("MarkNotificationRead")]
+        public async Task<IActionResult> MarkNotificationRead([FromBody] MsgToEmp model)
+        {
+            var userId = HttpContext.Session.GetString("empId");
+            var isRemoved = await _notification.MarkNotificationAsRead(userId, model);
+
+            return Ok(new
+            {
+                success = isRemoved
+            });
         }
 
         [Route("Profile")]
         public IActionResult Profile()
         {
+
             return View();
         }
 

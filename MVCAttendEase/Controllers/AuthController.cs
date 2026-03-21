@@ -137,71 +137,105 @@ namespace MVCAttendEase.Controllers
         //    3. Also save to Redis for 30 minutes (fast login cache)
         // ─────────────────────────────────────────────────────────────────────
         [HttpPost]
-        public async Task<IActionResult> Register([FromForm] RegisterEmployeeModel model)
+public async Task<IActionResult> Register([FromForm] RegisterEmployeeModel model)
+{
+    if (model == null)
+    {
+        return BadRequest(new { message = "Invalid registration request", success = false });
+    }
+
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(new { message = "Invalid model data", success = false });
+    }
+
+    try
+    {
+        // ✅ Upload Profile Image
+        if (model.c_profileimage != null && model.c_profileimage.Length > 0)
         {
-             if(model == null)
+            model.ProfileImageUrl = await _cloudinaryService.UploadImageAsync(model.c_profileimage);
+        }
+
+        // ✅ Register User
+        var employeeId = await _auth.Register(model);
+
+        if (employeeId <= 0)
+        {
+            return BadRequest(new { message = "Registration failed", success = false });
+        }
+
+        // ✅ Safe Name Handling
+        var userDisplayName = string.IsNullOrWhiteSpace(model.c_name) 
+            ? "Employee" 
+            : model.c_name;
+
+        // ✅ Send Email (ONLY if email exists)
+        if (!string.IsNullOrWhiteSpace(model.c_email))
+        {
+            string body = $@"Dear {userDisplayName}, <br><br>
+                            Thank you for registering with our Attendance Management System. <br>
+                            Your registration has been completed successfully. 🎉 <br><br>
+
+                            Please note that your account is currently under review. 
+                            You will be able to login only after an administrator activates your account. <br><br>
+
+                            Once your account is activated, you will receive a confirmation. <br><br>
+
+                            Best regards, <br>
+                            Admin Team <br>
+                            AttendEase System";
+
+            string subject = "Registration Successful";
+
+            try
             {
-                return BadRequest("Invalid registration request");
+                await _mailService.SendEmail(model.c_email, subject, body);
             }
-
-            if (model.c_profileimage != null && model.c_profileimage.Length > 0)
+            catch (Exception ex)
             {
-                model.ProfileImageUrl = await _cloudinaryService.UploadImageAsync(model.c_profileimage);
-            }
-
-            var employee = await _auth.Register(model);
-
-            if(employee > 0)
-            {
-                string body = $@"Dear {model.c_name}, <br><br>
-
-                                    Thank you for registering with our Attendance Management System. <br>
-                                    Your registration has been completed successfully. 🎉 <br><br>
-
-                                    Please note that your account is currently under review. 
-                                    You will be able to login only after an administrator activates your account. <br><br>
-
-                                    Once your account is activated, you will receive a confirmation, 
-                                    and then you can access the system using your credentials. <br><br>
-
-                                    If you have any questions or need assistance, feel free to contact us. <br><br>
-
-                                    Best regards, <br>
-                                    Admin Team <br>
-                                    AttendEase System
-                                    ";
-                string subject = "Registration Successfully";
-
-                _mailService.SendEmail(model.c_email, subject, body);
-
-                var candidateName = string.IsNullOrWhiteSpace(model.c_name) ? "Employee" : model.c_name;
-                var userDisplayName = candidateName ?? "Employee";
-                var notification = new NotificationMessage
-                {
-                    EmployeeId = employee,
-                    FullName = userDisplayName,
-                    Email = model.c_email ?? string.Empty,
-                    Role = "Employee",
-                    Message = $"New user registration from {userDisplayName}.",
-                    RegisteredAt = DateTime.UtcNow
-                };
-
-                try
-                {
-                    await _notificationPublisher.PublishAsync(notification);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to publish registration notification for {Email}", model.c_email);
-                }
-
-                return Ok(new { message = "Registration successful", success = true });
-            }
-            else
-            {
-                return BadRequest(new { message = "Registration failed", success = false });
+                _logger.LogWarning(ex, "Email sending failed for {Email}", model.c_email);
             }
         }
+
+        // ✅ Publish Notification (RabbitMQ)
+        var notification = new NotificationMessage
+        {
+            EmployeeId = employeeId,
+            FullName = userDisplayName,
+            Email = model.c_email ?? string.Empty,
+            Role = "Employee",
+            Message = $"New user registration from {userDisplayName}.",
+            RegisteredAt = DateTime.UtcNow
+        };
+
+        try
+        {
+            await _notificationPublisher.PublishAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to publish notification for {Email}", model.c_email);
+        }
+
+        return Ok(new
+        {
+            message = "Registration successful",
+            success = true,
+            employeeId = employeeId
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error during registration");
+
+        return StatusCode(500, new
+        {
+            message = "Something went wrong",
+            success = false
+        });
+    }
+}
 
         // ─────────────────────────────────────────────────────────────────────
         //  GET: /Auth/Logout

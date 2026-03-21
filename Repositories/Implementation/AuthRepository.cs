@@ -22,7 +22,7 @@ namespace Repositories.Implementation
 
         public async Task<EmployeeModel?> Login(LoginModel model)
         {
-            var query = @"SELECT c_empid,c_email,c_role,c_status,c_password 
+            var query = @"SELECT c_empid,c_name,c_email,c_role,c_status,c_password 
                         FROM t_employees 
                         WHERE c_email = @Email";
 
@@ -45,7 +45,9 @@ namespace Repositories.Implementation
                     return new EmployeeModel
                     {
                         EmpId = reader.GetInt32(reader.GetOrdinal("c_empid")),
-                        Email = reader.GetString(reader.GetOrdinal("c_email")),
+                        Name   = reader.IsDBNull(reader.GetOrdinal("c_name"))
+                             ? string.Empty
+                            : reader.GetString(reader.GetOrdinal("c_name")),                        Email = reader.GetString(reader.GetOrdinal("c_email")),
                         Role = reader.GetString(reader.GetOrdinal("c_role")),
                         Status = reader.GetString(reader.GetOrdinal("c_status"))
                     };

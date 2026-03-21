@@ -65,6 +65,8 @@ namespace MVCAttendEase.Controllers
                     // Redis hit — login instantly without hitting PostgreSQL
                     HttpContext.Session.SetString("Role",  cachedEmployee.Role?.Trim() ?? "Employee");
                     HttpContext.Session.SetString("empId", cachedEmployee.EmpId.ToString());
+                    HttpContext.Session.SetString("empName", cachedEmployee.Name ?? string.Empty);   // ← add
+                    HttpContext.Session.SetString("empEmail", cachedEmployee.Email ?? string.Empty); // ← add
 
                     _logger.LogInformation("Login via Redis cache for: {Email}", model.c_email);
 
@@ -91,8 +93,8 @@ namespace MVCAttendEase.Controllers
             var employeeCache = new EmployeeModel
             {
                 EmpId        = result.EmpId,
-                Name         = string.Empty,
-                Email        = result.Email ?? model.c_email,
+                 Name         = result.Name ?? string.Empty,
+                 Email        = result.Email ?? model.c_email, 
                 Password     = model.c_password,
                 Gender       = string.Empty,
                 Status       = result.Status,
@@ -105,6 +107,8 @@ namespace MVCAttendEase.Controllers
 
             HttpContext.Session.SetString("Role",  result.Role?.Trim() ?? string.Empty);
             HttpContext.Session.SetString("empId", result.EmpId.ToString());
+            HttpContext.Session.SetString("empName",  result.Name          ?? string.Empty);
+            HttpContext.Session.SetString("empEmail", result.Email         ?? string.Empty);
 
             _logger.LogInformation("Login via PostgreSQL for: {Email}", model.c_email);
 

@@ -10,5 +10,6 @@ namespace MVCAttendEase.Models
         public string Uri { get; set; }
         public string QueueName { get; set; }
         public string? NotificationQueueName { get; set; }
+        public string? AttendanceNotificationQueueName { get; set; }  // ← add this
     }
 }

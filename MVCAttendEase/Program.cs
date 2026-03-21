@@ -53,6 +53,7 @@ builder.Services.AddScoped<RabbitMQService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddSingleton<NotificationPublisher>();
 builder.Services.AddHostedService<RabbitMqNotificationConsumer>();
+builder.Services.AddHostedService<RabbitMqAttendanceConsumer>();  
 
 // =================== Elasticsearch ===================
 // builder.Services.Configure<ElasticsearchConfig>(

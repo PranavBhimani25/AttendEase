@@ -85,13 +85,13 @@ namespace MVCAttendEase.Services
             using var scope = _scopeFactory.CreateScope();
             var redis = GetRedis(scope);
 
-            var allValues = await redis.LRangeAsync(NOTIFICATIONS_KEY, 0, -1);
+    var allValues = await redis.LRangeAsync(NOTIFICATIONS_KEY, -6, -1);
             if (index < 0 || index >= allValues.Length) return false;
 
 // Mirror the index: frontend 0 = Redis last item
     int redisIndex = allValues.Length - 1 - index;
-    
-            var targetJson = allValues[index].ToString();
+
+            var targetJson = allValues[redisIndex].ToString();
             if (string.IsNullOrEmpty(targetJson)) return false;
 
             var removed = await redis.LRemAsync(NOTIFICATIONS_KEY, targetJson);
@@ -121,8 +121,19 @@ namespace MVCAttendEase.Services
             {
                 if (value.HasValue)
                 {
-                    var msg = JsonSerializer.Deserialize<NotificationMessage>(value.ToString()!);
-                    if (msg != null) notifications.Add(msg);
+                    var json = value.ToString();
+                    if (string.IsNullOrWhiteSpace(json)) continue;  // ← empty skip karo
+
+                    try
+                    {
+                        var msg = JsonSerializer.Deserialize<NotificationMessage>(json);
+                        if (msg != null) notifications.Add(msg);
+                    }
+                    catch
+                    {
+                        // Corrupt JSON entry skip karo — baaki load hote rahein
+                        continue;
+                    }
                 }
             }
             notifications.Reverse();

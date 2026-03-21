@@ -9,6 +9,9 @@ namespace MVCAttendEase.Models
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = "Employee";
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
-        public string Message { get; set; } = "New employee registered";
+         public string Message { get; set; } = string.Empty;
+
+        // "Registration", "CheckIn", "CheckOut"
+        public string NotificationType { get; set; } = "Registration";
     }
 }

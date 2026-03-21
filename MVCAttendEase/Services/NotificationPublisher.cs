@@ -58,5 +58,34 @@ namespace MVCAttendEase.Services
                 body: body.AsMemory(),
                 cancellationToken: CancellationToken.None);
         }
+        public async Task PublishAttendanceAsync(NotificationMessage message)
+        {
+            await using var connection = await _factory.CreateConnectionAsync(CancellationToken.None);
+            await using var channel = await connection.CreateChannelAsync(
+                new CreateChannelOptions(false, false, null, null), CancellationToken.None);
+
+            var queueName = string.IsNullOrWhiteSpace(_config.AttendanceNotificationQueueName)
+                ? "attendance_notifications"
+                : _config.AttendanceNotificationQueueName!;
+
+            await channel.QueueDeclareAsync(
+                queue:      queueName,
+                durable:    true,
+                exclusive:  false,
+                autoDelete: false,
+                arguments:  null,
+                passive:    false,
+                noWait:     false,
+                cancellationToken: CancellationToken.None);
+
+            var payload = JsonSerializer.Serialize(message);
+            var body    = Encoding.UTF8.GetBytes(payload);
+
+            await channel.BasicPublishAsync(
+                exchange:   string.Empty,
+                routingKey: queueName,
+                body:       body.AsMemory(),
+                cancellationToken: CancellationToken.None);
+        }
     }
 }

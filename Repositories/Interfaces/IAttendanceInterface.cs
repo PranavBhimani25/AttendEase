@@ -10,9 +10,9 @@ namespace Repositories.Interfaces
     {
          Task<bool> IsTodayAttendanceExists(int empid);
 
-        Task<(bool success, string message, string status)> CheckIn(AttendanceModel model);
+        Task<(bool success, string message, string status, int attendId)> CheckIn(AttendanceModel model);
 
-        Task<(bool success, string message, int workingHours, string status)> CheckOut(AttendanceModel model);
+        Task<(bool success, string message, int workingHours, string status, int attendId)> CheckOut(AttendanceModel model);
 
         Task<List<AttendanceModel>> GetAttendanceByEmployee(int empId);
     }

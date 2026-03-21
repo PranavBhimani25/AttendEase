@@ -112,6 +112,10 @@ function initAdminNotifications() {
         return;
     }
 
+     var notifications = [];
+    var unreadCount = 0;
+    var MAX_ITEMS = 6;
+
     // Load persistent unread count and history from server
     Promise.all([
         fetchUnreadCount().then(count => {
@@ -121,9 +125,7 @@ function initAdminNotifications() {
         fetchHistory()
     ]).catch(e => console.warn('Load notifications failed', e));
 
-    var notifications = [];
-    var unreadCount = 0;
-    var MAX_ITEMS = 6;
+   
 
     var eventSource;
     if (window.EventSource) {
@@ -206,12 +208,24 @@ function initAdminNotifications() {
             var dot = document.createElement("div");
             dot.className = index < unreadCount ? "notif-unread-dot" : "notif-read-spacer";
 
-            // Avatar with initials
+           // Avatar with initials + type icon overlay
             var avatar = document.createElement("div");
             avatar.className = "notif-avatar";
-            var scheme = avatarColors[index % avatarColors.length];
-            avatar.style.background = scheme.bg;
-            avatar.style.color = scheme.color;
+            var type = item?.notificationType || "Registration";
+
+            // Color scheme per type
+            if (type === "CheckIn") {
+                avatar.style.background = "#E1F5EE";
+                avatar.style.color = "#0F6E56";
+            } else if (type === "CheckOut") {
+                avatar.style.background = "#FAECE7";
+                avatar.style.color = "#993C1D";
+            } else {
+                var scheme = avatarColors[index % avatarColors.length];
+                avatar.style.background = scheme.bg;
+                avatar.style.color = scheme.color;
+            }
+
             var name = item?.fullName || "NU";
             var parts = name.trim().split(" ");
             avatar.textContent = parts.length >= 2
@@ -230,6 +244,12 @@ function initAdminNotifications() {
             var body = document.createElement("div");
             body.className = "notification-body-item";
             body.textContent = item?.message || "A new user has registered.";
+            
+            // Add a small type pill
+            var typePill = document.createElement("span");
+            typePill.className = "notif-type-pill notif-type-" + (item?.notificationType || "Registration").toLowerCase();
+            typePill.textContent = item?.notificationType || "Registration";
+            body.appendChild(typePill);
 
             var footer = document.createElement("div");
             footer.className = "notification-footer-item";
@@ -286,10 +306,12 @@ function initAdminNotifications() {
     });
 
     function showAllNotificationsModal() {
-        let backdrop = document.getElementById("notification-modal-backdrop");
-        if (!backdrop) {
-            backdrop = document.createElement("div");
-            backdrop.id = "notification-modal-backdrop";
+            // Remove old modal completely so spinner always resets fresh
+            const old = document.getElementById("notification-modal-backdrop");
+            if (old) old.remove();
+
+            const backdrop = document.createElement("div");
+            backdrop.id        = "notification-modal-backdrop";
             backdrop.className = "notification-modal-backdrop";
             backdrop.innerHTML = `
                 <div class="notification-modal">
@@ -309,9 +331,12 @@ function initAdminNotifications() {
                 </div>
             `;
             document.body.appendChild(backdrop);
-        }
-        backdrop.classList.add("show");
-        loadAllNotifications();
+
+            // Small delay taaki DOM append ho jaye pehle
+            requestAnimationFrame(() => {
+                backdrop.classList.add("show");
+                loadAllNotifications();
+            });
     }
 
     function closeAllNotificationsModal() {
@@ -365,8 +390,12 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
                     list.appendChild(card);
                 });
             }
-        } catch (e) {
+       } catch (e) {
             console.error('Failed to load all notifications:', e);
+            const list = document.getElementById("all-notifications-list");
+            if (list) {
+                list.innerHTML = '<div class="text-center p-4 text-danger">Failed to load notifications. Please try again.</div>';
+            }
         }
     }
 
@@ -408,7 +437,11 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
                 method: 'POST'
             });
             if (res.ok) {
-                unreadCount--;
+                notifications.splice(index, 1);
+            renderNotifications();
+                // Server se fresh count lo — local decrement reliable nahi hai
+                const freshCount = await fetchUnreadCount();
+                unreadCount = Math.max(0, freshCount);
                 updateBadge();
                 await fetchHistory();
             }
@@ -820,6 +853,18 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
     color: #9ba3ad;
 }
 
+.notif-type-pill {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 20px;
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+}
+.notif-type-registration { background: #e6f1fb; color: #185FA5; }
+.notif-type-checkin      { background: #E1F5EE; color: #0F6E56; }
+.notif-type-checkout     { background: #FAECE7; color: #993C1D; }
 /* ════════════════════════════════════════════
    END NOTIFICATION UI
    ════════════════════════════════════════════ */

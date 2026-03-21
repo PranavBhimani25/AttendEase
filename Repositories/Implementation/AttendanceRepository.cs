@@ -41,14 +41,14 @@ namespace Repositories.Implementation
 
         // ================= CHECK IN =================
 
-        public async Task<(bool success, string message, string status)> CheckIn(AttendanceModel model)
+        public async Task<(bool success, string message, string status, int attendId)> CheckIn(AttendanceModel model)
         {
             try
             {
                 bool exists = await IsTodayAttendanceExists(model.EmpId);
 
                 if (exists)
-                    return (false, "Already checked in today", "");
+                    return (false, "Already checked in today", "", 0);
 
                 await _conn.OpenAsync();
 
@@ -60,7 +60,8 @@ namespace Repositories.Implementation
                 string qry = @"INSERT INTO t_attendance
                 (c_empid,c_attenddate,c_clockinhour,c_clockinmin,c_worktype,c_tasktype,c_attendstatus)
                 VALUES
-                (@empid,CURRENT_DATE,@hour,@min,@worktype,@tasktype,@status)";
+                (@empid,CURRENT_DATE,@hour,@min,@worktype,@tasktype,@status)
+                RETURNING c_attendid";
 
                 using var cmd = new NpgsqlCommand(qry, _conn);
 
@@ -71,9 +72,9 @@ namespace Repositories.Implementation
                 cmd.Parameters.AddWithValue("@tasktype", model.TaskType ?? "");
                 cmd.Parameters.AddWithValue("@status", status);
 
-                await cmd.ExecuteNonQueryAsync();
+                var insertedId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
-                return (true, "Checked In", status);
+                return (true, "Checked In", status, insertedId);
             }
             finally
             {
@@ -83,14 +84,14 @@ namespace Repositories.Implementation
 
         // ================= CHECK OUT =================
 
-        public async Task<(bool success, string message, int workingHours, string status)> CheckOut(AttendanceModel model)
+        public async Task<(bool success, string message, int workingHours, string status, int attendId)> CheckOut(AttendanceModel model)
         {
             try
             {
                 bool exists = await IsTodayAttendanceExists(model.EmpId);
 
                 if (!exists)
-                    return (false, "Please check in first", 0, "");
+                    return (false, "Please check in first", 0, "", 0);
 
                 await _conn.OpenAsync();
 
@@ -99,10 +100,12 @@ namespace Repositories.Implementation
                 int checkinHour = 0;
                 int checkinMin = 0;
                 int? checkoutHour = null;
+                int attendId = 0;
 
                 string status = "Regular";
 
-                string fetchQry = @"SELECT c_clockinhour,
+                  string fetchQry = @"SELECT c_attendid,
+                                 c_clockinhour,
                                            c_clockinmin,
                                            c_attendstatus,
                                            c_clockouthour
@@ -118,17 +121,18 @@ namespace Repositories.Implementation
 
                     if (await reader.ReadAsync())
                     {
-                        checkinHour = reader.GetInt32(0);
-                        checkinMin = reader.GetInt32(1);
-                        status = reader.GetString(2);
+                        attendId = reader.GetInt32(0);
+                        checkinHour = reader.GetInt32(1);
+                        checkinMin = reader.GetInt32(2);
+                        status = reader.GetString(3);
 
-                        if (!reader.IsDBNull(3))
-                            checkoutHour = reader.GetInt32(3);
+                        if (!reader.IsDBNull(4))
+                            checkoutHour = reader.GetInt32(4);
                     }
                 }
 
                 if (checkoutHour != null)
-                    return (false, "Already checked out today", 0, "");
+                    return (false, "Already checked out today", 0, "", attendId);
 
                 DateTime checkinTime = DateTime.Today.AddHours(checkinHour).AddMinutes(checkinMin);
 
@@ -169,7 +173,7 @@ namespace Repositories.Implementation
 
                 await updateCmd.ExecuteNonQueryAsync();
 
-                return (true, "Checked Out", workingHours, status);
+                return (true, "Checked Out", workingHours, status, attendId);
             }
             finally
             {

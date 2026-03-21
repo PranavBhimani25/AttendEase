@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -6,8 +7,8 @@ using Microsoft.Extensions.Logging;
 using MVCAttendEase.Services;
 using Repositories.Interfaces;
 using Repositories.Models;
+using MVCAttendEase.Models;
 using MVCAttendEase.Filters;
-using MVCAttendEase.Services;
 
 namespace MVCAttendEase.Controllers
 {
@@ -19,6 +20,7 @@ namespace MVCAttendEase.Controllers
         private readonly ILogger<AttendanceController> _logger;
         private readonly IAdminInterface _adminRepo;
         private readonly RedisService _redis;
+        private readonly NotificationPublisher _notificationPublisher; //admin notification
 
         [ActivatorUtilitiesConstructor]
 
@@ -27,13 +29,15 @@ namespace MVCAttendEase.Controllers
             ElasticsearchService elastic,
             IAdminInterface adminRepo,
             ILogger<AttendanceController> logger,
-            RedisService redis)
+            RedisService redis,
+            NotificationPublisher notificationPublisher)
         {
             _attendanceRepo = attendanceRepo;
             _elastic = elastic;
             _adminRepo = adminRepo;
             _logger = logger;
             _redis = redis;
+            _notificationPublisher = notificationPublisher;
         }
 
         public IActionResult Index()
@@ -50,18 +54,40 @@ namespace MVCAttendEase.Controllers
             if (result.success)
             {
                 var emp = await _adminRepo.GetEmployeeDetails(model.EmpId);
+                 var empName  = HttpContext.Session.GetString("empName")  ?? "Employee";
+                var empEmail = HttpContext.Session.GetString("empEmail") ?? string.Empty;
+                var notification = new NotificationMessage
+                {
+                    EmployeeId       = model.EmpId,
+                    FullName         = empName,
+                    Email            = empEmail,
+                    Role             = "Employee",
+                    NotificationType = "CheckIn",
+                    Message          = $"{empName} checked in ({result.status}).",
+                    RegisteredAt     = DateTime.UtcNow
+                };
+                try
+                {
+                    await _notificationPublisher.PublishAttendanceAsync(notification);
+                }
+                catch (Exception ex)
+                {
+                    // Don't block the check-in if notification fails
+                    _ = ex;
+                }
+                // Real-time invalidation: wipe every emp:{empId}:* key
                 await _redis.InvalidateEmployeeAsync(model.EmpId);
             
 
                 await _elastic.IndexAttendanceAsync(new AdminReportSearchModel
                 {
-                    AttendId = model.AttendId, // ⚠️ ensure this is returned from DB
+                    AttendId = result.attendId,
                     EmpId = model.EmpId,
                     EmployeeName = emp.Name,
-                    AttendDate = model.AttendDate,
+                    AttendDate = model.AttendDate ?? DateTime.Today,
                     AttendStatus = result.status,
-                    WorkType = model.WorkType,
-                    TaskType = model.TaskType
+                    WorkType = model.WorkType ?? string.Empty,
+                    TaskType = model.TaskType ?? string.Empty
                 });
             }
             return Json(new
@@ -82,6 +108,29 @@ namespace MVCAttendEase.Controllers
             // If check-out is successful, invalidate all related cache keys for this employee
             if (result.success)
             {
+                var empName  = HttpContext.Session.GetString("empName")  ?? "Employee";
+                var empEmail = HttpContext.Session.GetString("empEmail") ?? string.Empty;
+
+                var notification = new NotificationMessage
+                {
+                    EmployeeId       = model.EmpId,
+                    FullName         = empName,
+                    Email            = empEmail,
+                    Role             = "Employee",
+                    NotificationType = "CheckOut",
+                    Message          = $"{empName} checked out. Worked {result.workingHours}h ({result.status}).",
+                    RegisteredAt     = DateTime.UtcNow
+                };
+
+                try
+                {
+                    await _notificationPublisher.PublishAttendanceAsync(notification);
+                }
+                catch (Exception ex)
+                {
+                    _ = ex;
+                }
+         
                 // Real-time invalidation: wipe every emp:{empId}:* key
                 await _redis.InvalidateEmployeeAsync(model.EmpId);
             }
@@ -93,13 +142,13 @@ namespace MVCAttendEase.Controllers
 
                 await _elastic.IndexAttendanceAsync(new AdminReportSearchModel
                 {
-                    AttendId = model.AttendId,
+                    AttendId = result.attendId,
                     EmpId = model.EmpId,
                     EmployeeName = emp.Name,
-                    AttendDate = model.AttendDate,
+                    AttendDate = model.AttendDate ?? DateTime.Today,
                     AttendStatus = result.status,
-                    WorkType = model.WorkType,
-                    TaskType = model.TaskType
+                    WorkType = model.WorkType ?? string.Empty,
+                    TaskType = model.TaskType ?? string.Empty
                 });
             }
 
@@ -115,6 +164,7 @@ namespace MVCAttendEase.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAttendanceByEmployee(int empId)
         {
+            
             //Redis Cache Code for Attendance Grid
             var result = await _redis.GetOrSetAsync(
                 RedisKeys.AttendanceGrid(empId),

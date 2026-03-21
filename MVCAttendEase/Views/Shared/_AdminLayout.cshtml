@@ -470,10 +470,31 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
 
 <style>
 /* ── UNCHANGED: Layout ── */
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 #example {
     display: flex;
     min-height: 100vh;
 }
+
+.content-wrapper {
+    padding: 20px 20px 0 20px;
+    flex: 1;
+}
+
+.k-grid {
+    margin-bottom: 0 !important;
+}
+
+#example {
+    display: flex;
+    min-height: 100vh;
+}
+
 
 /* ── UNCHANGED: Sidebar ── */
 #sidebar {
@@ -877,7 +898,7 @@ window.closeAllNotificationsModal = closeAllNotificationsModal; // expose to glo
 }
 
 .content-wrapper {
-    padding: 25px;
+    padding: 25px 25px 0 25px; /* remove bottom padding */
     flex: 1;
 }
 

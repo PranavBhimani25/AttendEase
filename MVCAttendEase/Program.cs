@@ -109,12 +109,14 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthorization();
 app.UseSession();
+app.UseAuthorization();
+
+
 
 app.MapControllerRoute(
-    name:    "default",
-    pattern: "{controller=Auth}/{action=Login}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 async Task IndexElasticData()
 {

@@ -2,199 +2,75 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AttendEase</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MVCAttendEase.styles.css" asp-append-version="true" />
-    @* <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" /> *@
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Kendo UI Nordic Theme -->
     <link rel="stylesheet" href="~/lib/kendo/bootstrap-nordic.css" />
 
-
-
     <style>
+        /* ─── FOUNDATION ─── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body{
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg,#1E3A8A,#3B82F6);
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:flex-start;   /* changed */
-            padding-top:60px;         /* space from top */
-            padding-bottom:60px;
+        :root {
+            --primary:   #6366F1;
+            --secondary: #8B5CF6;
+            --accent:    #EC4899;
+            --success:   #6EE7B7;
+            --text-dark: #0F172A;
+            --text-mid:  #475569;
+            --text-soft: #94A3B8;
+            --border:    #E2E8F0;
+            --surface:   #F8FAFC;
         }
 
-        .auth-container{
-            width:100%;
-            max-width:520px;
-        }
-
-        .auth-card{
-            background:white;
-            padding:35px;
-            border-radius:12px;
-            box-shadow:0 12px 30px rgba(0,0,0,0.2);
-        }
-
-        .auth-title{
-            text-align:center;
-            font-size:28px;
-            font-weight:600;
-            margin-bottom:10px;
-            color:#1E3A8A;
-        }
-
-        .auth-subtitle{
-            text-align:center;
-            color:#777;
-            margin-bottom:30px;
-        }
-
-        .auth-footer{
-            text-align:center;
-            margin-top:20px;
-        }
-
-        .auth-footer a{
-            color:#3B82F6;
-            text-decoration:none;
-            font-weight:500;
-        }
-
-        .k-button{
-            background:#3B82F6;
-            border:none;
-        }
-
-        .k-button:hover{
-            background:#1E40AF;
-        }
-                /* ===================== PRELOADER STYLES ===================== */
-        #preloader {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        html, body {
             height: 100%;
-            background: rgba(0, 0, 0, 0.72);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        #preloader.show {
-            display: flex;
-        }
+        /* ─── KENDO GLOBAL OVERRIDES ─── */
 
-        .preloader-box {
-            background: #0F1117;
-            padding: 36px 48px;
-            border-radius: 16px;
-            text-align: center;
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-            min-width: 230px;
-        }
+        /* Remove Kendo's default fieldset wrapper look */
+        .k-form fieldset { border: none; padding: 0; margin: 0; }
+        .k-form legend   { display: none; }
 
-        .spinner {
-            position: relative;
-            width: 52px;
-            height: 52px;
-            margin: 0 auto 20px auto;
-        }
+        /* Notification polish */
+        .k-notification-group { z-index: 9999 !important; }
+        .k-notification        { border-radius: 12px !important; font-family: 'Poppins', sans-serif !important; font-size: 13px !important; }
+        .k-notification-success { background: #ECFDF5 !important; border-color: #A7F3D0 !important; color: #065F46 !important; }
+        .k-notification-error   { background: #FEF2F2 !important; border-color: #FECACA !important; color: #991B1B !important; }
 
-        .spinner-ring-outer,
-        .spinner-ring-inner {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
+        /* Remove Kendo's bold form labels default */
+        .k-form .k-form-label { font-weight: 600 !important; }
 
-        .spinner-ring-outer {
-            animation: spin 1.4s linear infinite;
-        }
+        /* Ensure inputs don't have Kendo's default box-shadow on focus (we handle it) */
+        .k-input:focus, .k-textbox:focus { outline: none !important; }
 
-        .spinner-ring-inner {
-            animation: spin-reverse 2s linear infinite;
-        }
-
-        .spinner-dot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #C4B5FD;
-            animation: pulse 1.4s ease-in-out infinite;
-        }
-
-        @@keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @@keyframes spin-reverse {
-            to { transform: rotate(-360deg); }
-        }
-
-        @@keyframes pulse {
-            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            50%       { opacity: 0.4; transform: translate(-50%, -50%) scale(0.6); }
-        }
-
-        .preloader-box p {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 500;
-            color: #E2E8F0;
-            letter-spacing: 0.01em;
-        }
-
-        .preloader-box small {
-            display: block;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #4B5563;
-        }
-        /* ============================================================ */
-
+        /* ─── CUSTOM SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
     </style>
-
 </head>
 
 <body>
-    <!-- ===================== PRELOADER HTML ===================== -->
-<div id="preloader">
-    <div class="preloader-box">
-        <div class="spinner">
-            <svg class="spinner-ring-outer" width="52" height="52" viewBox="0 0 52 52">
-                <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(139,92,246,0.15)" stroke-width="3.5"/>
-                <circle cx="26" cy="26" r="22" fill="none" stroke="#8B5CF6" stroke-width="3.5"
-                    stroke-dasharray="138" stroke-dashoffset="100" stroke-linecap="round"/>
-            </svg>
-            <svg class="spinner-ring-inner" width="52" height="52" viewBox="0 0 52 52">
-                <circle cx="26" cy="26" r="14" fill="none" stroke="rgba(167,139,250,0.12)" stroke-width="2"/>
-                <circle cx="26" cy="26" r="14" fill="none" stroke="#A78BFA" stroke-width="2"
-                    stroke-dasharray="88" stroke-dashoffset="66" stroke-linecap="round"/>
-            </svg>
-            <div class="spinner-dot"></div>
-        </div>
-        <p id="preloader-msg">Please wait...</p>
-        <small id="preloader-sub"></small>
-    </div>
-</div>
-<!-- ========================================================== -->
-    <div class="auth-container">
-        <div class="auth-card">
-            @RenderBody()
-        </div>
-    </div>
-    <!-- Scripts -->
+    @RenderBody()
+
+    <!-- jQuery -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap JS (optional) -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- Kendo All -->
     <script src="~/lib/kendo/kendo.all.min.js"></script>
      <!-- ===================== PRELOADER HELPER FUNCTIONS ===================== -->
     <script>
@@ -212,9 +88,6 @@
     </script>
     <!-- ====================================================================== -->
 
-
-    @RenderSection("Scripts",required:false)
-
+    @RenderSection("Scripts", required: false)
 </body>
-
 </html>

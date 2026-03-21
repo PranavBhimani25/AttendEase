@@ -1,234 +1,951 @@
 @{
-    ViewData["Title"] = "Register";
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Register";
 }
 
-<div class="auth-title">
-    AttendEase
-</div>
+<div class="auth-wrapper">
 
-<div class="auth-subtitle">
-    Employee Attendance System
-</div>
+    <!-- ════════════ LEFT PANEL ════════════ -->
+    <div class="auth-left">
+        <div class="left-content">
+            <div class="brand-logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="white" fill-opacity="0.2"/>
+                        <path d="M14 6L20 10V18L14 22L8 18V10L14 6Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                        <circle cx="14" cy="14" r="3" fill="white" fill-opacity="0.6"/>
+                    </svg>
+                </div>
+                <span class="brand-name">AttendEase</span>
+            </div>
 
-<form id="registerForm"></form>
+            <div class="illustration-wrap">
+                <svg viewBox="0 0 480 380" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-svg">
+                    <circle cx="240" cy="190" r="165" fill="white" fill-opacity="0.05"/>
+                    <circle cx="240" cy="190" r="115" fill="white" fill-opacity="0.06"/>
+                    <rect x="55" y="100" width="130" height="78" rx="16" fill="white" fill-opacity="0.15"/>
+                    <circle cx="85" cy="132" r="18" fill="#A78BFA" fill-opacity="0.8"/>
+                    <path d="M78 131C78 127.134 81.134 124 85 124C88.866 124 92 127.134 92 131C92 134.866 88.866 138 85 138C81.134 138 78 134.866 78 131Z" fill="white" fill-opacity="0.9"/>
+                    <path d="M73 148C73 143.582 78.373 140 85 140C91.627 140 97 143.582 97 148" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="103" y="124" width="68" height="9" rx="4.5" fill="white" fill-opacity="0.8"/>
+                    <rect x="103" y="138" width="48" height="7" rx="3.5" fill="white" fill-opacity="0.45"/>
+                    <rect x="103" y="151" width="60" height="6" rx="3" fill="#6EE7B7" fill-opacity="0.7"/>
+                    <rect x="295" y="90" width="130" height="78" rx="16" fill="white" fill-opacity="0.15"/>
+                    <circle cx="325" cy="122" r="18" fill="#F472B6" fill-opacity="0.8"/>
+                    <path d="M318 121C318 117.134 321.134 114 325 114C328.866 114 332 117.134 332 121C332 124.866 328.866 128 325 128C321.134 128 318 124.866 318 121Z" fill="white" fill-opacity="0.9"/>
+                    <path d="M313 138C313 133.582 318.373 130 325 130C331.627 130 337 133.582 337 138" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="343" y="114" width="68" height="9" rx="4.5" fill="white" fill-opacity="0.8"/>
+                    <rect x="343" y="128" width="48" height="7" rx="3.5" fill="white" fill-opacity="0.45"/>
+                    <rect x="343" y="141" width="60" height="6" rx="3" fill="#6EE7B7" fill-opacity="0.7"/>
+                    <rect x="130" y="160" width="220" height="140" rx="20" fill="white" fill-opacity="0.18"/>
+                    <rect x="130" y="160" width="220" height="44" rx="20" fill="white" fill-opacity="0.12"/>
+                    <rect x="130" y="185" width="220" height="20" fill="white" fill-opacity="0.06"/>
+                    <circle cx="160" cy="182" r="12" fill="#6366F1" fill-opacity="0.7"/>
+                    <path d="M160 177V187M155 182H165" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="180" y="176" width="90" height="8" rx="4" fill="white" fill-opacity="0.5"/>
+                    <rect x="180" y="188" width="65" height="7" rx="3.5" fill="white" fill-opacity="0.3"/>
+                    <rect x="148" y="216" width="185" height="14" rx="7" fill="white" fill-opacity="0.15"/>
+                    <rect x="148" y="216" width="90" height="14" rx="7" fill="#A78BFA" fill-opacity="0.5"/>
+                    <rect x="148" y="238" width="185" height="14" rx="7" fill="white" fill-opacity="0.15"/>
+                    <rect x="148" y="238" width="130" height="14" rx="7" fill="#6366F1" fill-opacity="0.45"/>
+                    <rect x="148" y="260" width="185" height="14" rx="7" fill="white" fill-opacity="0.15"/>
+                    <rect x="148" y="260" width="75" height="14" rx="7" fill="#F472B6" fill-opacity="0.45"/>
+                    <rect x="148" y="284" width="185" height="10" rx="5" fill="white" fill-opacity="0.3"/>
+                    <rect x="290" y="220" width="130" height="45" rx="14" fill="white" fill-opacity="0.18"/>
+                    <circle cx="312" cy="243" r="11" fill="#6EE7B7" fill-opacity="0.85"/>
+                    <path d="M308 243L311 246L316 240" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="329" y="236" width="75" height="7" rx="3.5" fill="white" fill-opacity="0.7"/>
+                    <rect x="329" y="248" width="55" height="6" rx="3" fill="white" fill-opacity="0.4"/>
+                    <rect x="55" y="215" width="130" height="45" rx="14" fill="white" fill-opacity="0.18"/>
+                    <circle cx="77" cy="238" r="11" fill="#FFD93D" fill-opacity="0.85"/>
+                    <path d="M77 232L79.5 237H85L80.7 240.2L82.4 245.5L77 242L71.6 245.5L73.3 240.2L69 237H74.5L77 232Z" fill="white" fill-opacity="0.9"/>
+                    <rect x="95" y="231" width="75" height="7" rx="3.5" fill="white" fill-opacity="0.7"/>
+                    <rect x="95" y="243" width="55" height="6" rx="3" fill="white" fill-opacity="0.4"/>
+                    <circle cx="80" cy="75" r="6" fill="#A78BFA" fill-opacity="0.6"/>
+                    <circle cx="400" cy="80" r="5" fill="#F472B6" fill-opacity="0.6"/>
+                    <circle cx="430" cy="200" r="7" fill="#6EE7B7" fill-opacity="0.5"/>
+                    <circle cx="50" cy="310" r="5" fill="#FFD93D" fill-opacity="0.6"/>
+                    <rect x="165" y="318" width="150" height="38" rx="19" fill="white" fill-opacity="0.15"/>
+                    <text x="240" y="342" text-anchor="middle" fill="white" font-size="13" font-family="sans-serif" font-weight="600">+1,200 Members</text>
+                </svg>
+            </div>
 
-<div class="auth-footer">
-    Already have an account?
-    <a href="/Auth/Login">Login</a>
-</div>
+            <div class="left-text">
+                <h2>Join Your Organization</h2>
+                <p>Create your account and start tracking attendance with precision and ease.</p>
+            </div>
 
-<div id="notification"></div>
+            <div class="feature-pills">
+                <div class="pill"><span class="pill-dot green"></span>Real-time tracking</div>
+                <div class="pill"><span class="pill-dot purple"></span>Smart reports</div>
+                <div class="pill"><span class="pill-dot pink"></span>Secure &amp; private</div>
+            </div>
+        </div>
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
-@section Scripts{
+    <!-- ════════════ RIGHT PANEL ════════════ -->
+    <div class="auth-right">
+        <div class="auth-card" id="registerCard">
 
-    <style>
-        .auth-card {
-            width: auto;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            <div class="card-header">
+                <div class="avatar-ring">
+                    <div class="avatar-inner">
+                        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+                            <path d="M13 4C10.239 4 8 6.239 8 9C8 11.761 10.239 14 13 14C15.761 14 18 11.761 18 9C18 6.239 15.761 4 13 4Z" fill="#6366F1"/>
+                            <path d="M5 21C5 17.134 8.686 14 13 14C17.314 14 21 17.134 21 21" stroke="#6366F1" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="20" cy="8" r="4" fill="#6EE7B7"/>
+                            <path d="M18.5 8L19.5 9L21.5 7" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="card-title">Create Account</h1>
+                <p class="card-subtitle">Fill in your details to get started</p>
+            </div>
+
+            <!-- MANUAL HTML FORM — full control over layout -->
+            <form id="registerForm" novalidate autocomplete="off">
+
+                <!-- ── Row 1: Full Name ── -->
+                <div class="form-row">
+                    <div class="field-group" style="flex:1">
+                        <label class="field-label" for="reg_name">
+                            <i class="fa fa-user lbl-icon"></i> Full Name
+                        </label>
+                        <div class="input-wrap">
+                            <i class="fa fa-user fi"></i>
+                            <input id="reg_name" type="text" class="fi-input"
+                                   placeholder="e.g. Aryan Mehta" autocomplete="name"/>
+                            <i class="fa fa-check vtick" id="tk_name"></i>
+                        </div>
+                        <span class="err" id="e_name"></span>
+                    </div>
+                </div>
+
+                <!-- ── Row 2: Work Email ── -->
+                <div class="form-row">
+                    <div class="field-group" style="flex:1">
+                        <label class="field-label" for="reg_email">
+                            <i class="fa fa-envelope lbl-icon"></i> Work Email
+                        </label>
+                        <div class="input-wrap">
+                            <i class="fa fa-envelope fi"></i>
+                            <input id="reg_email" type="email" class="fi-input"
+                                   placeholder="you@company.com" autocomplete="email"/>
+                            <i class="fa fa-check vtick" id="tk_email"></i>
+                        </div>
+                        <span class="err" id="e_email"></span>
+                    </div>
+                </div>
+
+                <!-- ── Row 3: Password | Confirm Password ── -->
+                <div class="form-row two-col">
+
+                    <div class="field-group">
+                        <label class="field-label" for="reg_pw">
+                            <i class="fa fa-lock lbl-icon"></i> Password
+                        </label>
+                        <div class="input-wrap">
+                            <i class="fa fa-lock fi"></i>
+                            <input id="reg_pw" type="password" class="fi-input"
+                                   placeholder="Min 8 characters" autocomplete="new-password"/>
+                            <button type="button" class="eye-btn" data-tid="reg_pw">
+                                <i class="fa fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        <!-- Strength bar -->
+                        <div class="sbar-wrap"><div class="sbar" id="sbar"></div></div>
+                        <span class="slabel" id="slabel"></span>
+                        <span class="err" id="e_pw"></span>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="reg_cpw">
+                            <i class="fa fa-shield-alt lbl-icon"></i> Confirm Password
+                        </label>
+                        <div class="input-wrap">
+                            <i class="fa fa-shield-alt fi"></i>
+                            <input id="reg_cpw" type="password" class="fi-input"
+                                   placeholder="Repeat password"/>
+                            <button type="button" class="eye-btn" data-tid="reg_cpw">
+                                <i class="fa fa-eye-slash"></i>
+                            </button>
+                        </div>
+                        <span class="err" id="e_cpw"></span>
+                    </div>
+
+                </div>
+
+                <!-- ── Row 4: Gender | Profile Photo ── -->
+                <div class="form-row two-col">
+
+                    <div class="field-group">
+                        <label class="field-label">
+                            <i class="fa fa-venus-mars lbl-icon"></i> Gender
+                        </label>
+                        <div class="gender-group" id="genderGroup">
+                            <label class="g-opt" data-val="Male">
+                                <input type="radio" name="gender" value="Male"/>
+                                <span class="rcircle"></span>
+                                <i class="fa fa-mars"></i> Male
+                            </label>
+                            <label class="g-opt" data-val="Female">
+                                <input type="radio" name="gender" value="Female"/>
+                                <span class="rcircle"></span>
+                                <i class="fa fa-venus"></i> Female
+                            </label>
+                            <label class="g-opt" data-val="Other">
+                                <input type="radio" name="gender" value="Other"/>
+                                <span class="rcircle"></span>
+                                <i class="fa fa-genderless"></i> Other
+                            </label>
+                        </div>
+                        <span class="err" id="e_gender"></span>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label">
+                            <i class="fa fa-image lbl-icon"></i> Profile Photo
+                        </label>
+
+                        <!--
+                            FIX: file input lives OUTSIDE the zone entirely.
+                            A <label for="reg_photo"> wraps the visible zone so
+                            the native OS picker opens on ANY click anywhere
+                            inside — no JS .trigger() needed, no bubble loop.
+                            The remove button uses type="button" + stopPropagation
+                            so it doesn't re-open the picker.
+                        -->
+                        <input type="file"
+                               id="reg_photo"
+                               name="profile_image"
+                               accept=".jpg,.jpeg,.png"
+                               style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"/>
+
+                        <label for="reg_photo" id="uploadZone" class="upload-zone">
+                            <!-- Default state -->
+                            <div id="upDefault" class="up-default">
+                                <div class="up-icon"><i class="fa fa-cloud-upload-alt"></i></div>
+                                <div class="up-txts">
+                                    <span class="up-main">Click or drag photo</span>
+                                    <span class="up-sub">JPG / PNG · max 2 MB</span>
+                                </div>
+                            </div>
+                            <!-- Selected state -->
+                            <div id="upSelected" class="up-selected" style="display:none">
+                                <img id="upThumb" src="" alt="preview"/>
+                                <div class="up-info">
+                                    <span class="up-fname" id="upFname"></span>
+                                    <span class="up-fsize" id="upFsize"></span>
+                                </div>
+                                <button type="button" id="upRemove" class="up-remove"
+                                        onclick="event.preventDefault();event.stopPropagation();removePhoto();">
+                                    <i class="fa fa-times-circle"></i>
+                                </button>
+                            </div>
+                        </label>
+
+                        <span class="err" id="e_photo"></span>
+                    </div>
+
+                </div>
+
+                <!-- ── Submit ── -->
+                <button type="submit" class="btn-submit" id="regBtn">
+                    <span class="btext"><i class="fa fa-user-plus"></i>&nbsp; Create My Account</span>
+                    <span class="bspinner"></span>
+                </button>
+
+            </form>
+
+            <div id="notification"></div>
+
+            <div class="switch-auth">
+                Already have an account?
+                <a href="/Auth/Login" class="link-primary">Sign In →</a>
+            </div>
+
+        </div><!-- /.auth-card -->
+    </div><!-- /.auth-right -->
+
+</div><!-- /.auth-wrapper -->
+
+@section Scripts {
+<style>
+/* ─────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Poppins', sans-serif; overflow: hidden; }
+
+/* ─────────────────────────────────────────
+   SPLIT LAYOUT
+───────────────────────────────────────── */
+.auth-wrapper { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+
+/* ─────────────────────────────────────────
+   LEFT
+───────────────────────────────────────── */
+.auth-left {
+    flex: 0 0 42%;
+    background: linear-gradient(135deg,#1E1B4B 0%,#4F46E5 40%,#7C3AED 75%,#BE185D 100%);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 36px 38px;
+}
+.blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .2; pointer-events: none; }
+.blob-1 { width:380px;height:380px;background:#A78BFA;top:-80px;right:-60px;
+    animation:bF 9s ease-in-out infinite alternate; }
+.blob-2 { width:280px;height:280px;background:#EC4899;bottom:-60px;left:-50px;
+    animation:bF 11s ease-in-out infinite alternate-reverse; }
+@@keyframes bF {
+    from{transform:translate(0,0) scale(1)}
+    to  {transform:translate(18px,-18px) scale(1.06)}
+}
+.left-content {
+    position:relative;z-index:2;width:100%;max-width:370px;
+    display:flex;flex-direction:column;align-items:flex-start;gap:16px;
+}
+.brand-logo { display:flex;align-items:center;gap:10px; }
+.logo-icon {
+    width:40px;height:40px;background:rgba(255,255,255,.15);
+    border-radius:10px;display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);
+}
+.brand-name { color:#fff;font-size:20px;font-weight:700; }
+.illustration-wrap { width:100%;animation:fU 7s ease-in-out infinite alternate; }
+.hero-svg { width:100%;height:auto; }
+@@keyframes fU { from{transform:translateY(0)} to{transform:translateY(-10px)} }
+.left-text h2 { color:#fff;font-size:19px;font-weight:700;line-height:1.35;margin-bottom:4px; }
+.left-text p  { color:rgba(255,255,255,.65);font-size:12.5px;line-height:1.7; }
+.feature-pills { display:flex;gap:8px;flex-wrap:wrap; }
+.pill {
+    display:flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);
+    backdrop-filter:blur(8px);border-radius:20px;
+    padding:6px 12px;color:#fff;font-size:12px;font-weight:500;
+}
+.pill-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.pill-dot.green  { background:#6EE7B7; }
+.pill-dot.purple { background:#A78BFA; }
+.pill-dot.pink   { background:#F472B6; }
+
+/* ─────────────────────────────────────────
+   RIGHT
+───────────────────────────────────────── */
+.auth-right {
+    flex:1;
+    background:#F1F5F9;
+    display:flex;align-items:center;justify-content:center;
+    padding:16px 24px;
+    overflow-y:auto;
+    position:relative;
+}
+.auth-right::before {
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:
+        radial-gradient(ellipse at 70% 10%,rgba(99,102,241,.08) 0%,transparent 55%),
+        radial-gradient(ellipse at 20% 90%,rgba(139,92,246,.06) 0%,transparent 55%);
+}
+
+/* ─────────────────────────────────────────
+   CARD
+───────────────────────────────────────── */
+.auth-card {
+    width:100%;max-width:610px;
+    background:#fff;border-radius:24px;
+    padding:28px 36px 24px;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 20px 60px -10px rgba(99,102,241,.15);
+    border:1px solid rgba(99,102,241,.08);
+    animation:cIn .55s cubic-bezier(.16,1,.3,1) both;
+    transition:box-shadow .3s,transform .3s;
+}
+@@keyframes cIn {
+    from{opacity:0;transform:translateY(22px)}
+    to  {opacity:1;transform:translateY(0)}
+}
+.auth-card:hover {
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 28px 70px -8px rgba(99,102,241,.2);
+    transform:translateY(-2px);
+}
+
+/* ─────────────────────────────────────────
+   HEADER
+───────────────────────────────────────── */
+.card-header { text-align:center;margin-bottom:20px; }
+.avatar-ring {
+    width:62px;height:62px;border-radius:50%;
+    background:linear-gradient(135deg,#6366F1,#8B5CF6);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 12px;
+    box-shadow:0 8px 25px rgba(99,102,241,.35);
+    position:relative;
+}
+.avatar-ring::before {
+    content:'';position:absolute;inset:-3px;border-radius:50%;
+    background:linear-gradient(135deg,#6366F1,#8B5CF6);
+    opacity:.15;animation:pR 2.5s ease-in-out infinite;
+}
+@@keyframes pR {
+    0%,100%{transform:scale(1);opacity:.15}
+    50%{transform:scale(1.12);opacity:.05}
+}
+.avatar-inner {
+    width:53px;height:53px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+}
+.card-title    { font-size:20px;font-weight:700;color:#0F172A;margin-bottom:3px;letter-spacing:-.3px; }
+.card-subtitle { font-size:12.5px;color:#94A3B8; }
+
+/* ─────────────────────────────────────────
+   FORM ROWS  ← THE KEY FIX
+───────────────────────────────────────── */
+#registerForm { display:flex;flex-direction:column;gap:12px;width:100%; }
+
+.form-row {
+    display:flex;
+    gap:14px;
+    width:100%;
+    align-items:flex-start;   /* so error messages don't stretch siblings */
+}
+
+/* two equal columns — each always 50% */
+.form-row.two-col > .field-group {
+    flex:1 1 0;
+    min-width:0;
+}
+
+/* ─────────────────────────────────────────
+   FIELD GROUP
+───────────────────────────────────────── */
+.field-group { display:flex;flex-direction:column;gap:4px; }
+
+.field-label {
+    font-size:11.5px;font-weight:600;color:#475569;
+    display:flex;align-items:center;gap:5px;letter-spacing:.1px;
+}
+.lbl-icon { color:#6366F1;font-size:10.5px; }
+
+/* ─────────────────────────────────────────
+   INPUT WRAP + FIELD INPUT
+───────────────────────────────────────── */
+.input-wrap {
+    position:relative;
+    display:flex;align-items:center;
+    width:100%;
+}
+
+/* left icon */
+.fi {
+    position:absolute;left:13px;
+    color:#CBD5E1;font-size:13px;
+    pointer-events:none;z-index:2;
+    transition:color .2s;
+}
+.input-wrap:focus-within .fi { color:#6366F1; }
+
+.fi-input {
+    width:100%;
+    height:46px;                        /* consistent height */
+    padding:0 36px 0 38px;             /* left: icon, right: tick/eye */
+    border:1.5px solid #E2E8F0;
+    border-radius:12px;
+    background:#F8FAFC;
+    font-family:'Poppins',sans-serif;
+    font-size:13px;
+    color:#0F172A;
+    outline:none;
+    transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.fi-input::placeholder { color:#C8D3E0;font-size:12.5px; }
+.fi-input:focus {
+    border-color:#6366F1;background:#fff;
+    box-shadow:0 0 0 3px rgba(99,102,241,.11);
+}
+
+/* validation states */
+.fi-input.is-valid   { border-color:#10B981!important;background:#fff; }
+.fi-input.is-invalid {
+    border-color:#EF4444!important;
+    background:#FFF5F5;
+    box-shadow:0 0 0 3px rgba(239,68,68,.08)!important;
+}
+
+/* valid tick */
+.vtick {
+    position:absolute;right:12px;
+    color:#10B981;font-size:11.5px;
+    opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.vtick.on { opacity:1; }
+
+/* eye button */
+.eye-btn {
+    position:absolute;right:10px;
+    background:none;border:none;cursor:pointer;
+    color:#CBD5E1;font-size:13px;padding:4px;
+    transition:color .2s;z-index:2;
+}
+.eye-btn:hover { color:#6366F1; }
+
+/* ─────────────────────────────────────────
+   PASSWORD STRENGTH
+───────────────────────────────────────── */
+.sbar-wrap {
+    height:4px;background:#F1F5F9;border-radius:4px;
+    overflow:hidden;margin-top:3px;
+}
+.sbar {
+    height:100%;width:0;border-radius:4px;
+    transition:width .4s,background-color .4s;
+}
+.slabel { font-size:10.5px;color:#94A3B8;font-weight:500;min-height:13px; }
+
+/* ─────────────────────────────────────────
+   ERROR MSG
+───────────────────────────────────────── */
+.err {
+    font-size:11px;color:#EF4444;font-weight:500;
+    min-height:15px;
+    display:flex;align-items:center;gap:4px;
+    animation:eIn .18s ease;
+}
+@@keyframes eIn { from{opacity:0;transform:translateY(-3px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─────────────────────────────────────────
+   GENDER RADIOS
+───────────────────────────────────────── */
+.gender-group {
+    display:flex;gap:7px;
+    width:100%;
+}
+.g-opt {
+    flex:1 1 0;min-width:0;
+    height:46px;                        /* same as fi-input */
+    border:1.5px solid #E2E8F0;
+    border-radius:12px;
+    display:flex;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;
+    background:#F8FAFC;
+    font-size:12px;color:#64748B;font-weight:500;
+    transition:all .2s;user-select:none;
+    white-space:nowrap;
+    padding:0 6px;
+}
+.g-opt:hover { border-color:#A5B4FC;background:#fff;color:#6366F1; }
+.g-opt input[type="radio"] { display:none; }
+
+.rcircle {
+    width:13px;height:13px;border-radius:50%;
+    border:2px solid #CBD5E1;flex-shrink:0;
+    transition:all .2s;
+    display:flex;align-items:center;justify-content:center;
+}
+.g-opt.active {
+    border-color:#6366F1;
+    background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.07));
+    color:#6366F1;
+}
+.g-opt.active .rcircle {
+    border-color:#6366F1;background:#6366F1;
+}
+.g-opt.active .rcircle::after {
+    content:'';width:5px;height:5px;border-radius:50%;background:#fff;
+}
+.gender-group.err-state .g-opt { border-color:#FCA5A5; }
+
+/* ─────────────────────────────────────────
+   UPLOAD ZONE
+───────────────────────────────────────── */
+.upload-zone {
+    /* works as both <div> and <label> */
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 46px;                       /* same as fi-input */
+    padding: 0 12px;
+    border: 1.5px dashed #C7D2FE;
+    border-radius: 12px;
+    background: #F5F3FF;
+    cursor: pointer;
+    transition: all .2s;
+    overflow: hidden;
+    /* reset label defaults */
+    font-weight: normal;
+    margin-bottom: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.upload-zone:hover       { border-color: #6366F1; background: #EEF2FF; }
+.upload-zone.dragover    { border-color: #6366F1; background: #EEF2FF; }
+.upload-zone.has-file    { border-style: solid; border-color: #6366F1; background: #EEF2FF; }
+
+/* default state */
+.up-default {
+    display:flex;align-items:center;gap:10px;width:100%;
+}
+.up-icon {
+    width:24px;height:24px;border-radius:6px;flex-shrink:0;
+    background:linear-gradient(135deg,#6366F1,#8B5CF6);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:11px;
+}
+.up-txts { display:flex;flex-direction:column; }
+.up-main { font-size:11.5px;color:#334155;font-weight:600;line-height:1.2; }
+.up-sub  { font-size:10px;color:#94A3B8; }
+
+/* selected state */
+.up-selected {
+    display:flex;align-items:center;gap:8px;width:100%;
+}
+#upThumb {
+    width:28px;height:28px;border-radius:7px;
+    object-fit:cover;flex-shrink:0;
+    border:2px solid #6366F1;
+}
+.up-info { flex:1;min-width:0; }
+.up-fname {
+    font-size:11.5px;color:#334155;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:block;
+}
+.up-fsize { font-size:10.5px;color:#94A3B8; }
+.up-remove {
+    background:none;border:none;cursor:pointer;
+    color:#EF4444;font-size:15px;flex-shrink:0;
+    transition:transform .2s;padding:2px;
+}
+.up-remove:hover { transform:scale(1.2); }
+
+/* ─────────────────────────────────────────
+   SUBMIT BUTTON
+───────────────────────────────────────── */
+.btn-submit {
+    width:100%;height:50px;
+    background:linear-gradient(135deg,#6366F1,#8B5CF6);
+    color:#fff;border:none;border-radius:14px;
+    font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;
+    cursor:pointer;letter-spacing:.4px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:transform .2s,box-shadow .2s;
+    box-shadow:0 4px 15px rgba(99,102,241,.4);
+    position:relative;overflow:hidden;
+    margin-top:4px;
+}
+.btn-submit::before {
+    content:'';position:absolute;
+    top:0;left:-100%;width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+    transition:left .5s;
+}
+.btn-submit:hover::before { left:100%; }
+.btn-submit:hover { transform:translateY(-2px);box-shadow:0 8px 25px rgba(99,102,241,.5); }
+.btn-submit:active { transform:translateY(0); }
+.btn-submit:disabled { opacity:.75;cursor:not-allowed;transform:none; }
+
+.bspinner {
+    display:none;width:18px;height:18px;
+    border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff;border-radius:50%;
+    animation:spin .7s linear infinite;
+}
+.btn-submit.loading .btext   { display:none; }
+.btn-submit.loading .bspinner{ display:block; }
+@@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ─────────────────────────────────────────
+   SWITCH LINK
+───────────────────────────────────────── */
+.switch-auth {
+    text-align:center;font-size:13px;color:#64748B;margin-top:14px;
+}
+.link-primary {
+    color:#6366F1;font-weight:600;text-decoration:none;
+    margin-left:5px;transition:color .2s;
+}
+.link-primary:hover { color:#4F46E5; }
+
+/* ─────────────────────────────────────────
+   KENDO NOTIFICATION
+───────────────────────────────────────── */
+.k-notification-group { z-index:9999!important; }
+.k-notification { border-radius:12px!important;font-family:'Poppins',sans-serif!important;font-size:13px!important; }
+.k-notification-success { background:#ECFDF5!important;border-color:#A7F3D0!important;color:#065F46!important; }
+.k-notification-error   { background:#FEF2F2!important;border-color:#FECACA!important;color:#991B1B!important; }
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@@media (max-width:1000px){ .auth-left{display:none} .auth-right{flex:1} }
+@@media (max-width:600px){
+    .auth-card { padding:22px 16px; border-radius:18px; }
+    .form-row.two-col { flex-direction:column; }
+    .gender-group { flex-direction:column; }
+}
+</style>
+
+<script>
+$(document).ready(function () {
+
+    /* ── Notification ── */
+    var notify = $("#notification").kendoNotification({
+        position:{ pinned:true, top:24, right:24 },
+        autoHideAfter:3000
+    }).data("kendoNotification");
+
+    function toast(msg, type){ notify.show(msg, type||"info"); }
+
+    /* ═══════════════════════════════════════════
+       HELPERS
+    ═══════════════════════════════════════════ */
+    function setErr(inputId, errId, msg){
+        $("#"+inputId).removeClass("is-valid").addClass("is-invalid");
+        $("#"+errId).html('<i class="fa fa-exclamation-circle"></i> '+msg);
+        /* hide valid tick if any */
+        var tickId = "tk_" + inputId.replace("reg_","");
+        $("#"+tickId).removeClass("on");
+    }
+
+    function setOk(inputId, errId, tickId){
+        $("#"+inputId).removeClass("is-invalid").addClass("is-valid");
+        $("#"+errId).text("");
+        if(tickId){ $("#"+tickId).addClass("on"); }
+    }
+
+    function clearF(inputId, errId, tickId){
+        $("#"+inputId).removeClass("is-valid is-invalid");
+        if(errId)  $("#"+errId).text("");
+        if(tickId) $("#"+tickId).removeClass("on");
+    }
+
+    /* ═══════════════════════════════════════════
+       PASSWORD STRENGTH
+    ═══════════════════════════════════════════ */
+    var SC = ["","#EF4444","#F59E0B","#3B82F6","#10B981"];
+    var SL = ["","Weak","Fair","Good","Strong ✓"];
+
+    function strength(p){
+        var s=0;
+        if(p.length>=8)             s++;
+        if(/[A-Z]/.test(p))         s++;
+        if(/[0-9]/.test(p))         s++;
+        if(/[^A-Za-z0-9]/.test(p))  s++;
+        return s;
+    }
+
+    $("#reg_pw").on("input", function(){
+        var v=$(this).val();
+        if(!v){ $("#sbar").css({width:"0",background:""}); $("#slabel").text("").css("color","");
+                clearF("reg_pw","e_pw","tk_pw"); return; }
+        var s=strength(v);
+        $("#sbar").css({ width:(s*25)+"%", backgroundColor:SC[s] });
+        $("#slabel").text(SL[s]).css("color",SC[s]);
+        if(v.length<8) setErr("reg_pw","e_pw","At least 8 characters required");
+        else            setOk("reg_pw","e_pw","tk_pw");
+        /* re-check confirm if typed */
+        if($("#reg_cpw").val()) validateCPW();
+    });
+
+    /* ═══════════════════════════════════════════
+       VALIDATORS
+    ═══════════════════════════════════════════ */
+    function validateName(){
+        var v=$.trim($("#reg_name").val());
+        if(!v)                          { setErr("reg_name","e_name","Full name is required"); return false; }
+        if(v.length<2)                  { setErr("reg_name","e_name","Name must be at least 2 characters"); return false; }
+        if(!/^[a-zA-Z\s\-'\.]+$/.test(v)){ setErr("reg_name","e_name","Only letters and spaces are allowed"); return false; }
+        setOk("reg_name","e_name","tk_name"); return true;
+    }
+
+    function validateEmail(){
+        var v=$.trim($("#reg_email").val());
+        var re=/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        if(!v)          { setErr("reg_email","e_email","Email address is required"); return false; }
+        if(!re.test(v)) { setErr("reg_email","e_email","Enter a valid email address"); return false; }
+        setOk("reg_email","e_email","tk_email"); return true;
+    }
+
+    function validatePW(){
+        var v=$("#reg_pw").val();
+        if(!v)         { setErr("reg_pw","e_pw","Password is required"); return false; }
+        if(v.length<8) { setErr("reg_pw","e_pw","At least 8 characters required"); return false; }
+        setOk("reg_pw","e_pw","tk_pw"); return true;
+    }
+
+    function validateCPW(){
+        var pw=$("#reg_pw").val(), cpw=$("#reg_cpw").val();
+        if(!cpw)    { setErr("reg_cpw","e_cpw","Please confirm your password"); return false; }
+        if(pw!==cpw){ setErr("reg_cpw","e_cpw","Passwords do not match"); return false; }
+        setOk("reg_cpw","e_cpw",""); return true;
+    }
+
+    function validateGender(){
+        if(!selectedGender){
+            $("#e_gender").html('<i class="fa fa-exclamation-circle"></i> Please select a gender');
+            $("#genderGroup").addClass("err-state"); return false;
         }
-    </style>
+        $("#e_gender").text(""); $("#genderGroup").removeClass("err-state"); return true;
+    }
 
-    <script>
+    /* Real-time blur/input listeners */
+    $("#reg_name").on("blur", validateName).on("input", function(){ if($(this).val()) validateName(); });
+    $("#reg_email").on("blur", validateEmail).on("input", function(){ if($(this).val()) validateEmail(); });
+    $("#reg_pw").on("blur", validatePW);
+    $("#reg_cpw").on("input blur", function(){ if($(this).val()) validateCPW(); });
+    $("#reg_cpw").on("blur", validateCPW);
 
-        $(document).ready(function () {
+    /* ═══════════════════════════════════════════
+       EYE TOGGLE
+    ═══════════════════════════════════════════ */
+    $(".eye-btn").on("click", function(){
+        var id=$(this).data("tid");
+        var $i=$(this).find("i");
+        if($("#"+id).attr("type")==="password"){
+            $("#"+id).attr("type","text");
+            $i.removeClass("fa-eye-slash").addClass("fa-eye");
+        } else {
+            $("#"+id).attr("type","password");
+            $i.removeClass("fa-eye").addClass("fa-eye-slash");
+        }
+    });
 
-            // ── Kendo Notification setup ──────────────────────────────────────
-            $("#notification").kendoNotification({
-                position: {
-                    pinned: true,
-                    top: 30,
-                    right: 30
-                },
-                autoHideAfter: 2000,
-                stacking: "down",
-                templates: [
-                    {
-                        type: "error",
-                        template: "<div class='k-notification-error'>#: message #</div>"
-                    }
-                ]
-            });
+    /* ═══════════════════════════════════════════
+       GENDER
+    ═══════════════════════════════════════════ */
+    var selectedGender="";
+    $(".g-opt").on("click", function(){
+        $(".g-opt").removeClass("active");
+        $(this).addClass("active");
+        selectedGender=$(this).data("val");
+        $(this).find("input[type=radio]").prop("checked",true);
+        $("#e_gender").text(""); $("#genderGroup").removeClass("err-state");
+    });
 
-            // ── Kendo Form setup ──────────────────────────────────────────────
-            $("#registerForm").kendoForm({
+    /* ═══════════════════════════════════════════
+       UPLOAD  —  FIXED
+       The <label for="reg_photo"> opens the OS
+       file picker natively on click.
+       JS only handles: change event, drag-drop,
+       and the remove button.
+    ═══════════════════════════════════════════ */
+    var selectedFile = null;
+    var MAX = 2 * 1024 * 1024;   // 2 MB
 
-                items: [
-                    {
-                        field: "name",
-                        label: "Full Name",
-                        validation: { required: { message: "Full name is required" } },
-                        editor: function (container, options) {
-                            $('<input required="required" name="' + options.field + '" type="text"/>')
-                                .appendTo(container)
-                                .kendoTextBox({ placeholder: "Enter your full name" });
-                        }
-                    },
-                    {
-                        field: "email",
-                        label: "Email",
-                        validation: {
-                            required: { message: "Email is required" },
-                            email: { message: "Invalid email format" }
-                        },
-                        editor: function (container, options) {
-                            $('<input required="required" name="' + options.field + '" type="email"/>')
-                                .appendTo(container)
-                                .kendoTextBox({ placeholder: "Enter your email" });
-                        }
-                    },
-                    {
-                        field: "password",
-                        label: "Password",
-                        validation: {
-                            required: { message: "Password is required" },
-                            minLength: { message: "Password must be at least 6 characters", value: 6 }
-                        },
-                        editor: function (container, options) {
-                            $('<input required="required" name="' + options.field + '" type="password"/>')
-                                .appendTo(container)
-                                .kendoTextBox({ placeholder: "Enter your password" });
-                        }
-                    },
-                    {
-                        field: "confirm_password",
-                        label: "Confirm Password",
-                        validation: {
-                            required: { message: "Please confirm your password" },
-                            minLength: { message: "Password must be at least 6 characters", value: 6 }
-                        },
-                        editor: function (container, options) {
-                            $('<input required="required" name="' + options.field + '" type="password"/>')
-                                .appendTo(container)
-                                .kendoTextBox({ placeholder: "Confirm your password" });
-                        }
-                    },
-                    {
-                        field: "gender",
-                        label: "Gender",
-                        editor: function (container, options) {
-                            $("<select name='" + options.field + "'></select>")
-                                .appendTo(container)
-                                .kendoDropDownList({
-                                    optionLabel: "Select gender",
-                                    dataTextField: "text",
-                                    dataValueField: "value",
-                                    dataSource: [
-                                        { text: "Male",   value: "Male"   },
-                                        { text: "Female", value: "Female" },
-                                        { text: "Other",  value: "Other"  }
-                                    ]
-                                });
-                        }
-                    },
-                    {
-                        field: "profile_image",
-                        label: { text: "Profile Image" },
-                        editor: function (container, options) {
-                            $("<input type='file' name='" + options.field + "' />")
-                                .appendTo(container)
-                                .kendoUpload({
-                                    async: { autoUpload: false },
-                                    multiple: false,
-                                    validation: {
-                                        allowedExtensions: [".jpg", ".jpeg", ".png"],
-                                        maxFileSize: 2097152  // 2MB
-                                    }
-                                });
-                        }
-                    }
-                ],
+    /* Called by the remove button's inline onclick */
+    window.removePhoto = function () {
+        selectedFile = null;
+        $("#reg_photo").val("");          // clear the input value
+        $("#upDefault").show();
+        $("#upSelected").hide();
+        $("#uploadZone").removeClass("has-file");
+        $("#e_photo").text("");
+    };
 
-                buttonsTemplate: `
-                    <button type="submit" class="k-button k-primary w-100">
-                        Register
-                    </button>
-                `,
+    function applyFile(file) {
+        if (!file) return;
 
-                submit: function (e) {
-                    e.preventDefault();
+        if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+            $("#e_photo").html('<i class="fa fa-exclamation-circle"></i> Only JPG and PNG allowed');
+            return;
+        }
+        if (file.size > MAX) {
+            $("#e_photo").html('<i class="fa fa-exclamation-circle"></i> Max file size is 2 MB');
+            return;
+        }
 
-                    var formdata = new FormData();
-                    formdata.append("c_name",     e.model.name);
-                    formdata.append("c_email",    e.model.email);
-                    formdata.append("c_password", e.model.password);
+        selectedFile = file;
+        $("#e_photo").text("");
 
-                    var genderValue = $("select[name='gender']").data("kendoDropDownList").value();
-                    formdata.append("c_gender", genderValue);
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+            $("#upThumb").attr("src", ev.target.result);
+            var nm = file.name;
+            if (nm.length > 22) nm = nm.substring(0, 20) + "…";
+            $("#upFname").text(nm);
+            $("#upFsize").text((file.size / 1024).toFixed(1) + " KB");
+            $("#upDefault").hide();
+            $("#upSelected").show();
+            $("#uploadZone").addClass("has-file");
+        };
+        reader.readAsDataURL(file);
+    }
 
-                    var files = $("input[name='profile_image']").get(0).files;
-                    if (files.length > 0) {
-                        formdata.append("c_profileimage", files[0]);
-                    }
+    /* FILE INPUT CHANGE — fires when user picks from OS dialog */
+    $("#reg_photo").on("change", function () {
+        if (this.files && this.files[0]) {
+            applyFile(this.files[0]);
+        }
+    });
 
-                    // ── Show preloader when Register button is clicked ─────────
-                    showPreloader("Registering your account...", "Saving data to database & Redis cache");
-                    // ─────────────────────────────────────────────────────────────
-
-                    $.ajax({
-                        url: "/Auth/Register",
-                        method: "POST",
-                        data: formdata,
-                        contentType: false,
-                        processData: false,
-
-                        success: function (response) {
-
-                            if (response.success) {
-
-                                // ── Update preloader message on success ───────────
-                                showPreloader("Registration Successful!", "Redirecting to login page...");
-                                // ─────────────────────────────────────────────────
-
-                                $("#notification").data("kendoNotification")
-                                    .show("Registration successful! Redirecting to login...", "success");
-
-                                setTimeout(function () {
-                                    window.location.href = "/Auth/Login";
-                                }, 1500);
-
-                            } else {
-                                // ── Hide preloader on failure ─────────────────────
-                                hidePreloader();
-                                // ─────────────────────────────────────────────────
-
-                                $("#notification").data("kendoNotification")
-                                    .show({ message: response.message || "Registration failed" }, "error");
-                            }
-                        },
-
-                        error: function () {
-                            // ── Hide preloader on error ───────────────────────────
-                            hidePreloader();
-                            // ─────────────────────────────────────────────────────
-
-                            $("#notification").data("kendoNotification")
-                                .show({ message: "An error occurred. Please try again." }, "error");
-                        }
-                    });
-                }
-
-            });
-
-            // ── Password match validator ──────────────────────────────────────
-            $("#registerForm").kendoValidator({
-                rules: {
-                    passwordMatch: function (input) {
-                        if (input.attr("name") === "confirm_password") {
-                            return $("input[name='password']").val() === input.val();
-                        }
-                        return true;
-                    }
-                },
-                messages: {
-                    passwordMatch: "Passwords do not match"
-                }
-            }).data("kendoValidator");
-
+    /* DRAG & DROP onto the label zone */
+    $("#uploadZone")
+        .on("dragover", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass("dragover");
+        })
+        .on("dragleave", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass("dragover");
+        })
+        .on("drop", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass("dragover");
+            var dt = e.originalEvent.dataTransfer;
+            if (dt && dt.files && dt.files[0]) {
+                applyFile(dt.files[0]);
+            }
         });
 
-    </script>
+    /* ═══════════════════════════════════════════
+       SUBMIT
+    ═══════════════════════════════════════════ */
+    $("#registerForm").on("submit", function(e){
+        e.preventDefault();
+
+        var ok = validateName() & validateEmail() & validatePW() & validateCPW() & validateGender();
+        // use bitwise & so all validators run (no short-circuit)
+
+        if(!ok){
+            var $first=$(".is-invalid:first");
+            if($first.length) $first[0].scrollIntoView({behavior:"smooth",block:"center"});
+            toast("Please fix the errors highlighted above","error");
+            return;
+        }
+
+        var btn=$("#regBtn");
+        btn.addClass("loading").prop("disabled",true);
+
+        var fd=new FormData();
+        fd.append("c_name",    $.trim($("#reg_name").val()));
+        fd.append("c_email",   $.trim($("#reg_email").val()));
+        fd.append("c_password",$("#reg_pw").val());
+        fd.append("c_gender",  selectedGender);
+        if(selectedFile) fd.append("c_profileimage", selectedFile);
+
+        $.ajax({
+            url:"/Auth/Register", method:"POST",
+            data:fd, contentType:false, processData:false,
+            success:function(res){
+                btn.removeClass("loading").prop("disabled",false);
+                if(res.success){
+                    toast("Account created! Redirecting to login…","success");
+                    setTimeout(function(){ window.location.href="/Auth/Login"; },1800);
+                } else {
+                    toast(res.message||"Registration failed. Try again.","error");
+                }
+            },
+            error:function(xhr){
+                btn.removeClass("loading").prop("disabled",false);
+                var m=(xhr.responseJSON&&xhr.responseJSON.message)?xhr.responseJSON.message:"Server error. Please try again.";
+                toast(m,"error");
+            }
+        });
+    });
+
+});
+</script>
 }
